@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>タロット占い — Divination</title>
+<style>
+  :root {
+    --gold:#8b6914; --dark:#faf8f4; --surface:#ffffff; --border:#d8d0c4;
+    --muted:#6a6050; --text:#2c2418; --hi:#fdf6e8;
+    --card-bg:#f5f2ec; --card-back:#e8e0d4;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--dark); color:var(--text);
+    font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
+    min-height:100vh;
+  }
+  .container{ max-width:1100px; margin:0 auto; padding:30px 24px 60px; }
+  header{ text-align:center; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;
+    background:linear-gradient(180deg,#f5f2ec 0%,#faf8f4 100%); margin:-30px -24px 32px; padding:26px 32px 20px; }
+  header .small{ font-size:12px; letter-spacing:5px; color:#8a8070; margin-bottom:6px;}
+  header h1{ font-size:24px; color:var(--gold); letter-spacing:6px; margin:0 0 4px; font-weight:normal;}
+  header .sub{ font-size:16px; color:var(--muted); letter-spacing:2px;}
+  .back-link{ font-size:14px; color:var(--muted); text-decoration:none; }
+  .back-link:hover{ color:var(--gold); }
+
+  .section{ margin-bottom:32px; }
+  .section-title{
+    font-size:18px; font-weight:700; letter-spacing:2px; color:var(--gold);
+    border-bottom:none; border-left:3px solid var(--gold); padding:4px 0 4px 12px; margin:40px 0 16px;
+  }
+
+  /* Step 1: 記入 */
+  textarea{
+    width:100%; min-height:140px; padding:14px; font-family:inherit; font-size:16px;
+    background:#ffffff; border:1px solid var(--border); border-radius:4px;
+    color:var(--text); line-height:1.8; resize:vertical;
+  }
+  textarea:focus{ outline:none; border-color:var(--gold); }
+  .tip{ font-size:14px; color:var(--muted); margin-top:8px; line-height:1.7;}
+
+  /* スプレッド選択 */
+  .spreads{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px;}
+  .spread-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:7px; padding:14px 12px; cursor:pointer; transition:.2s;
+    text-align:center;
+  }
+  .spread-card:hover{ border-color:var(--gold); }
+  .spread-card.active{ background:var(--hi); border-color:var(--gold); }
+
+  /* 4スプレッド選択カード */
+  .spread-choice-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+  }
+  .spread-choice{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:22px 16px; cursor:pointer;
+    text-align:center; transition:.2s;
+    position:relative;
+  }
+  .spread-choice:hover{ border-color:var(--gold); transform:translateY(-2px);}
+  .spread-choice.active{
+    background:var(--hi); border-color:var(--gold);
+    box-shadow:0 0 0 1px var(--gold);
+  }
+  .spread-choice .choice-count{
+    font-size:14px; color:var(--gold); letter-spacing:2px;
+    margin-bottom:6px; font-weight:normal;
+  }
+  .spread-choice .choice-name{
+    font-size:18px; color:var(--text); margin-bottom:12px;
+    letter-spacing:2px;
+  }
+  .spread-choice .choice-use{
+    font-size:14px; color:var(--muted); line-height:1.7;
+  }
+  @media (max-width: 760px){
+    .spread-choice-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  .spread-card .name{ font-size:16px; color:var(--gold); margin-bottom:4px;}
+  .spread-card .count{ font-size:14px; color:var(--muted);}
+  .spread-card .desc{ font-size:14px; color:var(--muted); margin-top:6px; line-height:1.6;}
+
+  /* アクションボタン */
+  .actions{ text-align:center; margin:24px 0;}
+  button.primary{
+    background:var(--gold); color:#ffffff; border:none;
+    padding:15px 40px; border-radius:4px; font-family:inherit;
+    font-size:14px; letter-spacing:4px; cursor:pointer; font-weight:700;
+  }
+  button.primary:hover{ background:#a07a1a;}
+  button.primary:disabled{ background:#d8d0c4; color:#a09888; cursor:not-allowed;}
+  button.ghost{
+    background:transparent; color:var(--gold); border:1px solid var(--gold);
+    padding:10px 22px; border-radius:4px; font-family:inherit;
+    font-size:14px; letter-spacing:2px; cursor:pointer;
+  }
+  button.ghost:hover{ background:var(--hi);}
+
+  /* シャッフル演出 */
+  #shuffleStage, #cardsStage, #questionStage, #resultStage{
+    display:none;
+  }
+  #shuffleStage{
+    background:#f5f2ec; border:1px solid var(--border); border-radius:8px;
+    padding:30px 20px; text-align:center; position:relative; min-height:280px;
+    overflow:hidden;
+  }
+  .shuffle-area{
+    position:relative; height:200px; margin:12px auto; max-width:500px;
+  }
+  .shuffle-card{
+    position:absolute; width:70px; height:110px;
+    background:linear-gradient(135deg,#8b6914 0%,#c9933a 50%,#8b6914 100%);
+    border:1.5px solid var(--gold); border-radius:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    top:50%; left:50%; margin-left:-35px; margin-top:-55px;
+    transition: transform 0.4s cubic-bezier(.3,.7,.4,1);
+  }
+  .shuffle-card::after{
+    content:"✦"; position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    color:#ffffff; font-size:18px; opacity:.7;
+  }
+  .shuffle-hint{
+    font-size:14px; color:var(--muted); margin-top:10px; line-height:1.8;
+  }
+  .shuffle-counter{
+    font-size:13px; color:#a09888; letter-spacing:2px; margin-top:6px;
+  }
+
+  /* 引かれたカード表示：ケルト十字レイアウト */
+  .spread-layout{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(4, auto);
+    gap:20px 14px;
+    justify-items:center; align-items:start;
+    margin:20px auto; padding:30px 20px;
+    background:transparent; border-radius:0;
+    border:none;
+    max-width:1000px;
+  }
+  .drawn-card{
+    width:180px; background:transparent; border:none;
+    padding:0; cursor:pointer;
+    transition:.2s; position:relative;
+    display:grid; grid-template-columns: 70px 1fr; gap:10px; align-items:center;
+  }
+  .drawn-card:hover{ transform:translateY(-3px); z-index:5;}
+
+  /* ケルト十字：各ポジションのグリッド配置 */
+  /* レイアウト:
+     [ .  .  3  .  10 ]
+     [ 5  1  .  .  9  ]   ← 1の上に2を重ねる(位置クラス pos-2 が絶対配置)
+     [ .  .  .  .  8  ]
+     [ .  .  4  .  7  ]
+     6は 5/1 行の右(列4)
+  */
+  .drawn-card.pos-1{ grid-column:2; grid-row:2; z-index:2; }
+  .drawn-card.pos-2{
+    grid-column:2; grid-row:3;
+    transform:rotate(90deg);
+    transition: transform .2s;
+  }
+  .drawn-card.pos-2:hover{ transform:rotate(90deg) translateY(-3px); }
+  .drawn-card.pos-3{ grid-column:2; grid-row:1; }
+  .drawn-card.pos-4{ grid-column:2; grid-row:4; }
+  .drawn-card.pos-5{ grid-column:1; grid-row:2; }
+  .drawn-card.pos-6{ grid-column:3; grid-row:2; }
+  .drawn-card.pos-7{ grid-column:5; grid-row:4; }
+  .drawn-card.pos-8{ grid-column:5; grid-row:3; }
+  .drawn-card.pos-9{ grid-column:5; grid-row:2; }
+  .drawn-card.pos-10{ grid-column:5; grid-row:1; }
+
+  .drawn-card .face{
+    width:70px; aspect-ratio:350/600; border:1px solid var(--border);
+    border-radius:4px; overflow:hidden;
+    background:#f5f2ec;
+  }
+  .drawn-card .face img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform .3s;
+  }
+  .drawn-card.reversed .face img{ transform:rotate(180deg); }
+  .drawn-card .info{
+    display:flex; flex-direction:column; gap:3px; min-width:0;
+  }
+  .drawn-card .pos-label{
+    font-size:12px; color:var(--gold); letter-spacing:1px;
+    padding-bottom:0; border-bottom:none;
+    white-space:normal; line-height:1.4;
+  }
+  .drawn-card .card-name{
+    font-size:14px; color:var(--text); line-height:1.3;
+    white-space:normal;
+  }
+  .drawn-card .card-orient{
+    font-size:11px; color:var(--muted); letter-spacing:1px;
+  }
+  .drawn-card .reversed-mark{
+    position:absolute; top:3px; right:3px; color:#c04030; font-size:9px;
+    background:rgba(255,255,255,.9); padding:1px 4px; border-radius:2px; font-weight:bold;
+    z-index:2;
+  }
+
+  /* スマホ：ケルト十字は狭いので縦並び2列にフォールバック */
+  @media (max-width: 760px){
+    .spread-layout{
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: auto;
+      padding:16px 10px;
+    }
+    .drawn-card{ width:100%; }
+    .drawn-card.pos-1,
+    .drawn-card.pos-2,
+    .drawn-card.pos-3,
+    .drawn-card.pos-4,
+    .drawn-card.pos-5,
+    .drawn-card.pos-6,
+    .drawn-card.pos-7,
+    .drawn-card.pos-8,
+    .drawn-card.pos-9,
+    .drawn-card.pos-10{
+      grid-column:auto; grid-row:auto; transform:none;
+    }
+    .drawn-card.pos-2 { transform:none; }
+    .drawn-card.reversed .face img{ transform:rotate(180deg); }
+  }
+
+  /* 解釈エリア */
+  .reading{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:7px; padding:18px 22px; line-height:1.9; font-size:16px;
+    white-space:pre-wrap;
+  }
+  .reading strong{ color:var(--gold); }
+  .tab-bar{ display:flex; gap:6px; margin-bottom:12px;}
+  .tab-bar button{
+    flex:1; padding:10px; background:var(--surface); border:1px solid var(--border);
+    color:var(--muted); cursor:pointer; font-family:inherit; font-size:14px;
+    letter-spacing:1px; border-radius:5px;
+  }
+  .tab-bar button.active{ color:var(--gold); border-color:var(--gold); background:var(--hi);}
+
+  /* Sticky ミニカード一覧（読み解き中に常時視認） */
+  .sticky-cards{
+    position:sticky; top:0; z-index:10;
+    background:var(--dark); padding:10px 0 14px;
+    border-bottom:1px solid var(--border); margin-bottom:18px;
+  }
+  .sticky-cards .hint{
+    font-size:13px; color:var(--muted); text-align:center;
+    margin-bottom:8px; letter-spacing:1px;
+  }
+  .mini-row{
+    display:grid; grid-template-columns:repeat(10, 1fr); gap:6px;
+  }
+  .mini-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:4px; padding:4px; text-align:center; position:relative;
+    cursor:pointer; transition:.2s;
+  }
+  .mini-card:hover{ border-color:var(--gold); transform:translateY(-2px);}
+  .mini-card .mini-pos{
+    font-size:13px; color:var(--gold); margin-bottom:2px; line-height:1.2;
+    letter-spacing:0;
+  }
+  .mini-card .mini-face{
+    width:100%; aspect-ratio:350/600; border:1px solid var(--border);
+    border-radius:2px; overflow:hidden; background:#f5f2ec; margin-bottom:2px;
+  }
+  .mini-card .mini-face img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .mini-card.reversed .mini-face img{ transform:rotate(180deg); }
+  .mini-card .mini-name{
+    font-size:13px; color:var(--text); line-height:1.3;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .mini-card .mini-rev{
+    position:absolute; top:2px; right:2px; color:#c04030; font-size:7px;
+    background:rgba(255,255,255,.85); padding:1px 3px; border-radius:2px;
+    font-weight:bold; z-index:2; letter-spacing:0;
+  }
+  @media (max-width: 760px){
+    .mini-row{ grid-template-columns:repeat(5, 1fr); }
+  }
+
+  /* AI読み解き貼付エリア */
+  .ai-reading-box{
+    background:#040608; border:1px solid var(--border); border-radius:6px;
+    padding:16px 20px; font-family:inherit; font-size:16px;
+    color:var(--text); line-height:2; white-space:pre-wrap;
+    min-height:180px; resize:vertical; width:100%;
+  }
+  .ai-reading-box:focus{ outline:none; border-color:var(--gold); }
+  .ai-reading-rendered{
+    background:var(--surface); border:1px solid var(--gold);
+    border-radius:7px; padding:20px 24px; line-height:2; font-size:16px;
+    white-space:pre-wrap; color:var(--text);
+  }
+  .ai-reading-rendered strong{ color:var(--gold); }
+
+  .prompt-box{
+    background:#040608; border:1px solid var(--border); border-radius:6px;
+    padding:14px; font-family:"SF Mono","Menlo",monospace; font-size:22px;
+    color:#a0a8b0; line-height:1.8; white-space:pre-wrap; max-height:400px;
+    overflow-y:auto;
+  }
+  .copy-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .copy-row .msg{ font-size:22px; color:var(--muted);}
+
+  .meta-log{
+    font-size:22px; color:#404858; margin-top:14px; padding:10px 14px;
+    background:#040608; border-radius:4px; border:1px solid #0e1420;
+    line-height:1.8; font-family:"SF Mono","Menlo",monospace;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="small">DIVINATION</div>
+    <h1>タ ロ ッ ト</h1>
+    <div class="sub">あなたの悩みを聞く前に、カードは決まります。</div>
+    <div style="margin-top:12px"><a class="back-link" href="../index.html">← 三命盤に戻る</a></div>
+    <div style="margin-top:14px;">
+      <a href="result.html" style="display:inline-block; padding:12px 24px; border:1px solid var(--gold); color:var(--gold); text-decoration:none; border-radius:4px; font-size:16px; letter-spacing:2px;">📜 前回の結果を見る →</a>
+    </div>
+  </header>
+
+  <!-- Step 1: はじめに（儀式の案内＋スプレッド選択） -->
+  <div class="section" id="introStage">
+    <div class="section-title">① スプレッドを選ぶ</div>
+    <div class="reading" style="line-height:2; margin-bottom:24px;">
+「AIが都合よくカードを選んでない？」
+そんな不安を持たずに占えるように、<strong>このタロットは悩みを聞く前にカードを切ります</strong>。
+
+先に偶然でカードを並べて、<em>それから</em>あなたの悩みを書いていただきます。
+    </div>
+
+    <div class="spread-choice-grid" id="spreadChoices">
+      <div class="spread-choice" data-spread="one">
+        <div class="choice-count">1枚</div>
+        <div class="choice-name">ワンオラクル</div>
+        <div class="choice-use">今日のメッセージ<br>Yes / No を背中押し</div>
+      </div>
+      <div class="spread-choice" data-spread="three">
+        <div class="choice-count">3枚</div>
+        <div class="choice-name">スリーカード</div>
+        <div class="choice-use">過去 → 現在 → 未来<br>簡易な相談の流れ</div>
+      </div>
+      <div class="spread-choice" data-spread="yesno">
+        <div class="choice-count">2枚</div>
+        <div class="choice-name">二者択一</div>
+        <div class="choice-use">A案 vs B案 の比較<br>（転職 vs 独立、等）</div>
+      </div>
+      <div class="spread-choice active" data-spread="cross">
+        <div class="choice-count">10枚</div>
+        <div class="choice-name">ケルト十字</div>
+        <div class="choice-use">人生レベル・複雑な悩み<br>総合占</div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:28px;">
+      <button class="primary" id="startBtn" onclick="startShuffle()">カ ー ド を 切 る</button>
+    </div>
+  </div>
+
+  <!-- Step 2: シャッフルステージ -->
+  <div class="section" id="shuffleStage">
+    <div class="section-title">② シャッフル</div>
+    <div class="shuffle-hint" id="shuffleHint">カードの上にマウスを動かして、心を込めてシャッフルしてください</div>
+    <div class="shuffle-area" id="shuffleArea"></div>
+    <div class="shuffle-counter" id="shuffleCounter">ENTROPY: 0</div>
+    <div style="margin-top:20px;">
+      <button class="primary" id="drawBtn" onclick="drawAndReveal()" disabled>⏳ もう少しシャッフル...</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 引かれたカード（悩み記入前） -->
+  <div class="section" id="cardsStage">
+    <div class="section-title">③ 引かれたカード</div>
+    <div class="spread-layout" id="spreadLayout"></div>
+    <div class="tip" style="text-align:center; font-size:16px; color:var(--muted); margin-top:12px; line-height:1.8;">
+      10枚のカードが並びました。<br>
+      このカードたちに向かって、あなたの問いを書いてください。
+    </div>
+  </div>
+
+  <!-- Step 4: 悩み記入 -->
+  <div class="section" id="questionStage">
+    <div class="section-title">④ 悩み・質問を記入</div>
+    <textarea id="question" placeholder="気になっていること、悩み、聞きたいことを、あなたの言葉で自由に書いてください。&#10;&#10;例：新しい仕事のオファーを受けるべきか迷っている。今のチームにも愛着があるけど、新しい挑戦もしたい。"></textarea>
+    <div class="tip">※ 書く行為そのものが、問いを整理します。詳しく書くほど、解釈も深くなります。</div>
+    <div class="actions" style="margin-top:20px;">
+      <button class="primary" id="readBtn" onclick="doReading()">読 ん で も ら う</button>
+    </div>
+  </div>
+
+  <!-- Step 5: 読み解き -->
+  <div class="section" id="resultStage">
+    <div class="section-title">⑤ 読み解き</div>
+    <div class="tab-bar">
+      <button class="active" id="tabLocal" onclick="setReadingTab('local')">辞書ベース解釈</button>
+      <button id="tabAI" onclick="setReadingTab('ai')">AI用プロンプト</button>
+      <button id="tabLog" onclick="setReadingTab('log')">監査ログ</button>
+    </div>
+    <div id="readingLocal" class="reading"></div>
+    <div id="readingAI" style="display:none">
+      <div class="copy-row">
+        <span class="msg">↓ このプロンプトをKiro・ChatGPT・Claudeなどに貼ると、AIが深く読み解きます</span>
+        <button class="ghost" onclick="copyPrompt()">📋 コピー</button>
+      </div>
+      <div class="prompt-box" id="promptBox"></div>
+    </div>
+    <div id="readingLog" style="display:none">
+      <div class="copy-row">
+        <span class="msg">↓ シャッフル結果の監査ログ（カード展開時刻と悩み入力時刻が別タイムスタンプで記録されます）</span>
+        <button class="ghost" onclick="copyLog()">📋 コピー</button>
+      </div>
+      <div class="prompt-box" id="logBox"></div>
+    </div>
+
+    <div class="actions" style="margin-top:30px;">
+      <button class="ghost" onclick="reset()">もう一度引く</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="deck.js"></script>
+<script src="ritual.js"></script>
+<script src="reading.js"></script>
+<script>
+// スプレッド選択（デフォルトはケルト十字）
+let currentSpread = "cross";
+let currentReading = null;
+let shuffleCards = [];
+let shuffleStartAt = 0;
+let cardsDrawnAt = null;
+
+// 起動時にスプレッド選択UIのクリックを有効化
+document.querySelectorAll('.spread-choice').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.spread-choice').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    currentSpread = el.getAttribute('data-spread');
+  });
+});
+
+// シャッフル開始
+function startShuffle() {
+  document.getElementById("introStage").style.display = "none";
+  document.getElementById("shuffleStage").style.display = "block";
+  entropyPool.reset();
+
+  // カードの山を表示
+  const area = document.getElementById("shuffleArea");
+  area.innerHTML = "";
+  shuffleCards = [];
+  for (let i = 0; i < 12; i++) {
+    const c = document.createElement("div");
+    c.className = "shuffle-card";
+    c.style.transform = `translate(${(i-6)*4}px, ${(i-6)*2}px) rotate(${(i-6)*1.5}deg)`;
+    area.appendChild(c);
+    shuffleCards.push(c);
+  }
+
+  // マウス/タッチでエントロピー収集
+  area.onmousemove = handleShuffleMove;
+  area.ontouchmove = (e) => {
+    if (e.touches[0]) handleShuffleMove({clientX: e.touches[0].clientX, clientY: e.touches[0].clientY});
+  };
+
+  shuffleStartAt = performance.now();
+  document.getElementById("drawBtn").disabled = true;
+  document.getElementById("drawBtn").textContent = "⏳ もう少しシャッフル...";
+
+  document.getElementById("shuffleStage").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function handleShuffleMove(e) {
+  const area = document.getElementById("shuffleArea");
+  const rect = area.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  entropyPool.add(Math.floor(x*7919), Math.floor(y*7907));
+
+  // カードを動かす演出
+  shuffleCards.forEach((c, i) => {
+    const dx = (Math.sin(entropyPool.samples.length * 0.3 + i) * 40);
+    const dy = (Math.cos(entropyPool.samples.length * 0.27 + i*1.3) * 20);
+    const rot = (Math.sin(entropyPool.samples.length * 0.2 + i*0.7) * 15);
+    c.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+  });
+
+  document.getElementById("shuffleCounter").textContent = `ENTROPY: ${entropyPool.samples.length}`;
+
+  // 十分なエントロピーが溜まったら引けるように
+  const elapsed = performance.now() - shuffleStartAt;
+  if (entropyPool.samples.length >= 40 && elapsed >= 2000) {
+    const btn = document.getElementById("drawBtn");
+    btn.disabled = false;
+    btn.textContent = "✦ カードを展開する";
+  }
+}
+
+// カードを引いて展開（悩み記入は「まだ」受け取らない）
+function drawAndReveal() {
+  currentReading = drawCards(TAROT_DECK, currentSpread);
+  cardsDrawnAt = new Date().toISOString();
+
+  // カードを中央にまとめる演出
+  shuffleCards.forEach(c => {
+    c.style.transform = "translate(0,0) rotate(0deg)";
+  });
+
+  setTimeout(() => {
+    document.getElementById("shuffleStage").style.display = "none";
+    document.getElementById("cardsStage").style.display = "block";
+    document.getElementById("questionStage").style.display = "block";
+    renderCards();
+    document.getElementById("cardsStage").scrollIntoView({behavior:"smooth", block:"start"});
+    // 悩み入力欄にフォーカス（少し遅らせてカードを見る時間を作る）
+    setTimeout(() => document.getElementById("question").focus(), 1200);
+  }, 500);
+}
+
+function renderCards() {
+  const html = currentReading.cards.map((card, i) => {
+    const orient = card.reversed ? "逆位置" : "正位置";
+    const posClass = `pos-${i+1}`;
+    return `<div class="drawn-card ${posClass} ${card.reversed?"reversed":""}" title="${card.name}（${orient}）">
+      ${card.reversed ? '<span class="reversed-mark">逆</span>' : ""}
+      <div class="face">
+        <img src="${card.img}" alt="${card.name}" loading="lazy">
+      </div>
+      <div class="info">
+        <div class="pos-label">${i+1}. ${card.position.label}</div>
+        <div class="card-name">${card.name}</div>
+        <div class="card-orient">${orient}</div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("spreadLayout").innerHTML = html;
+}
+
+// 読んでもらう：ここで初めて悩みとカードが結合される
+function doReading() {
+  const q = document.getElementById("question").value.trim();
+  if (!q) {
+    if (!confirm("相談内容が空です。このまま読みますか？")) return;
+  }
+  // 監査ログ用に「悩み入力時刻」を記録
+  currentReading.meta.questionEnteredAt = new Date().toISOString();
+  currentReading.meta.cardsDrawnAt = cardsDrawnAt;
+
+  renderReadings(q);
+  document.getElementById("resultStage").style.display = "block";
+  document.getElementById("resultStage").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderReadings(question) {
+  document.getElementById("readingLocal").textContent = interpretLocal(currentReading, question);
+  document.getElementById("promptBox").textContent = buildAIPrompt(currentReading, question);
+  document.getElementById("logBox").textContent = exportAuditLog(currentReading, question);
+}
+
+function setReadingTab(tab) {
+  ["local","ai","log"].forEach(t => {
+    document.getElementById("tab" + (t==="local"?"Local":t==="ai"?"AI":"Log")).classList.toggle("active", t===tab);
+    document.getElementById("reading" + (t==="local"?"Local":t==="ai"?"AI":"Log")).style.display = (t===tab?"block":"none");
+  });
+}
+
+function copyPrompt() {
+  navigator.clipboard.writeText(document.getElementById("promptBox").textContent);
+  alert("AI用プロンプトをコピーしました");
+}
+function copyLog() {
+  navigator.clipboard.writeText(document.getElementById("logBox").textContent);
+  alert("監査ログをコピーしました");
+}
+
+function reset() {
+  document.getElementById("shuffleStage").style.display = "none";
+  document.getElementById("cardsStage").style.display = "none";
+  document.getElementById("questionStage").style.display = "none";
+  document.getElementById("resultStage").style.display = "none";
+  document.getElementById("introStage").style.display = "block";
+  document.getElementById("question").value = "";
+  currentReading = null;
+  cardsDrawnAt = null;
+  entropyPool.reset();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+</script>
+</body>
+</html>

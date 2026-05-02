@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>タロット占い 結果 — Divination</title>
+<style>
+  :root {
+    --gold:#c9933a; --dark:#06080f; --surface:#0d1120; --border:#1e2a40;
+    --muted:#6a7080; --text:#d8ccb8; --hi:#1c0f04;
+    --card-bg:#0d1a2e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--dark); color:var(--text);
+    font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
+    font-size:16px;
+    min-height:100vh;
+  }
+  html{ font-size:16px; }
+  .container{ max-width:1400px; margin:0 auto; padding:30px 24px 60px; }
+  header{ text-align:center; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;}
+  header .small{ font-size:13px; letter-spacing:5px; color:#6a7080; margin-bottom:6px;}
+  header h1{ font-size:32px; color:var(--gold); letter-spacing:6px; margin:0 0 4px; font-weight:normal;}
+  header .sub{ font-size:16px; color:var(--muted); letter-spacing:2px;}
+
+  .meta-box{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:7px; padding:20px 26px; margin:24px 0;
+    line-height:1.9;
+  }
+  .meta-box .label{ font-size:14px; letter-spacing:3px; color:var(--muted); margin-bottom:8px; }
+  .meta-box .question{ color:var(--text); font-size:18px; line-height:1.8; }
+  .meta-box .date{ font-size:15px; color:var(--muted); margin-top:10px; }
+
+  .main-layout{
+    display:grid;
+    grid-template-columns: 560px 1fr;
+    gap:30px;
+    align-items:start;
+  }
+  .left-pane{ position:sticky; top:20px; align-self:start; }
+  .right-pane{ min-width:0; }
+
+  .spread-layout{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(4, auto);
+    gap:8px;
+    padding:20px 16px;
+    background:#040608;
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  .spread-layout > a{ display:contents; }
+
+  .drawn-card{
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:6px; padding:6px; cursor:pointer;
+    transition:.25s; position:relative; text-align:center;
+  }
+  .drawn-card:hover{ border-color:var(--gold); transform:translateY(-2px); z-index:5;}
+  .drawn-card.active{
+    border-color:var(--gold);
+    box-shadow:0 0 0 2px var(--gold), 0 0 20px rgba(201,147,58,.5);
+    background:#1a1208;
+  }
+
+  .pos-1 { grid-column:2; grid-row:2; z-index:2; }
+  .pos-2 { grid-column:2; grid-row:3; transform:rotate(90deg); transform-origin:center; z-index:3; }
+  .pos-2:hover { transform:rotate(90deg) translateY(-2px); }
+  .pos-3 { grid-column:2; grid-row:1; }
+  .pos-4 { grid-column:2; grid-row:4; }
+  .pos-5 { grid-column:1; grid-row:2; }
+  .pos-6 { grid-column:3; grid-row:2; }
+  .pos-7 { grid-column:5; grid-row:4; }
+  .pos-8 { grid-column:5; grid-row:3; }
+  .pos-9 { grid-column:5; grid-row:2; }
+  .pos-10 { grid-column:5; grid-row:1; }
+
+  .drawn-card .pos-label{ font-size:11px; color:var(--gold); letter-spacing:1px; margin-bottom:4px; line-height:1.3; }
+  .drawn-card .face{ width:100%; aspect-ratio:350/600; border:1px solid var(--gold); border-radius:3px; overflow:hidden; background:#040608; margin-bottom:4px; }
+  .drawn-card .face img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .drawn-card.reversed .face img{ transform:rotate(180deg); }
+  .drawn-card .card-name{ font-size:11px; color:var(--text); line-height:1.3; }
+  .drawn-card .card-orient{ font-size:10px; color:var(--muted); }
+  .drawn-card.reversed .card-orient{ color:#d04030; }
+  .drawn-card .reversed-mark{
+    position:absolute; top:3px; right:3px; color:#d04030; font-size:9px;
+    background:rgba(0,0,0,.85); padding:1px 3px; border-radius:2px; font-weight:bold; z-index:2;
+  }
+  .pos-2 .reversed-mark{ transform:rotate(-90deg); transform-origin:center; }
+
+  .reading-item{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:22px 26px; margin-bottom:20px;
+    scroll-margin-top:20px; transition:.3s; cursor:pointer;
+  }
+  .reading-item.active{
+    border-color:var(--gold);
+    box-shadow:0 0 0 1px rgba(201,147,58,.3);
+  }
+  .reading-item .reading-header{
+    display:flex; align-items:center; gap:14px; margin-bottom:14px;
+    padding-bottom:12px; border-bottom:1px solid var(--border);
+  }
+  .reading-item .mini-face{ width:60px; aspect-ratio:350/600; border:1px solid var(--gold); border-radius:4px; overflow:hidden; background:#040608; flex-shrink:0; }
+  .reading-item .mini-face img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .reading-item.reversed .mini-face img{ transform:rotate(180deg); }
+  .reading-item .header-text{ flex:1; min-width:0; }
+  .reading-item .header-pos{ font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:2px; }
+  .reading-item .header-name{ font-size:18px; color:var(--text); }
+  .reading-item .header-orient{ font-size:13px; color:var(--muted); letter-spacing:2px; }
+  .reading-item.reversed .header-orient{ color:#d04030; }
+  .reading-item h3{ color:var(--gold); font-size:18px; font-weight:normal; margin:0 0 12px; }
+  .reading-item p{ margin:10px 0; font-size:16px; line-height:1.9; }
+  .reading-item strong{ color:var(--gold); }
+  .reading-item em{ color:#b89860; font-style:normal; letter-spacing:1px; }
+
+  .summary{
+    background:var(--surface); border:1px solid var(--gold);
+    border-radius:8px; padding:26px 30px; margin-top:30px;
+    scroll-margin-top:20px;
+    transition:.3s;
+  }
+  .summary.active{
+    box-shadow:0 0 0 2px var(--gold), 0 0 24px rgba(201,147,58,.3);
+  }
+  .drawn-card.all-active{
+    border-color:var(--gold);
+    box-shadow:0 0 0 1px var(--gold), 0 0 12px rgba(201,147,58,.4);
+    background:#1a1208;
+  }
+  .summary-title{
+    color:var(--gold); font-size:20px; letter-spacing:2px;
+    margin:0 0 16px; padding-bottom:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .summary p{ font-size:17px; line-height:2.0; margin:12px 0; }
+  .summary strong{ color:var(--gold); }
+  .summary em{ color:#b89860; font-style:normal; }
+  .summary blockquote{
+    border-left:3px solid var(--gold); padding:12px 22px;
+    margin:18px 0; background:rgba(201,147,58,.05);
+    border-radius:0 6px 6px 0;
+  }
+
+  @media (max-width: 960px){
+    .main-layout{ grid-template-columns:1fr; }
+    .left-pane{ position:static; }
+    .spread-layout{ max-width:500px; margin:0 auto; }
+  }
+
+  .footer-links{
+    text-align:center; margin-top:40px; padding-top:24px;
+    border-top:1px solid var(--border);
+  }
+  .footer-links a{
+    display:inline-block; padding:12px 28px; margin:0 8px;
+    border:1px solid var(--gold); color:var(--gold);
+    text-decoration:none; border-radius:4px;
+    font-size:16px; letter-spacing:2px;
+  }
+  .footer-links a:hover{ background:var(--hi); }
+
+  /* 追いタロット（追質問セクション） */
+  .followup{
+    background:var(--surface); border:1px dashed var(--gold);
+    border-radius:8px; padding:24px 28px; margin-top:24px;
+  }
+  .followup-title{
+    color:var(--gold); font-size:18px; letter-spacing:2px;
+    margin:0 0 6px; font-weight:normal;
+  }
+  .followup-sub{
+    color:var(--muted); font-size:14px; margin-bottom:16px; line-height:1.7;
+  }
+  .followup textarea{
+    width:100%; min-height:88px; resize:vertical;
+    background:#040608; color:var(--text);
+    border:1px solid var(--border); border-radius:5px;
+    padding:12px 14px; font-family:inherit; font-size:16px; line-height:1.7;
+    margin-bottom:12px;
+  }
+  .followup textarea:focus{ outline:none; border-color:var(--gold); }
+  .followup .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .followup button{
+    background:transparent; border:1px solid var(--gold); color:var(--gold);
+    padding:10px 22px; border-radius:4px; cursor:pointer;
+    font-family:inherit; font-size:15px; letter-spacing:2px;
+    transition:.2s;
+  }
+  .followup button:hover{ background:var(--hi); }
+  .followup button.primary{ background:var(--gold); color:#06080f; }
+  .followup button.primary:hover{ background:#dba95c; }
+  .followup .hint{
+    font-size:13px; color:var(--muted); margin-top:10px; line-height:1.7;
+  }
+  .followup-log{ margin-top:22px; }
+  .followup-qa{
+    background:#040608; border:1px solid var(--border);
+    border-radius:6px; padding:16px 20px; margin-bottom:14px;
+  }
+  .followup-qa .q{
+    color:var(--gold); font-size:15px; letter-spacing:1px;
+    margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid var(--border);
+  }
+  .followup-qa .q::before{ content:"Q. "; color:#b89860; }
+  .followup-qa .a{ font-size:16px; line-height:1.9; color:var(--text); }
+  .followup-qa .a p{ margin:8px 0; }
+  .followup-qa .a strong{ color:var(--gold); }
+  .followup-qa .a em{ color:#b89860; font-style:normal; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="small">DIVINATION / READING</div>
+    <h1>占 い 結 果</h1>
+    <div class="sub">ケルト十字 — 10枚のカードが告げるもの</div>
+    <div style="font-size:13px; color:#2a3448; letter-spacing:1px; margin-top:6px;">build: 2026-04-28-ai-career-followup-q1</div>
+  </header>
+
+  <div class="meta-box">
+    <div class="label">ご相談</div>
+    <div class="question">今回昇進できなそうで、この会社なかなか厳しい。AI活用の仕事への転身はどうか</div>
+    <div class="date">2026年 4月 28日 — ケルト十字</div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="left-pane">
+      <div class="spread-layout">
+        <a href="#reading-1"><div class="drawn-card reversed pos-1" data-num="1">
+          <span class="reversed-mark">逆</span>
+          <div class="pos-label">1. 現状</div>
+          <div class="face"><img src="images/p07.jpg" alt="ペンタクルの7"></div>
+          <div class="card-name">ペンタクルの7</div>
+          <div class="card-orient">逆位置</div>
+        </div></a>
+        <a href="#reading-2"><div class="drawn-card pos-2" data-num="2">
+          <div class="pos-label">2. 障害</div>
+          <div class="face"><img src="images/s11.jpg" alt="ソードのペイジ"></div>
+          <div class="card-name">ソードのペイジ</div>
+          <div class="card-orient">正位置</div>
+        </div></a>
+        <a href="#reading-3"><div class="drawn-card pos-3" data-num="3">
+          <div class="pos-label">3. 顕在</div>
+          <div class="face"><img src="images/w12.jpg" alt="ワンドのナイト"></div>
+          <div class="card-name">ワンドのナイト</div>
+          <div class="card-orient">正位置</div>
+        </div></a>
+        <a href="#reading-4"><div class="drawn-card reversed pos-4" data-num="4">
+          <span class="reversed-mark">逆</span>
+          <div class="pos-label">4. 潜在</div>
+          <div class="face"><img src="images/m04.jpg" alt="皇帝"></div>
+          <div class="card-name">皇帝</div>
+          <div class="card-orient">逆位置</div>
+        </div></a>
+        <a href="#reading-5"><div class="drawn-card pos-5" data-num="5">
+          <div class="pos-label">5. 過去</div>
+          <div class="face"><img src="images/w09.jpg" alt="ワンドの9"></div>
+          <div class="card-name">ワンドの9</div>
+          <div class="card-orient">正位置</div>
+        </div></a>
+        <a href="#reading-6"><div class="drawn-card reversed pos-6" data-num="6">
+          <span class="reversed-mark">逆</span>
+          <div class="pos-label">6. 近未来</div>
+          <div class="face"><img src="images/c09.jpg" alt="カップの9"></div>
+          <div class="card-name">カップの9</div>
+          <div class="card-orient">逆位置</div>
+        </div></a>
+        <a href="#reading-7"><div class="drawn-card pos-7" data-num="7">
+          <div class="pos-label">7. 自分</div>
+          <div class="face"><img src="images/w02.jpg" alt="ワンドの2"></div>
+          <div class="card-name">ワンドの2</div>
+          <div class="card-orient">正位置</div>
+        </div></a>
+        <a href="#reading-8"><div class="drawn-card reversed pos-8" data-num="8">
+          <span class="reversed-mark">逆</span>
+          <div class="pos-label">8. 周囲</div>
+          <div class="face"><img src="images/s06.jpg" alt="ソードの6"></div>
+          <div class="card-name">ソードの6</div>
+          <div class="card-orient">逆位置</div>
+        </div></a>
+        <a href="#reading-9"><div class="drawn-card pos-9" data-num="9">
+          <div class="pos-label">9. 希望と恐れ</div>
+          <div class="face"><img src="images/s01.jpg" alt="ソードのエース"></div>
+          <div class="card-name">ソードのA</div>
+          <div class="card-orient">正位置</div>
+        </div></a>
+        <a href="#reading-10"><div class="drawn-card reversed pos-10" data-num="10">
+          <span class="reversed-mark">逆</span>
+          <div class="pos-label">10. 最終</div>
+          <div class="face"><img src="images/w08.jpg" alt="ワンドの8"></div>
+          <div class="card-name">ワンドの8</div>
+          <div class="card-orient">逆位置</div>
+        </div></a>
+      </div>
+    </div>
+
+    <div class="right-pane">
+
+      <div class="reading-item reversed" id="reading-1" data-num="1">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/p07.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">1. 現状</div>
+            <div class="header-name">ペンタクルの7 <span class="header-orient">逆位置</span></div>
+          </div>
+        </div>
+        <h3>収穫の手前で待たされる、焦りの季節</h3>
+        <p>現状に<strong>ペンタクルの7・逆位置</strong>。正位置は<em>育ててきた畑を前にじっと立ち、収穫のタイミングを見極める農夫</em>の姿。それが逆＝<strong>育てたのに実が落ちない／収穫が遅れている／「これだけやったのに」という焦り</strong>。まさに今のあなたの気持ちを言い当てています。長年この会社で種を蒔き、水をやり、枝葉を整えてきた。なのに今季の収穫(昇進)が見送られそう——<em>「何のために畑に立ってきたのか」</em>という感覚。このカードは「努力が無駄だった」とは言っていません。<strong>実はちゃんと育っている、ただしこの畑では実らない</strong>可能性を示唆しています。</p>
+      </div>
+
+      <div class="reading-item" id="reading-2" data-num="2">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/s11.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">2. 障害</div>
+            <div class="header-name">ソードのペイジ <span class="header-orient">正位置</span></div>
+          </div>
+        </div>
+        <h3>「本当はどうなのか」を言語化しきれない未熟さ</h3>
+        <p>障害に<strong>ソードのペイジ・正位置</strong>。剣を抱えた若者が風を警戒する姿＝<em>知性・観察・疑い・情報収集、ただし経験は浅い</em>。これが障害として立っているのは重要です。あなたの中には「会社が厳しい」「AIの仕事はどうか」という<strong>情報レベル・思考レベルの疑問</strong>があるけれど、<em>まだそれが観察・仮説の段階で、確信まで熟していない</em>。障害=このペイジ的思考そのものが、決断の邪魔をしている。「AI活用の仕事」と言っても中身はバラバラ——社内のAI担当、コンサル、事業会社のAI推進、スタートアップ、独立。<strong>対象がぼんやりしたまま「AI」と一括りにしていないか？</strong>このカードは「もっと具体的に調べて、言葉にしろ」と促しています。</p>
+      </div>
+
+      <div class="reading-item" id="reading-3" data-num="3">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/w12.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">3. 顕在意識</div>
+            <div class="header-name">ワンドのナイト <span class="header-orient">正位置</span></div>
+          </div>
+        </div>
+        <h3>「もう走り出したい」燃える騎士の意志</h3>
+        <p>顕在意識に<strong>ワンドのナイト・正位置</strong>。馬で疾走する情熱の騎士＝<em>行動・冒険・新天地への突進・変化への意欲</em>。自覚レベルで<strong>もう動きたい、新しい場所で燃えたい</strong>という意思ははっきりしています。これは4/27の「独立倍稼ぎ＝戦車」「転職か独立か＝カップペイジ(素直な独立)」の占断と見事に一本の線。<em>「動く」という方向性自体は、もう自分で決まっている</em>。ワンドのナイトの良さは情熱の純度。弱点は——<strong>「どこへ向かって走るか」の地図を持たずに駆け出しがち</strong>。そこは2番(ソードペイジ)と7番(ワンド2)が補う役割を持ちます。</p>
+      </div>
+
+      <div class="reading-item reversed" id="reading-4" data-num="4">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/m04.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">4. 潜在意識</div>
+            <div class="header-name">皇帝 <span class="header-orient">逆位置</span></div>
+          </div>
+        </div>
+        <h3>「権威に認められたい」という古い構造への疲れ</h3>
+        <p>潜在意識に<strong>大アルカナ・皇帝の逆位置</strong>。これは率直に読みます。正位置の皇帝は<em>秩序・権威・父性・支配構造</em>の象徴。逆＝<strong>硬直した組織／権威への反発／認めてくれない父的存在への失望／「昇進」という制度そのものへの違和感</strong>。今回昇進しなさそうなことの裏には、<em>組織の昇進プロセス・評価者(マネージャー含む)・大企業の階層構造そのものに、あなたの無意識が深く疲れている</em>事実があります。4/17のメモ「Hiro転職＋主力3人退職＋臨時上司未定」の状況——まさに皇帝逆の構造(意思決定者不在・評価の硬直)。このカードは<em>「もうこの構造に期待するのをやめていい」</em>という深層の声。AI活用の仕事への興味は、単なる流行への乗り換えではなく、<strong>「皇帝的な組織から抜けて、自分の裁量で動きたい」という根深い欲求</strong>と繋がっています。</p>
+      </div>
+
+      <div class="reading-item" id="reading-5" data-num="5">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/w09.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">5. 過去</div>
+            <div class="header-name">ワンドの9 <span class="header-orient">正位置</span></div>
+          </div>
+        </div>
+        <h3>頭に包帯を巻き、杖にもたれてきた戦士の履歴</h3>
+        <p>過去に<strong>ワンドの9・正位置</strong>。頭に包帯を巻いた戦士が杖にもたれて警戒する姿＝<em>忍耐、最後の守り、既に満身創痍、それでも踏ん張ってきた</em>。これがここに至る流れとして出ているのは、胸に来る真実です。Sony83%集中案件、Hiro転職、Promo Doc作成、JSC/神戸への深耕、主力3人の退職——<strong>あなたはずっと、包帯を巻いて杖にもたれながら、この会社で戦ってきた</strong>。4/27セッションでもワンド9が連続して出ていた通り、<em>慢性化した疲労</em>がこの過去カードで可視化されています。そしてこのカードは告げます——<strong>「よくここまで守ってきた。でも、杖にもたれる日々がもう数年続いても、体力的には限界が近い」</strong>と。</p>
+      </div>
+
+      <div class="reading-item reversed" id="reading-6" data-num="6">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/c09.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">6. 近未来</div>
+            <div class="header-name">カップの9 <span class="header-orient">逆位置</span></div>
+          </div>
+        </div>
+        <h3>「これで満足」という表面的な落とし所の誘惑</h3>
+        <p>近未来に<strong>カップの9・逆位置</strong>。正位置は「願いが叶う満足」、逆＝<strong>表面的な満足、過信、妥協的な幸福、本当の願いではない何かで自分を納得させる</strong>。近いうちに訪れる局面として——<em>「昇進は今回見送りでも、来年があるし」「AI案件を1本もらえたからこれでいいか」「給料は悪くないんだし」という"そこそこの満足"で自分を納得させる誘惑</em>が来ます。カップ9逆は一見悪いカードではないのですが、<strong>「本当に欲しいものから目を逸らす和解」</strong>を示唆します。短期的に気分が楽になっても、ペンタクル7逆(畑の焦り)は解消されません。<em>この近未来は、乗り越える対象</em>。</p>
+      </div>
+
+      <div class="reading-item" id="reading-7" data-num="7">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/w02.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">7. 自分自身</div>
+            <div class="header-name">ワンドの2 <span class="header-orient">正位置</span></div>
+          </div>
+        </div>
+        <h3>地球儀を手に、次の航路を見つめる姿</h3>
+        <p>自分ポジションに<strong>ワンドの2・正位置</strong>。これは非常に強いカードです。城の上で<em>地球儀を手に、もう一本の杖を柱に固定し、遠くの海を見つめる</em>姿。意味は<strong>ビジョン、選択、計画、2つの選択肢を見据える支配者の視点</strong>。あなた自身の姿として出ているのは——<em>既に「今の場所に留まる」か「新天地へ渡る」かを見比べる高台に立っている</em>ということ。3番のワンドナイト(突進の情熱)と7番のワンド2(冷静な計画)がセットで出ているのは最良の組合せ。<strong>情熱だけでも計画だけでもなく、両方を持っている</strong>。地球儀は「世界には他にも市場がある」の象徴=AI活用の仕事は国内に限らずグローバルに広がる領域との暗合。このカードがあなたの姿である限り、独立・転身の資格は十分です。</p>
+      </div>
+
+      <div class="reading-item reversed" id="reading-8" data-num="8">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/s06.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">8. 周囲の影響</div>
+            <div class="header-name">ソードの6 <span class="header-orient">逆位置</span></div>
+          </div>
+        </div>
+        <h3>「渡り舟」が出ていない、環境の停滞</h3>
+        <p>周囲に<strong>ソードの6・逆位置</strong>。正位置は<em>舟で向こう岸へ静かに渡る＝困難からの脱出、移行、穏やかな旅立ち</em>。逆＝<strong>渡れない、停滞、舟が出ない、去ろうとしても引き戻される、環境が動くことを許さない</strong>。これが周囲に出たのは重要な現実認識です。今の組織環境は——<em>Hiro転職で昇進プロセスは停滞、臨時上司はまだ未定、評価者が動かないから昇進の舟は出ない、しかもあなたが抜けようとすると「まだ残れ」と引き止められる可能性もある</em>。この周囲カードは、<strong>「会社側の動きを待っていても舟は出ない」</strong>ことを告げます。つまり——<em>自分で別の舟を探すか、自分で漕ぎ出すしかない</em>。待ちの戦略は、ソード6逆の停滞を長引かせるだけ。</p>
+      </div>
+
+      <div class="reading-item" id="reading-9" data-num="9">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/s01.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">9. 希望と恐れ</div>
+            <div class="header-name">ソードのエース <span class="header-orient">正位置</span></div>
+          </div>
+        </div>
+        <h3>雲間から現れる一振りの剣、明晰な切断への渇望</h3>
+        <p>希望と恐れに<strong>ソードのエース・正位置</strong>。雲間から現れた王冠を貫く鋭い剣＝<em>知性の突破口、明晰な決断、曖昧さを切り裂く一撃、新しい真実の誕生</em>。ここが非常に美しい配置です。あなたの内面の深いところには<strong>「もう曖昧な状態を終わらせて、スパッと決めたい」という強い渇望</strong>が燃えている。同時に<em>「そんなに明晰に決められるだろうか」という恐れ</em>もある。ソードAは両刃です——決断は自由をもたらすが、過去との決別も伴う。4/27セッションで「悪魔正位置＝確実に売れる／ただし撤退条件必須」というカードが出ていたのと同じ構造で、<strong>この問いでも「明晰な決断をする勇気」があなたの中にすでに備わっている</strong>ことをこのカードは示しています。</p>
+      </div>
+
+      <div class="reading-item reversed" id="reading-10" data-num="10">
+        <div class="reading-header">
+          <div class="mini-face"><img src="images/w08.jpg" alt=""></div>
+          <div class="header-text">
+            <div class="header-pos">10. 最終結果</div>
+            <div class="header-name">ワンドの8 <span class="header-orient">逆位置</span></div>
+          </div>
+        </div>
+        <h3>放たれるはずの8本の矢が、まだ宙に留まる</h3>
+        <p>最終結果に<strong>ワンドの8・逆位置</strong>。正位置は<em>8本の杖が勢いよく空を飛ぶ＝急速な進展、迅速な動き、メッセージの到達</em>。逆＝<strong>遅延、停滞、飛ばない矢、メッセージが届かない、焦っても動かない時期</strong>。率直にお伝えします。<em>このまま進むと、「AI活用の仕事に移ろう」と決めても、すぐには動き出せない</em>という最終結果です。これは「やめておけ」ではありません。<strong>方向性は正しいが、想定より時間がかかる</strong>というメッセージ。理由は近未来のカップ9逆(妥協の誘惑)、周囲のソード6逆(渡り舟が出ない)、2番のソードペイジ(情報不足)が組み合わさって、<em>「決めてから動き出すまで」に予想以上のタイムラグ</em>が発生する未来。ただし、ワンド8逆は<strong>「永遠に飛ばない」ではなく「今はまだ飛ばない」</strong>。矢は準備され、弦は引かれている。放たれる時は必ず来ます。</p>
+      </div>
+
+      <div class="summary" id="summary">
+        <div class="summary-title">要するに、どうなのか</div>
+        <p>10枚を通して読みます。通奏低音は<strong>「方向は正しい、ただし焦って動くな。情報を集めて、明晰に決め、放たれる時まで準備せよ」</strong>です。</p>
+
+        <p>まず、AI活用の仕事への転身という方向性について——<strong>カードは支持しています</strong>。3番ワンドナイト(燃える情熱)＋7番ワンド2(地球儀を手にした計画者の視点)＋9番ソードA(明晰な決断への渇望)。この3枚が揃うのは<em>「新しい航路に渡る資格があり、内側の準備も整っている」</em>という強いサイン。4番皇帝逆も「今の組織構造からの離脱」を後押ししています。</p>
+
+        <p>ただし、ここで率直に申し上げねばならない厳しい真実が3つあります。</p>
+
+        <blockquote>
+<strong>① 「AI活用の仕事」がまだ抽象的すぎる</strong>（2.ソードペイジ / 6.カップ9逆）<br>
+ソードペイジが障害に出ている意味は重い。<em>今のあなたの「AIの仕事」という言葉は、まだ思考の初期段階にあり、具体化されていない</em>。社内のAI案件を取りに行くのか、AIスタートアップに転職するのか、独立してAIコンサルを始めるのか、AI教育事業か——<strong>この解像度を上げないまま動くと、カップ9逆(表面的な満足)で妥協する結果になる</strong>。最低でもあと3〜5名のAI業界従事者に話を聞き、「自分がやるのはこの種類」を特定する作業を先に。<br><br>
+
+<strong>② 身体が既に限界に近い</strong>（1.ペンタクル7逆 / 5.ワンド9）<br>
+現状の焦りと過去の満身創痍は直結しています。<em>今すぐ決断→即転身のスピードを自分に課すと、ワンド9の包帯がさらに増える</em>。最終結果のワンド8逆「遅延」は、悪いニュースではなく<strong>「身体を整える時間を、運命があなたに与えている」</strong>と読んでいい。焦って動くのではなく、1〜3ヶ月の情報収集期間＋体力回復期間を組み込む。<br><br>
+
+<strong>③ 周囲の舟は当分出ない</strong>（8.ソード6逆 / 4.皇帝逆）<br>
+昇進プロセスの停滞、臨時上司未定、評価者不在——<em>組織側が動いてくれることを待つ戦略は無効</em>。このソード6逆が告げているのは「あなたが自分で舟を用意する」こと。昇進の結果を待ってから動くのではなく、<strong>昇進結果に関係なく、裏で着々と準備を進める</strong>。結果が出た時に「どちらでも動ける」状態を作っておく。<br><br>
+
+<strong>④ 決断は、身体が整った時に明晰に降りてくる</strong>（9.ソードA / 10.ワンド8逆）<br>
+ソードAが希望と恐れに出ている＝<em>明晰な決断は既にあなたの内側で準備されている</em>。ワンド8逆の遅延は、この明晰さが熟すまでの時間です。無理に今月決める必要はない。情報が揃い、身体が少し回復した瞬間に、ソードAは自然に振り下ろされる。
+        </blockquote>
+
+        <p>そして——これは今日のセッションで感じたことですが——<strong>4/27の占断群と合わせて読むと、あなたの運勢は一本の線を描いています</strong>。</p>
+
+        <p><em>塔(昇進崩壊)→戦車(独立意志の勝利)→カップペイジ(素直な独立)→悪魔(売れる事業だが撤退条件必須)→魔術師+隠者(サニックスで手札と知恵)→そして今日のワンド2+ソードA+皇帝逆</em>。すべて「今の組織から離れ、自分の裁量で動く未来」を指しています。カードはあなたの決断を急かしていません。<strong>ただ、決まっている方向は揺らがない</strong>とだけ告げています。</p>
+
+        <p>最後に、ひとつだけ温かい注意を。ペンタクル7逆の「育ててきた畑」を憎まないでください。<em>この会社で得た経験・人脈・スキルは、次の航路の燃料になります</em>。収穫が今年実らなかった事実と、土壌が豊かだった事実は、矛盾しません。<strong>ワンド2で地球儀を眺めながら、心の中で今の畑の収穫物(経験値)を、次に蒔く種に選んでいく</strong>——それがあなたの今の仕事です。</p>
+
+        <p>矢は、時が来れば必ず放たれます。</p>
+      </div>
+
+      <div class="followup" id="followup">
+        <h3 class="followup-title">追いタロット — もっと聞いてみる</h3>
+        <div class="followup-sub">読み解きを踏まえて、更に聞きたいことがあれば書いてください。<br>「プロンプト作成」ボタンで、引かれたカードの文脈を引き継いだ追質問プロンプトがクリップボードにコピーされます。それをKiroに貼って回答を受け取ったあと、私に渡していただければ下のログに追記します。</div>
+        <textarea id="followup-input" placeholder="例：ソードペイジが障害として出た理由をもっと深く知りたい。具体的にどの種類のAI案件から話を聞き始めるのがよいか？"></textarea>
+        <div class="actions">
+          <button type="button" class="primary" id="copy-prompt-btn">プロンプトを作成してコピー</button>
+          <button type="button" id="show-prompt-btn">プロンプトを表示</button>
+        </div>
+        <div class="hint" id="followup-hint"></div>
+        <div class="followup-log" id="followup-log">
+          <!-- 追質問Q&Aはここに追記される -->
+
+          <div class="followup-qa">
+            <div class="q">AI活用コンサルティング、AI活用事業開発、AI活用システム企画などを考えています</div>
+            <div class="a">
+              <p>なるほど、候補が3つ見えてきましたね。元の10枚のカードを見直すと——<strong>この3つは、カードが示唆している方向性とそれぞれ異なる響き方をします</strong>。率直にお伝えします。</p>
+
+              <p><strong>① AI活用コンサルティング</strong><br>
+              7番の<strong>ワンドの2（地球儀を手に次の航路を見つめる）</strong>と最も親和性が高いのがこれです。城の上から遠くの海を見渡す——<em>それはまさにコンサルタントが複数のクライアントの事業全体を俯瞰する視点</em>。今のProServeでの経験(Sony/JSC/神戸)は、<strong>異業種を横断する視点の蓄積</strong>そのもの＝ワンド2の資質。ただし警告があります。4番の<em>皇帝逆</em>——コンサルという業態は、結局「誰かの組織の権威構造」の中で助言する仕事でもある。大手コンサルファームに入れば、また別の皇帝(パートナー／クライアントの役員)に評価される日々が始まります。<strong>「独立系コンサル or 少人数ブティック」の形を取らない限り、皇帝逆の疲れは再発するリスク</strong>。</p>
+
+              <p><strong>② AI活用事業開発</strong><br>
+              3番の<strong>ワンドのナイト（燃える情熱の騎士）</strong>が最も強く応えるのがこれです。<em>馬で疾走する、ゼロから何かを立ち上げる</em>——事業開発は文字通りこの絵です。ただし2つの検討事項：<br>
+              ・<em>ワンドのナイトは燃えるが、持続力は弱い</em>——事業開発は短距離ではなく10年単位のマラソン。<strong>ワンド9（満身創痍の過去）</strong>を再発させないには、「一人で背負う事業開発」ではなく「チームで分担できる事業開発」を選ぶ必要あり。<br>
+              ・大企業の中の事業開発部門は、結局また4番<em>皇帝逆</em>の罠にハマる可能性。スタートアップ or 自分の会社 or ジョイントベンチャーの形が望ましい。<br>
+              そして——この選択肢は、4/27の占断群(戦車／悪魔／魔術師)と最もよく響きます。<strong>「事業開発＝自分で何かを立ち上げる」方向が、4月を通してカードが何度も示唆してきた「独立の軸」そのもの</strong>。</p>
+
+              <p><strong>③ AI活用システム企画</strong><br>
+              2番の<strong>ソードのペイジ（知性・観察・学び始め）</strong>と最も対応するのがこれです。システム企画は<em>情報収集と仕様策定の緻密な思考作業</em>——ソードペイジの領域。<strong>今のあなたのスキルセット(AWSの技術理解＋顧客折衝＋要件定義)から最もスムーズに移れる</strong>のは実はこれかもしれません。ただし3番<em>ワンドのナイト（突進したい情熱）</em>と10番<em>ワンド8逆（遅延）</em>から見ると——<em>システム企画は「走り出したい騎士」の情熱を満たすには、動きが緩やかすぎる可能性</em>。「書類を書く日々」に戻ったと感じる瞬間が来るかもしれない。ただ、<strong>独立後の最初の足場としては安定性が高く、ワンド9の体力回復を兼ねながら再始動できる現実的な選択</strong>でもあります。</p>
+
+              <p><strong>3つを並べ直すと、カードが示す順番はこうです</strong>——</p>
+
+              <p><em>【情熱の純度】で選ぶなら</em> → ②事業開発（ワンドナイトが最も喜ぶ）<br>
+              <em>【ビジョンの俯瞰】で選ぶなら</em> → ①コンサル（ワンド2の視点と合致）<br>
+              <em>【体力回復と段階的移行】で選ぶなら</em> → ③システム企画（ソードペイジの学びと整合）</p>
+
+              <p>そして<strong>カードが最も強く警告しているのは「1つに絞って全部賭けるな」</strong>ということ。7番ワンド2の絵を思い出してください——<em>あの城主は、2本の杖を手元に持っています。1本ではなく、2本</em>。これは<strong>「複数の選択肢を同時に走らせる」ことを許容するカード</strong>です。</p>
+
+              <p><strong>具体的な次の一歩として、こんな組み方はいかがでしょう</strong>：</p>
+
+              <p>✦ 最初の6ヶ月＝<strong>③システム企画の案件を1〜2本受ける</strong>（ワンド9の体力を回復しながら、独立後のキャッシュフローを確保）<br>
+              ✦ 並行して＝<strong>①コンサルとしてのブランディングを育てる</strong>（ブログ／登壇／人脈を地球儀のように広げる）<br>
+              ✦ 1年以内に＝<strong>②事業開発の種を自分の中で育てる</strong>（共同創業者候補と対話、自分のテーマを言語化）</p>
+
+              <p>——つまり<em>③で足場を作り、①で視界を広げ、②で本丸に進む</em>。ワンドの2の「2本の杖」は、<strong>③＋①を右手に、②を左手に、という3階建ての持ち方</strong>にも読めるのです。</p>
+
+              <p>最後にひとつ。<strong>9番のソードのエース（明晰な決断）</strong>は、あなたに「3つのうち1つを今すぐ選べ」とは言っていません。<em>「3つそれぞれについて、自分が本当にやりたい理由を1文で言語化してみる」——この剣の使い方</em>こそが、今日このカードが差し出している刃です。3つの理由が書けたら、次に「どれが自分のワンドナイトを最も燃やすか」を身体で感じる。ソードAは頭で、ワンドナイトは胸で答える。両方の答えが揃う瞬間——それがワンド8逆の矢が放たれる時です。</p>
+
+              <p><em>3つを「vs」で比較する必要はない。カードは「and」で行けと言っています。</em></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer-links">
+    <a href="index.html">← タロットに戻る</a>
+    <a href="../index.html">← 三命盤に戻る</a>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const items = document.querySelectorAll('.reading-item');
+  const cards = {};
+  document.querySelectorAll('.drawn-card[data-num]').forEach(c => {
+    cards[c.getAttribute('data-num')] = c;
+  });
+
+  const summary = document.getElementById('summary');
+  let suppressObserver = false;
+  let currentNum = 1;
+  const maxNum = items.length;
+  const SUMMARY_NUM = maxNum + 1;
+
+  function setActive(num) {
+    Object.values(cards).forEach(c => {
+      c.classList.remove('active');
+      c.classList.remove('all-active');
+    });
+    items.forEach(i => i.classList.remove('active'));
+    if (summary) summary.classList.remove('active');
+    if (cards[num]) cards[num].classList.add('active');
+    const target = document.getElementById('reading-' + num);
+    if (target) target.classList.add('active');
+  }
+
+  function setActiveAll() {
+    Object.values(cards).forEach(c => {
+      c.classList.remove('active');
+      c.classList.add('all-active');
+    });
+    items.forEach(i => i.classList.remove('active'));
+    if (summary) summary.classList.add('active');
+  }
+
+  function clearAllActive() {
+    Object.values(cards).forEach(c => c.classList.remove('all-active'));
+    if (summary) summary.classList.remove('active');
+  }
+
+  document.querySelectorAll('.drawn-card[data-num]').forEach(c => {
+    const num = c.getAttribute('data-num');
+    const link = c.closest('a');
+    if (link) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById('reading-' + num);
+        if (target) {
+          suppressObserver = true;
+          const rect = target.getBoundingClientRect();
+          const absTop = rect.top + window.pageYOffset;
+          window.scrollTo({ top: absTop - 30, behavior: 'smooth' });
+          clearAllActive();
+          setActive(num);
+          currentNum = parseInt(num, 10);
+          setTimeout(() => { suppressObserver = false; }, 900);
+        }
+      });
+    }
+  });
+
+  items.forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      const num = item.getAttribute('data-num');
+      suppressObserver = true;
+      clearAllActive();
+      setActive(num);
+      currentNum = parseInt(num, 10);
+      setTimeout(() => { suppressObserver = false; }, 600);
+    });
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    if (suppressObserver) return;
+    let best = null, bestTop = Infinity;
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const rect = e.target.getBoundingClientRect();
+      const anchor = window.innerHeight * 0.25;
+      if (rect.top <= anchor + 50 && rect.top > anchor - rect.height) {
+        const dist = Math.abs(rect.top - anchor);
+        if (dist < bestTop) { bestTop = dist; best = e.target; }
+      }
+    });
+    if (best) {
+      const num = best.getAttribute('data-num');
+      clearAllActive();
+      setActive(num);
+      currentNum = parseInt(num, 10);
+    }
+  }, {
+    rootMargin: '-10% 0px -60% 0px',
+    threshold: [0, 0.1, 0.5]
+  });
+
+  items.forEach(i => observer.observe(i));
+  setActive('1');
+
+  function goToCard(num) {
+    if (num < 1 || num > SUMMARY_NUM) return;
+    currentNum = num;
+    suppressObserver = true;
+
+    if (num === SUMMARY_NUM) {
+      if (summary) {
+        const rect = summary.getBoundingClientRect();
+        const absTop = rect.top + window.pageYOffset;
+        window.scrollTo({ top: absTop - 30, behavior: 'smooth' });
+      }
+      setActiveAll();
+    } else {
+      const target = document.getElementById('reading-' + num);
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const absTop = rect.top + window.pageYOffset;
+      window.scrollTo({ top: absTop - 30, behavior: 'smooth' });
+      clearAllActive();
+      setActive(String(num));
+    }
+    setTimeout(() => { suppressObserver = false; }, 900);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'j' || e.key === 'l') {
+      e.preventDefault();
+      goToCard(currentNum + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'k' || e.key === 'h') {
+      e.preventDefault();
+      goToCard(currentNum - 1);
+    }
+  });
+
+  /* ===== 追いタロット（追質問）===== */
+  const METADATA = {
+    question: document.querySelector('.meta-box .question')?.textContent.trim() || '',
+    date: document.querySelector('.meta-box .date')?.textContent.trim() || '',
+    spread: 'ケルト十字'
+  };
+
+  function collectCardsFromDOM(){
+    const list = [];
+    document.querySelectorAll('.drawn-card[data-num]').forEach(c => {
+      const num = c.getAttribute('data-num');
+      const pos = c.querySelector('.pos-label')?.textContent.trim() || '';
+      const name = c.querySelector('.card-name')?.textContent.trim() || '';
+      const orient = c.querySelector('.card-orient')?.textContent.trim() || '';
+      list.push(`${num}. ${pos}：${name}／${orient}`);
+    });
+    return list.join('\n');
+  }
+
+  function collectReadingDigestFromDOM(){
+    const lines = [];
+    document.querySelectorAll('.reading-item').forEach(item => {
+      const num = item.getAttribute('data-num');
+      const pos = item.querySelector('.header-pos')?.textContent.trim() || '';
+      const name = item.querySelector('.header-name')?.textContent.trim().replace(/\s+/g,' ') || '';
+      const h3 = item.querySelector('h3')?.textContent.trim() || '';
+      lines.push(`${num}. ${pos} ${name} — ${h3}`);
+    });
+    const summaryTxt = document.querySelector('#summary blockquote')?.textContent.replace(/\s+/g,' ').trim().slice(0, 800) || '';
+    return lines.join('\n') + (summaryTxt ? `\n\n【総合メッセージ要約】\n${summaryTxt}` : '');
+  }
+
+  function buildFollowupPrompt(userQ){
+    const prev = [];
+    document.querySelectorAll('.followup-qa').forEach(qa => {
+      const q = qa.querySelector('.q')?.textContent.replace(/^Q\.\s*/,'').trim();
+      const a = qa.querySelector('.a')?.textContent.replace(/\s+/g,' ').trim().slice(0, 600);
+      if (q) prev.push(`（前の追質問）Q: ${q}\nA: ${a}`);
+    });
+
+    // 九命盤サマリーがあれば読み込む（localStorage or URLパラメータ）
+    let meibanSection = '';
+    try {
+      let raw = localStorage.getItem("meiban_summary");
+      if (!raw) {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = params.get("meiban");
+        if (fromUrl) { raw = decodeURIComponent(fromUrl); localStorage.setItem("meiban_summary", raw); }
+      }
+      if (raw) {
+        const mb = JSON.parse(raw);
+        meibanSection = [
+          '【相談者の九命盤（命盤から読み取れるこの人の土台）】',
+          mb.text,
+          '※ タロットの解釈にこの命盤情報を踏まえてください。同じカードでも、この人の性格・現在の時期によって意味が変わります。',
+          ''
+        ].join('\n');
+      }
+    } catch(e) {}
+
+    return [
+      'あなたは経験豊富なタロットリーダーです。以下のケルト十字展開の結果を踏まえて、相談者の追加質問に答えてください。',
+      '',
+      '【元の相談】',
+      METADATA.question,
+      `（${METADATA.date}）`,
+      '',
+      meibanSection,
+      '【引かれたカード】',
+      collectCardsFromDOM(),
+      '',
+      '【これまでの読み解きダイジェスト】',
+      collectReadingDigestFromDOM(),
+      '',
+      prev.length ? '【これまでの追質問ログ】\n' + prev.join('\n\n') + '\n' : '',
+      '【今回の追加質問】',
+      userQ,
+      '',
+      '【お願い】',
+      '1. 新しくカードを引くのではなく、元の10枚の文脈の中で答えてください',
+      '2. 特定のカード（例：2番ソードペイジ、6番カップ9逆 等）を引用しながら具体的に',
+      '3. 九命盤の情報がある場合は、カードの解釈にその人の性格・時期を反映させてください',
+      '4. 曖昧な慰めより、具体的な気づきや次の一歩を示してください',
+      '5. 温かくも率直な占いの口調で',
+    ].filter(s => s !== '').join('\n');
+  }
+
+  const inputEl = document.getElementById('followup-input');
+  const copyBtn = document.getElementById('copy-prompt-btn');
+  const showBtn = document.getElementById('show-prompt-btn');
+  const hintEl = document.getElementById('followup-hint');
+
+  function validate(){
+    const v = inputEl?.value.trim() || '';
+    if (!v) {
+      hintEl.textContent = '追質問を記入してください。';
+      hintEl.style.color = '#d04030';
+      return null;
+    }
+    return v;
+  }
+
+  if (copyBtn) copyBtn.addEventListener('click', async () => {
+    const q = validate(); if (!q) return;
+    const prompt = buildFollowupPrompt(q);
+    try {
+      await navigator.clipboard.writeText(prompt);
+      hintEl.innerHTML = '✔ プロンプトをクリップボードにコピーしました。Kiroチャットに貼って回答を受け取ってください。';
+      hintEl.style.color = '#c9933a';
+    } catch(e) {
+      hintEl.textContent = 'クリップボードコピーに失敗しました。「プロンプトを表示」から手動でコピーしてください。';
+      hintEl.style.color = '#d04030';
+    }
+  });
+
+  if (showBtn) showBtn.addEventListener('click', () => {
+    const q = validate(); if (!q) return;
+    const prompt = buildFollowupPrompt(q);
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write('<pre style="white-space:pre-wrap;font-family:monospace;font-size:14px;padding:24px;background:#06080f;color:#d8ccb8;min-height:100vh;">' + prompt.replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch])) + '</pre>');
+      w.document.title = '追質問プロンプト';
+    } else {
+      alert(prompt);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
+
