@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>九命盤 — 9つの占術で読む、あなたの命盤</title>
+<title>羅占盤 — 9つの占術で読む、あなたの命盤</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -393,10 +393,10 @@
 
   <aside>
     <div style="display:flex; align-items:center; gap:2px; margin-bottom:20px; cursor:pointer;" onclick="goHome()">
-      <img src="icons/MeibanIcon01.png" alt="九命盤" style="width:88px; height:88px; opacity:.7; border-radius:50%; object-fit:cover;">
+      <img src="icons/MeibanIcon01.png" alt="羅占盤" style="width:88px; height:88px; opacity:.7; border-radius:50%; object-fit:cover;">
       <div>
         <div class="brand">NINE CHARTS</div>
-        <div class="brand-title" style="margin-bottom:0; margin-top:-3px;">九 命 盤</div>
+        <div class="brand-title" style="margin-bottom:0; margin-top:-3px;">羅 占 盤</div>
       </div>
     </div>
 
@@ -483,8 +483,8 @@
 
   <main id="main">
     <div class="empty" id="empty" style="height:auto; padding:40px 32px;">
-      <div class="sym" style="font-size:0; line-height:0; margin-bottom:10px;"><img src="icons/MeibanIcon01.png" alt="九命盤" style="width:168px; height:auto; opacity:.7;"></div>
-      <div style="font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:8px; font-family:'Noto Serif JP',serif; font-weight:700;">九 命 盤</div>
+      <div class="sym" style="font-size:0; line-height:0; margin-bottom:10px;"><img src="icons/MeibanIcon01.png" alt="羅占盤" style="width:168px; height:auto; opacity:.7;"></div>
+      <div style="font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:8px; font-family:'Noto Serif JP',serif; font-weight:700;">羅 占 盤</div>
       <div style="font-size:15px; color:var(--muted); margin-bottom:28px;">9つの占術で、あなたの命盤を読み解きます。</div>
 
       <!-- 2分岐の入口（7:3） -->
@@ -1569,7 +1569,7 @@ function buildExportText(){
     ? `${String(d.h).padStart(2,"0")}:${String(d.mi).padStart(2,"0")}`
     : "不明";
 
-  return `以下は三命盤（西洋占星術・四柱推命・紫微斗数）の計算結果です。この命盤データをもとに総合鑑定をお願いします。
+  return `以下は羅占盤（西洋占星術・四柱推命・紫微斗数）の計算結果です。この命盤データをもとに総合鑑定をお願いします。
 
 ━━━━━━━━━━━━━━━━━━━━
 基本情報
@@ -1847,7 +1847,7 @@ function buildCompatExportText(){
     WUXING_CYCLE[dayElB] === dayElA ? "相生（相手が育てる）" : "ぶつかる関係";
   const numKey = Math.min(nA.lifePath, nB.lifePath) + "-" + Math.max(nA.lifePath, nB.lifePath);
 
-  return `以下は2人の九命盤データと相性判定結果です。このデータをもとに2人の相性を総合鑑定してください。
+  return `以下は2人の羅占盤データと相性判定結果です。このデータをもとに2人の相性を総合鑑定してください。
 
 ━━━━━━━━━━━━━━━━━━━━
 【あなた】基本情報
@@ -9087,7 +9087,7 @@ async function pasteReading(){
 /* ── AI用エクスポート ── */
 function goToTarot(){
   if (!currentData) { alert("先に命盤を立ててください"); return; }
-  // 九命盤サマリーをlocalStorageに保存（タロット側で読み込む）
+  // 羅占盤サマリーをlocalStorageに保存（タロット側で読み込む）
   const d = currentData;
   const sunSign = SIGNS[signOf(d.sunLon)];
   const moonSign = SIGNS[signOf(d.moonLon)];
