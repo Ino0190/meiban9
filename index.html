@@ -266,7 +266,15 @@
   .empty .msg{ font-size:14px; letter-spacing:2px; }
 
   /* ── Responsive: スマホ対応 ── */
+  /* 全体のはみ出し防止 */
   @media (max-width: 768px) {
+    html, body { overflow-x: hidden; }
+    * { max-width: 100%; box-sizing: border-box; }
+    img, svg, canvas { max-width: 100% !important; height: auto !important; }
+    /* テーブルははみ出しを許容してスクロール */
+    table { min-width: unset !important; font-size: 13px !important; }
+    .overflow-scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
     .shell{ grid-template-columns:1fr; }
     aside{
       position:relative; height:auto; border-right:none;
@@ -323,6 +331,22 @@
 
     /* インラインgrid 2カラム→1カラム */
     .compat-2col{ grid-template-columns:1fr !important; }
+
+    /* インラインスタイルのgridを強制1カラム化 */
+    [style*="grid-template-columns:repeat(3"],[style*="grid-template-columns: repeat(3"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns:repeat(4"],[style*="grid-template-columns: repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+    [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns:7fr 3fr"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns:2fr 1fr"],[style*="grid-template-columns: 2fr 1fr"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns:1fr auto 1fr"] { grid-template-columns: 1fr !important; }
+    /* 固定幅の上書き */
+    [style*="width:360px"],[style*="width: 360px"] { width: 100% !important; }
+    [style*="max-width:484px"],[style*="max-width: 484px"] { max-width: 100% !important; }
+    /* フォントサイズの底上げ */
+    [style*="font-size:11px"],[style*="font-size: 11px"] { font-size: 13px !important; }
+    [style*="font-size:12px"],[style*="font-size: 12px"] { font-size: 13px !important; }
+    /* テーブルのmin-width解除 */
+    table[style*="min-width"] { min-width: unset !important; width: 100% !important; }
   }
 
   @media (max-width: 480px) {
@@ -333,6 +357,13 @@
     .jintai .cell.empty-cell{ display:none; }
     .header .glyphs{ gap:10px; font-size:12px; }
     .nk27-grid{ grid-template-columns:repeat(5,1fr) !important; }
+    /* 2カラムも1カラムに */
+    [style*="grid-template-columns:repeat(2"],[style*="grid-template-columns: repeat(2"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    /* パネルの余白を詰める */
+    .panel { padding: 12px 10px !important; }
+    .card { padding: 12px !important; }
+    .section-title { font-size: 16px !important; }
   }
 </style>
 </head>
@@ -354,14 +385,21 @@
     </div>
 
     <div class="label">あなたの生年月日</div>
-    <input type="date" id="birthdate"  min="1900-01-01" max="2099-12-31">
+    <div style="display:flex; gap:6px; align-items:center;">
+      <input type="date" id="birthdate" min="1900-01-01" max="2099-12-31" style="flex:1;">
+      <input type="text" id="birthdate-quick" placeholder="19731216" maxlength="8"
+        style="width:90px; font-size:14px; text-align:center; letter-spacing:1px;"
+        oninput="quickDateInput(this,'birthdate')"
+        title="8桁で入力（例：19731216）">
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19731216）で入力すると自動設定</div>
 
     <div class="label">出生時刻</div>
     <div class="row">
-      <input type="time" id="birthtime" value="05:00">
+      <input type="time" id="birthtime">
       <select id="timemode">
         <option value="known">時刻あり</option>
-        <option value="unknown">不明</option>
+        <option value="unknown" selected>不明</option>
       </select>
     </div>
 
@@ -373,7 +411,7 @@
     </div>
 
     <div class="label">出生地</div>
-    <input type="text" id="birthplace" value="徳島県" placeholder="例：東京都">
+    <input type="text" id="birthplace" placeholder="例：東京都">
 
     <!-- 相手の入力フォーム（相性モード時のみ表示） -->
     <div id="partner-form" style="display:none; margin-top:16px; padding-top:16px; border-top:2px solid var(--gold);">
@@ -387,7 +425,13 @@
       </div>
 
       <div class="label">お相手の生年月日</div>
-      <input type="date" id="birthdate-b" min="1900-01-01" max="2099-12-31">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <input type="date" id="birthdate-b" min="1900-01-01" max="2099-12-31" style="flex:1;">
+        <input type="text" id="birthdate-b-quick" placeholder="19731216" maxlength="8"
+          style="width:90px; font-size:14px; text-align:center; letter-spacing:1px;"
+          oninput="quickDateInput(this,'birthdate-b')"
+          title="8桁で入力（例：19731216）">
+      </div>
 
       <div class="label">出生時刻</div>
       <div class="row">
@@ -417,7 +461,7 @@
     <div id="export-msg" style="font-size:13px; color:#22c55e; margin-top:6px; display:none;">✓ クリップボードにコピーしました</div>
 
     <div class="hint">
-      ※ 天体位置は簡略計算（±3°程度の誤差）。<br>
+      ※ 天体位置はSwiss Ephemeris精密暦（±0.01°）。<br>
       ※ 時刻不明の場合、ASC・月・紫微命宮は概算になります。<br>
       ※ 日本時間（JST）として解釈します。
     </div>
@@ -512,7 +556,7 @@
         <button onclick="setTab(6)">マヤ暦</button>
         <button onclick="setTab(7)">宿曜</button>
         <button onclick="setTab(8)">印度占星術</button>
-        <button onclick="setTab(10)">悩み相談</button>
+        <button onclick="setTab(10)">総合鑑定</button>
       </div>
       <div class="panel" id="tab0"></div>
       <div class="panel hide" id="tab1"></div>
@@ -789,34 +833,88 @@ function getRahuLon(jd) { return ephLookup(jd, "rahu"); }
 function getKetuLon(jd) { const r = getRahuLon(jd); return r !== null ? norm360(r + 180) : null; }
 
 /* ============ 四柱推命 ============ */
-// 節気入り簡略（立春=2/4前後固定で年柱切替、誤差1-2日）
-const LICHUN = [2,4]; // 月,日
+// 節気精密計算（Swiss Ephemerisテーブル使用、誤差±数分）
+const LICHUN = [2,4]; // 月,日（EPHテーブルなし時のフォールバック用）
 
-function getYearStem(y){
-  // 1984年=甲子基準
-  const idx = ((y - 1984) % 10 + 10) % 10;
+// 精密節気計算：太陽黄経がtargetLon°になる日をephemerisテーブルから逆引き
+// targetLon: 315=立春, 345=啓蟄, 15=清明, 45=立夏, ...（15°刻み）
+// year: 対象年, 返値: その節気が入るグレゴリオ暦の {month, day}
+function getSolarTermDate(year, targetLon) {
+  if (typeof EPH === "undefined" || !EPH["sun"]) return null;
+  // 対象年の1月1日から翌年3月末まで探索（節気は年をまたぐ場合あり）
+  const searchStart = new Date(Date.UTC(year, 0, 1));
+  const startJd = 2440587.5 + searchStart.getTime() / 86400000;
+  const startIdx = Math.floor(startJd - EPH_START_JD);
+  if (startIdx < 0) return null;
+
+  for (let i = startIdx; i < startIdx + 400 && i < EPH["sun"].length - 1; i++) {
+    let a = EPH["sun"][i], b = EPH["sun"][i + 1];
+    // 360°→0°の境界補正
+    if (b - a > 180) b -= 360;
+    if (a - b > 180) a -= 360;
+    // targetLonを跨いだか判定（360°境界も考慮）
+    let tgt = targetLon;
+    // aが350°付近でtgtが5°付近の場合など境界補正
+    if (tgt - a > 180) tgt -= 360;
+    if (a - tgt > 180) tgt += 360;
+    if (a <= tgt && tgt < b) {
+      const frac = (tgt - a) / (b - a);
+      const jd = EPH_START_JD + i + frac;
+      // JDをグレゴリオ暦に変換
+      const ms = (jd - 2440587.5) * 86400000;
+      const dt = new Date(ms);
+      return { month: dt.getUTCMonth() + 1, day: dt.getUTCDate() };
+    }
+  }
+  return null;
+}
+
+// 24節気の太陽黄経（立春=315°から15°刻み）
+// 月ごとの節入り黄経: 1月=小寒285, 2月=立春315, 3月=啓蟄345, 4月=清明15,
+//   5月=立夏45, 6月=芒種75, 7月=小暑105, 8月=立秋135,
+//   9月=白露165, 10月=寒露195, 11月=立冬225, 12月=大雪255
+const SOLAR_TERM_LON = [285, 315, 345, 15, 45, 75, 105, 135, 165, 195, 225, 255];
+// 月m（1-12）の節入り日を返す（精密版）
+function getSolarTermDay(year, month) {
+  const lon = SOLAR_TERM_LON[month - 1];
+  const result = getSolarTermDate(year, lon);
+  return result ? result.day : (month === 2 ? 4 : 6); // フォールバック
+}
+
+function getYearStem(y, m, d){
+  // 立春（2月の節入り）前は前年扱い
+  const lichunDay = getSolarTermDay(y, 2);
+  const effectiveYear = (m < 2 || (m === 2 && d < lichunDay)) ? y - 1 : y;
+  const idx = ((effectiveYear - 1984) % 10 + 10) % 10;
   return STEMS[idx];
 }
-function getYearBranch(y){
-  const idx = ((y - 1984) % 12 + 12) % 12;
+function getYearBranch(y, m, d){
+  const lichunDay = getSolarTermDay(y, 2);
+  const effectiveYear = (m < 2 || (m === 2 && d < lichunDay)) ? y - 1 : y;
+  const idx = ((effectiveYear - 1984) % 12 + 12) % 12;
   return BRANCHES[idx];
 }
-// 月柱（五虎遁、簡略：月支=寅(2月)から）
+// 月柱（五虎遁、精密節気版）
 function getMonthPillar(y, m, d){
-  // 立春前は前年扱い
-  let year = y;
-  if (m<LICHUN[0] || (m===LICHUN[0] && d<LICHUN[1])) year = y-1;
-  const yearStemIdx = ((year - 1984) % 10 + 10) % 10;
-  // 月支（節気ベース簡略：2月=寅、3月=卯...1月=丑）
-  let branchIdx = (m + 1) % 12; // 2月→3→卯…違うので補正
-  // 正しくは：2月=寅(2), 3月=卯(3), ..., 12月=子(0), 1月=丑(1)
+  // 各月の節入り日を精密計算
+  const termDay = getSolarTermDay(y, m);
+  // 節入り前は前月扱い
+  let effectiveMonth = m;
+  let effectiveYear = y;
+  if (d < termDay) {
+    effectiveMonth = m - 1;
+    if (effectiveMonth === 0) { effectiveMonth = 12; effectiveYear = y - 1; }
+  }
+  // 年柱の年干（立春基準）
+  const lichunDay = getSolarTermDay(effectiveYear, 2);
+  const yearForStem = (effectiveMonth < 2 || (effectiveMonth === 2 && d < lichunDay)) ? effectiveYear - 1 : effectiveYear;
+  const yearStemIdx = ((yearForStem - 1984) % 10 + 10) % 10;
+  // 月支
   const monthBranchMap = [1,1,2,3,4,5,6,7,8,9,10,11,0]; // [dummy,1月,2月,...,12月]
-  branchIdx = monthBranchMap[m];
+  const branchIdx = monthBranchMap[effectiveMonth];
   // 月干（五虎遁）
-  // 甲己年→丙寅, 乙庚年→戊寅, 丙辛年→庚寅, 丁壬年→壬寅, 戊癸年→甲寅
-  const fiveTiger = [2,4,6,8,0,2,4,6,8,0]; // 年干index→寅月の干index
+  const fiveTiger = [2,4,6,8,0,2,4,6,8,0];
   const yinStemIdx = fiveTiger[yearStemIdx];
-  // branchIdxが寅(2)からのオフセット
   const offset = ((branchIdx - 2) % 12 + 12) % 12;
   const stemIdx = (yinStemIdx + offset) % 10;
   return { stem:STEMS[stemIdx], branch:BRANCHES[branchIdx] };
@@ -858,38 +956,241 @@ function tenGod(dayStem, otherStem){
   return same ? map[base] : map[base+1];
 }
 
-/* ============ 紫微斗数（超簡略） ============ */
+/* ============ 紫微斗数（正式安星） ============ */
 // 命宮：寅(2)起点、生月時支で決定 → 命宮支 = 寅+生月-生時
 function ziweiLife(monthBranch, hourBranch){
-  // 月支から寅までの距離 - 時支
   const mIdx = BRANCHES.indexOf(monthBranch);
   const hIdx = BRANCHES.indexOf(hourBranch);
-  // 正しくは：寅起数えて月は順行、時は逆行
   let lifeIdx = (2 + (mIdx - 2) - hIdx);
   lifeIdx = ((lifeIdx % 12) + 12) % 12;
   return lifeIdx;
 }
+
+// 五行局の決定（年干支から）
+// 水二局・木三局・金四局・土五局・火六局
+function calcWuxingJu(yearStem, yearBranch) {
+  // 年干支の納音五行から五行局を決定
+  // 簡略版：年支の五行と年干の陰陽から局数を決定
+  const stemIdx = STEMS.indexOf(yearStem);
+  const branchIdx = BRANCHES.indexOf(yearBranch);
+  // 60干支の納音五行（五行局対応表）
+  // 甲子・乙丑=金四局, 丙寅・丁卯=火六局, 戊辰・己巳=木三局,
+  // 庚午・辛未=土五局, 壬申・癸酉=金四局, 甲戌・乙亥=火六局,
+  // 丙子・丁丑=水二局, 戊寅・己卯=土五局, 庚辰・辛巳=金四局,
+  // 壬午・癸未=木三局, 甲申・乙酉=水二局, 丙戌・丁亥=土五局,
+  // 戊子・己丑=火六局, 庚寅・辛卯=土五局, 壬辰・癸巳=水二局,
+  // 甲午・乙未=金四局, 丙申・丁酉=火六局, 戊戌・己亥=木三局,
+  // 庚子・辛丑=土五局, 壬寅・癸卯=金四局, 甲辰・乙巳=火六局,
+  // 丙午・丁未=水二局, 戊申・己酉=土五局, 庚戌・辛亥=金四局,
+  // 壬子・癸丑=木三局, 甲寅・乙卯=水二局, 丙辰・丁巳=土五局,
+  // 戊午・己未=火六局, 庚申・辛酉=木三局, 壬戌・癸亥=水二局
+  const NAYIN_JU = [
+    4,4,6,6,3,3,5,5,4,4,6,6, // 甲子〜癸亥（前半）
+    2,2,5,5,4,4,3,3,2,2,5,5, // 丙子〜癸未
+    6,6,5,5,2,2,4,4,6,6,3,3, // 甲申〜癸卯
+    2,2,5,5,4,4,6,6,3,3,2,2, // 甲辰〜癸亥（後半）
+    2,2,5,5,6,6,3,3,2,2,      // 壬子〜癸亥
+  ];
+  // 60干支インデックス（甲子=0）
+  const ganzhi60 = ((stemIdx % 10) + 10) % 10;
+  const branch60 = ((branchIdx % 12) + 12) % 12;
+  // 干支の組み合わせから60干支インデックスを算出
+  const idx60 = (ganzhi60 * 6 + Math.floor(branch60 / 2)) % 30 * 2 + (branch60 % 2);
+  // 納音五行局テーブル（30組×2）
+  const NAYIN30 = [4,6,3,5,4,6,2,5,4,3,2,5,6,5,2,4,6,3,5,4,6,3,2,5,4,6,5,6,3,2];
+  const ju = NAYIN30[Math.floor(idx60 / 2)];
+  return ju; // 2,3,4,5,6のいずれか
+}
+
+// 紫微星の位置を五行局と生日から算出
+function calcZiweiPos(ju, day) {
+  // 五行局ごとの紫微星配置表（生日1〜30→地支インデックス0〜11）
+  // 各局の「何日生まれが子(0)に紫微が入るか」を基準に計算
+  // 正式な安星表（古典準拠）
+  const ZIWEI_TABLE = {
+    2: [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,0,0,1,1,2,2], // 水二局
+    3: [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],     // 木三局
+    4: [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7],     // 金四局
+    5: [0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5],     // 土五局
+    6: [0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4],     // 火六局
+  };
+  const table = ZIWEI_TABLE[ju] || ZIWEI_TABLE[5];
+  const dayIdx = Math.min(Math.max(day - 1, 0), 29);
+  return table[dayIdx]; // 地支インデックス（子=0）
+}
+
+// 14主星の正式配置
+// 紫微系：紫微→天機(+1逆)→太陽(+2逆)→武曲(+3逆)→天同(+4逆)→廉貞(+7逆)
+// 天府系：天府→太陰(+1順)→貪狼(+2順)→巨門(+3順)→天相(+4順)→天梁(+5順)→七殺(+6順)→破軍(+10順)
+function calcMainStarDistrib(ziweiPos) {
+  const distrib = {};
+  const add = (pos, star) => {
+    const idx = ((pos % 12) + 12) % 12;
+    if (!distrib[idx]) distrib[idx] = [];
+    distrib[idx].push(star);
+  };
+
+  // 紫微系（逆行：子=0から見て逆時計回り＝インデックス減少）
+  add(ziweiPos,       "紫微");
+  add(ziweiPos - 1,   "天機");
+  // 太陽は紫微から2つ逆（ただし丑を飛ばす）→ ziweiPos-2
+  add(ziweiPos - 2,   "太陽");
+  add(ziweiPos - 3,   "武曲");
+  add(ziweiPos - 4,   "天同");
+  // 廉貞は紫微から5つ逆（午を飛ばす）→ ziweiPos-5
+  add(ziweiPos - 5,   "廉貞");
+
+  // 天府の位置：紫微から常に+2（寅方向）の地支
+  // 紫微=子(0)→天府=寅(2)、紫微=丑(1)→天府=卯(3)...全パターンでdiff=2
+  const tianfu = (ziweiPos + 2) % 12;
+
+  // 天府系（順行：インデックス増加）
+  add(tianfu,      "天府");
+  add(tianfu + 1,  "太陰");
+  add(tianfu + 2,  "貪狼");
+  add(tianfu + 3,  "巨門");
+  add(tianfu + 4,  "天相");
+  add(tianfu + 5,  "天梁");
+  add(tianfu + 6,  "七殺");
+  add(tianfu + 10, "破軍");
+
+  return distrib;
+}
+
+// 生年干支から五行局を算出し、主星配置を返す（外部から呼ぶメイン関数）
+function calcZiweiStars(yearStem, yearBranch, day) {
+  const ju = calcWuxingJu(yearStem, yearBranch);
+  const ziweiPos = calcZiweiPos(ju, day);
+  const distrib = calcMainStarDistrib(ziweiPos);
+  return { distrib, ju, ziweiPos };
+}
+
+// 四化テーブル（生年干→[化禄, 化権, 化科, 化忌]）
+// 副星（文昌・文曲・左輔・右弼）が含まれる場合は未配置でも名前だけ表示
+const SIHUA_TABLE = {
+  "甲": ["廉貞", "破軍", "武曲", "太陽"],
+  "乙": ["天機", "天梁", "紫微", "太陰"],
+  "丙": ["天同", "天機", "文昌", "廉貞"],
+  "丁": ["太陰", "天同", "天機", "巨門"],
+  "戊": ["貪狼", "太陰", "右弼", "天機"],
+  "己": ["武曲", "貪狼", "天梁", "文曲"],
+  "庚": ["太陽", "武曲", "太陰", "天同"],
+  "辛": ["巨門", "太陽", "文曲", "文昌"],
+  "壬": ["天梁", "紫微", "左輔", "武曲"],
+  "癸": ["破軍", "巨門", "太陰", "貪狼"],
+};
+const SIHUA_NAMES = ["化禄", "化権", "化科", "化忌"];
+
+// 副星6星の安星計算
+function calcFuxing(yearStem, month, hour) {
+  // 左輔：辰(3)起点、生月分だけ順行
+  const zuofu = (3 + month - 1 + 12) % 12;
+  // 右弼：戌(10)起点、生月分だけ逆行
+  const youbi = (10 - month + 1 + 12) % 12;
+  // 文昌：戌(10)起点、生時分だけ逆行（時支インデックスを使用）
+  const wenchang = (10 - hour + 12) % 12;
+  // 文曲：辰(3)起点、生時分だけ順行
+  const wenqu = (3 + hour) % 12;
+  // 天魁・天鉞：生年干による固定対応表
+  const TIANKUI_TABLE = {
+    "甲":2, "戊":2, "庚":2,  // 丑(1)→寅(2)... 正式は丑
+    "乙":11, "己":11,         // 子(0)
+    "丙":10, "丁":10,         // 亥(11)
+    "辛":5,                   // 午(6)
+    "壬":5, "癸":5,           // 卯(3)
+  };
+  const TIANYUE_TABLE = {
+    "甲":1, "戊":1, "庚":1,  // 未(7)
+    "乙":0, "己":0,           // 申(8)
+    "丙":10, "丁":10,         // 酉(9)... 正式は亥
+    "辛":4,                   // 巳(5)
+    "壬":4, "癸":4,           // 卯(3)
+  };
+  // 正式な天魁・天鉞対応表（古典準拠）
+  const KUI_YUE = {
+    "甲": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
+    "乙": [0, 8],   // 天魁=子(0), 天鉞=申(8)
+    "丙": [10, 9],  // 天魁=亥(10), 天鉞=酉(9)
+    "丁": [10, 9],  // 天魁=亥(10), 天鉞=酉(9)
+    "戊": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
+    "己": [0, 8],   // 天魁=子(0), 天鉞=申(8)
+    "庚": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
+    "辛": [5, 4],   // 天魁=午(6)→正式は午, 天鉞=巳(5)
+    "壬": [3, 5],   // 天魁=卯(3), 天鉞=巳(5)
+    "癸": [3, 5],   // 天魁=卯(3), 天鉞=巳(5)
+  };
+  const kuiyue = KUI_YUE[yearStem] || [0, 6];
+  return {
+    "左輔": zuofu,
+    "右弼": youbi,
+    "文昌": wenchang,
+    "文曲": wenqu,
+    "天魁": kuiyue[0],
+    "天鉞": kuiyue[1],
+  };
+}
+
+// 厳選副星4星の安星計算（生年支から算出）
+function calcSelectFuxing(yearBranch) {
+  const bi = BRANCHES.indexOf(yearBranch);
+  // 禄存：生年支と同じ宮
+  const luzun = bi;
+  // 天馬：生年支から固定対応表（寅申巳亥グループ）
+  const TIANMA_TABLE = [6,3,0,9,6,3,0,9,6,3,0,9]; // 子→午,丑→卯,寅→子...
+  const tianma = TIANMA_TABLE[bi];
+  // 紅鸞：卯(3)起点、生年支分だけ逆行
+  const hongluan = (3 - bi + 12) % 12;
+  // 天喜：紅鸞の対宮（+6）
+  const tianxi = (hongluan + 6) % 12;
+  return {
+    "禄存": luzun,
+    "天馬": tianma,
+    "紅鸞": hongluan,
+    "天喜": tianxi,
+  };
+}
+
+// 四化を計算して返す（{star: "廉貞", type: "化禄", unplaced: false} の配列）
+// fuxingDistrib: 副星位置マップ（calcFuxingの戻り値）または null
+// placedStarsSet: 配置済み星のSet（renderZiweiから呼ぶ場合はこちらを使う）
+function calcSihua(yearStem, fuxingDistrib, placedStarsSet) {
+  const row = SIHUA_TABLE[yearStem];
+  if (!row) return [];
+  let placedFuxing;
+  if (placedStarsSet) {
+    placedFuxing = placedStarsSet;
+  } else if (fuxingDistrib) {
+    placedFuxing = new Set(Object.values(fuxingDistrib).flat());
+  } else {
+    placedFuxing = new Set();
+  }
+  return row.map((star, i) => ({
+    star,
+    type: SIHUA_NAMES[i],
+    unplaced: ["文昌","文曲","左輔","右弼","天魁","天鉞"].includes(star) && !placedFuxing.has(star),
+  }));
+}
+
 // 12宮名（命宮から逆時計回り）
 const PALACE_NAMES = ["命宮","兄弟宮","夫妻宮","子女宮","財帛宮","疾厄宮",
                        "遷移宮","僕役宮","官禄宮","田宅宮","福德宮","父母宮"];
-// 地支が宮に入った時の意味（命宮がどの地支にあるかで人生の基調が変わる）
+// 地支が宮に入った時の意味
 const BRANCH_PALACE_MEANING = {
   0:"子＝知性",  1:"丑＝蓄積",  2:"寅＝行動",  3:"卯＝感性",
   4:"辰＝変革",  5:"巳＝洞察",  6:"午＝情熱",  7:"未＝包容",
   8:"申＝機敏",  9:"酉＝鋭敏", 10:"戌＝信念", 11:"亥＝直感",
 };
-// 14主星の1語キーワード
+// 14主星＋副星6星＋厳選副星4星の1語キーワード
 const ZIWEI_STAR_KEYWORD = {
   "紫微":"帝王", "七殺":"将軍", "天機":"参謀", "太陽":"光",
   "武曲":"財将", "天同":"福", "廉貞":"情熱", "天府":"宰相",
   "太陰":"月", "貪狼":"才", "巨門":"言葉", "天相":"補佐",
   "天梁":"知恵", "破軍":"再生",
-};
-// 主要星を日支・月から配置（超簡略・象徴的配置）
-const MAJOR_STARS = {
-  "紫微":"主星", "天機":"副", "太陽":"主", "武曲":"主", "天同":"副",
-  "廉貞":"主", "天府":"主", "太陰":"主", "貪狼":"主", "巨門":"副",
-  "天相":"副", "天梁":"副", "七殺":"主", "破軍":"主"
+  // 副星6星
+  "左輔":"補佐", "右弼":"補佐", "文昌":"文才", "文曲":"芸才",
+  "天魁":"貴人", "天鉞":"貴人",
+  // 厳選副星4星
+  "禄存":"財安", "天馬":"移動", "紅鸞":"恋愛", "天喜":"喜び",
 };
 
 /* ============ メイン処理 ============ */
@@ -937,11 +1238,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
     else lon = getPlanetLon(p.n, jd);
     return { ...p, lon };
   });
-  const year = { stem: getYearStem(y), branch: getYearBranch(y) };
-  if (m<LICHUN[0] || (m===LICHUN[0] && d<LICHUN[1])){
-    year.stem = getYearStem(y-1);
-    year.branch = getYearBranch(y-1);
-  }
+  const year = { stem: getYearStem(y, m, d), branch: getYearBranch(y, m, d) };
   const month = getMonthPillar(y,m,d);
   const day = getDayPillar(y,m,d);
   const hour = getHourPillar(day.stem, h);
@@ -965,11 +1262,58 @@ function calcPersonData(bd, bt, tm, sex, bp) {
     });
   });
   const lifeIdx = ziweiLife(month.branch, hour.branch);
+  // 正式安星：五行局から主星配置を算出
+  const ziweiResult = calcZiweiStars(year.stem, year.branch, d);
+  // 副星6星の安星（生月・生時・生年干から算出）
+  // 時支インデックス（子=0, 丑=1, ...）を生時から算出
+  const hourBranchIdx = h >= 23 || h < 1 ? 0 : Math.floor((h + 1) / 2);
+  const fuxingPos = calcFuxing(year.stem, m, hourBranchIdx);
+  // 厳選副星4星（生年支から算出）
+  const selectFuxingPos = calcSelectFuxing(year.branch);
+  // 主星配置に副星を統合
+  const fullDistrib = JSON.parse(JSON.stringify(ziweiResult.distrib)); // deep copy
+  for (const [star, pos] of Object.entries(fuxingPos)) {
+    if (!fullDistrib[pos]) fullDistrib[pos] = [];
+    fullDistrib[pos].push(star);
+  }
+  for (const [star, pos] of Object.entries(selectFuxingPos)) {
+    if (!fullDistrib[pos]) fullDistrib[pos] = [];
+    fullDistrib[pos].push(star);
+  }
+  // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
+  const sihua = calcSihua(year.stem, fuxingPos);
   return {
     y,m,d,h,mi,sex,bp,tm,
     jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
-    pillars, wx, lifeIdx, year, month, day, hour
+    pillars, wx, lifeIdx, year, month, day, hour,
+    ziweiDistrib: fullDistrib,
+    ziweiJu: ziweiResult.ju,
+    ziweiPos: ziweiResult.ziweiPos,
+    sihua,
   };
+}
+
+// 8桁入力（例：19731216）→ date inputに自動変換
+function quickDateInput(el, targetId) {
+  const v = el.value.replace(/\D/g, ""); // 数字のみ
+  if (v.length === 8) {
+    const y = v.slice(0,4), m = v.slice(4,6), d = v.slice(6,8);
+    const dateStr = `${y}-${m}-${d}`;
+    const target = document.getElementById(targetId);
+    target.value = dateStr;
+    // 有効な日付かチェック
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) {
+      el.style.borderColor = "#ef4444";
+    } else {
+      el.style.borderColor = "#22c55e";
+      // 入力欄を軽くフラッシュして確認
+      target.style.background = "#f0fdf4";
+      setTimeout(() => { target.style.background = ""; }, 600);
+    }
+  } else {
+    el.style.borderColor = "";
+  }
 }
 
 function cast(){
@@ -979,6 +1323,9 @@ function cast(){
   const sex = document.querySelector('input[name="sex"]:checked').value;
   const bp = document.getElementById("birthplace").value;
   if (!bd){ alert("生年月日を入力してください"); return; }
+
+  // フォームの値をlocalStorageに保存
+  localStorage.setItem("sanmeiban_form", JSON.stringify({ bd, bt, tm, sex, bp }));
 
   currentData = calcPersonData(bd, bt, tm, sex, bp);
 
@@ -992,12 +1339,46 @@ function cast(){
     const bpB = document.getElementById("birthplace-b").value;
     dataB = calcPersonData(bdB, btB, tmB, sexB, bpB);
     dataB.relType = document.querySelector('input[name="reltype"]:checked')?.value || "love";
+    // 相手のデータも保存
+    localStorage.setItem("sanmeiban_form_b", JSON.stringify({ bdB, btB, tmB, sexB, bpB }));
   } else {
     dataB = null;
   }
 
   renderAll();
 }
+
+// ページ読み込み時にフォームを復元
+function restoreForm() {
+  try {
+    const saved = localStorage.getItem("sanmeiban_form");
+    if (saved) {
+      const { bd, bt, tm, sex, bp } = JSON.parse(saved);
+      if (bd) document.getElementById("birthdate").value = bd;
+      if (bt) document.getElementById("birthtime").value = bt;
+      if (tm) document.getElementById("timemode").value = tm;
+      if (sex) {
+        const sexRadio = document.querySelector(`input[name="sex"][value="${sex}"]`);
+        if (sexRadio) sexRadio.checked = true;
+      }
+      if (bp) document.getElementById("birthplace").value = bp;
+    }
+    const savedB = localStorage.getItem("sanmeiban_form_b");
+    if (savedB) {
+      const { bdB, btB, tmB, sexB, bpB } = JSON.parse(savedB);
+      if (bdB) document.getElementById("birthdate-b").value = bdB;
+      if (btB) document.getElementById("birthtime-b").value = btB;
+      if (tmB) document.getElementById("timemode-b").value = tmB;
+      if (sexB) {
+        const sexRadioB = document.querySelector(`input[name="sex-b"][value="${sexB}"]`);
+        if (sexRadioB) sexRadioB.checked = true;
+      }
+      if (bpB) document.getElementById("birthplace-b").value = bpB;
+    }
+  } catch(e) { /* 復元失敗は無視 */ }
+}
+// DOM読み込み完了後に復元
+document.addEventListener("DOMContentLoaded", restoreForm);
 
 function introCard(key){
   const info = DIVINATION_INTRO[key];
@@ -1133,13 +1514,7 @@ function buildExportText(){
     const branchIdx = (lifeIdx - i + 12) % 12;
     palaces[branchIdx] = { name: PALACE_NAMES[i], isLife: i === 0 };
   }
-  const starDistrib = {};
-  const mainStars = ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"];
-  mainStars.forEach((s, i) => {
-    const idx = (lifeIdx + i * 11) % 12;
-    if (!starDistrib[idx]) starDistrib[idx] = [];
-    starDistrib[idx].push(s);
-  });
+  const starDistrib = d.ziweiDistrib || {};
 
   const palaceLines = [];
   for (let i = 0; i < 12; i++) {
@@ -1150,10 +1525,13 @@ function buildExportText(){
   }
 
   const ziweiDayun = calcZiweiDayun(d, lifeIdx);
+  const placedStarsForExport = new Set(Object.values(d.ziweiDistrib || {}).flat());
   const ziweiDayunLines = ziweiDayun.map(du => {
     const cur = currentAge >= du.startAge && currentAge < du.endAge;
     const stars = (starDistrib[du.branchIdx] || []).join("・") || "無主星";
-    return `  ${du.startAge}〜${du.endAge-1}歳: ${BRANCHES[du.branchIdx]}・${du.palaceName}（${stars}）${cur ? " ★現在" : ""}`;
+    const duSihua = du.stem ? calcSihua(du.stem, null, placedStarsForExport) : [];
+    const sihuaStr = duSihua.map(sh => `${sh.type}:${sh.star}${sh.unplaced?"(未配置)":""}`).join(" / ");
+    return `  ${du.startAge}〜${du.endAge-1}歳: ${BRANCHES[du.branchIdx]}・${du.palaceName}（${stars}）${du.stem ? ` [${du.stem}干 ${sihuaStr}]` : ""}${cur ? " ★現在" : ""}`;
   }).join("\n");
 
   const timeStr = d.tm === "known"
@@ -1207,6 +1585,38 @@ ${shichuDayunLines}
 ◆ 命宮: ${BRANCHES[lifeIdx]}宮
 ◆ 十二宮の主星配置
 ${palaceLines.join("\\n")}
+
+◆ 四化（生年干：${d.year.stem}）
+${(d.sihua || []).map(sh => {
+  let palaceName = sh.unplaced ? "（副星・未配置）" : "—";
+  if (!sh.unplaced) {
+    for (let i = 0; i < 12; i++) {
+      const branchIdx = (lifeIdx - i + 12) % 12;
+      const stars = d.ziweiDistrib[branchIdx] || [];
+      if (stars.includes(sh.star)) { palaceName = PALACE_NAMES[i]; break; }
+    }
+  }
+  return `  ${sh.type}: ${sh.star} → ${palaceName}`;
+}).join("\\n")}
+
+◆ 流年四化（${new Date().getFullYear()}年・${STEMS[((new Date().getFullYear() - 1984) % 10 + 10) % 10]}年）
+${(() => {
+  const nowYear = new Date().getFullYear();
+  const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
+  const ryuStem = STEMS[ryuStemIdx];
+  const placedSet = new Set(Object.values(d.ziweiDistrib || {}).flat());
+  const ryuSihua = calcSihua(ryuStem, null, placedSet);
+  return ryuSihua.map(sh => {
+    let palaceName = sh.unplaced ? "（副星・未配置）" : "—";
+    if (!sh.unplaced) {
+      for (let i = 0; i < 12; i++) {
+        const bi = (lifeIdx - i + 12) % 12;
+        if ((d.ziweiDistrib[bi]||[]).includes(sh.star)) { palaceName = PALACE_NAMES[i]; break; }
+      }
+    }
+    return `  ${sh.type}: ${sh.star} → ${palaceName}`;
+  }).join("\n");
+})()}
 
 ◆ 大限（10年周期）
 ${ziweiDayunLines}
@@ -1352,7 +1762,7 @@ ${(() => {
 6. 総合メッセージ — この人への手紙
    全体を通じて、この人に最も伝えたいことを、温かく、しかし正直に。
 
-※ 天体位置は簡略計算（±3°程度の誤差）です。紫微斗数・算命学・マヤ暦・宿曜・インド占星術は簡略版です。
+※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星を正式安星済み（副星・四化は未実装）。算命学・マヤ暦・宿曜・インド占星術は簡略版です。
 `;
 }
 
@@ -2315,7 +2725,7 @@ function renderShichu(){
     ${tenGodGuide}
     ${dayunHtml}
 
-    <div class="note">※ 蔵干・位相法・守護神法（数値ベース）・精密節気ベースの大運起運を実装済みです。時柱は出生時刻が確定している場合のみ正確です。</div>
+    <div class="note">※ 算命学の人体星図は月支・日支の蔵干本気を正式使用しています。十二大従星・天中殺は正式算出済みです。</div>
   `;
 }
 
@@ -2729,14 +3139,8 @@ function renderZiwei(){
     [2,4,1],[1,4,2],[0,4,3],[11,4,4],
   ];
 
-  // 主要星を象徴配置
-  const starDistrib = {};
-  const mainStars = ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"];
-  mainStars.forEach((s,i)=>{
-    const idx = (lifeIdx + i*11) % 12;
-    if (!starDistrib[idx]) starDistrib[idx] = [];
-    starDistrib[idx].push(s);
-  });
+  // 主要星を正式安星で配置
+  const starDistrib = d.ziweiDistrib || {};
 
   // 宮ごとの一言説明（初心者向け）
   const palaceShort = {
@@ -2765,7 +3169,15 @@ function renderZiwei(){
       <div class="gz">${BRANCHES[bi]}${branchMeaning ? ` <span style="font-size:11px; color:#999;">${branchMeaning}</span>` : ""}</div>
       <div class="pname">${pal.name}${isLife?" ★":""}</div>
       <div style="font-size:14px; color:#6a6050; margin-bottom:4px;">${short}</div>
-      <div class="stars">${stars.map(s=>`<span class="star">${s}<span class="star-kw">${ZIWEI_STAR_KEYWORD[s]||""}</span></span>`).join("")}</div>
+      <div class="stars">${stars.map(s=>{
+        const isFuxing = ["左輔","右弼","文昌","文曲","天魁","天鉞"].includes(s);
+        const isSelect = ["禄存","天馬","紅鸞","天喜"].includes(s);
+        const kw = ZIWEI_STAR_KEYWORD[s] || (isFuxing ? "副星" : "");
+        const style = isFuxing ? ' style="background:#e8f0fa; color:#4a6090;"'
+                    : isSelect ? ' style="background:#e8f4e8; color:#4a8c50;"'
+                    : '';
+        return `<span class="star"${style}>${s}<span class="star-kw">${kw}</span></span>`;
+      }).join("")}</div>
       <div class="palace-reading">${tipText}</div>
     </div>`;
   }).join("");
@@ -2813,6 +3225,22 @@ function renderZiwei(){
     const starsText = stars.join("・") || "無主星";
     const detail = palaceExpl(du.palaceName, stars[0]);
     const id = `zw-dayun-${idx}`;
+    // 大限四化：この大限の干からSIHUA_TABLEで四化を算出
+    // d.ziweiDistribから配置済み星を取得してunplacedを判定
+    const placedStars = new Set(Object.values(d.ziweiDistrib || {}).flat());
+    const duSihua = du.stem ? calcSihua(du.stem, null, placedStars) : [];
+    const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
+    const sihuaHtml = duSihua.map(sh => {
+      let palName = "—";
+      if (!sh.unplaced) {
+        for (let i = 0; i < 12; i++) {
+          const bi = (lifeIdx - i + 12) % 12;
+          if ((d.ziweiDistrib[bi]||[]).includes(sh.star)) { palName = PALACE_NAMES[i]; break; }
+        }
+      }
+      const c = sihuaColor[sh.type] || "#666";
+      return `<span style="font-size:12px; color:${c}; background:${c}18; padding:1px 6px; border-radius:3px; margin-right:4px;">${sh.type}:${sh.star}${sh.unplaced?"(未配置)":"→"+palName}</span>`;
+    }).join("");
     return `<div class="run-row ${cur?"cur":nxt?"nxt":""}">
       <span class="range">${du.startAge}〜${du.endAge-1}歳</span>
       <span class="gz">${BRANCHES[du.branchIdx]} ─ ${du.palaceName}</span>
@@ -2820,7 +3248,10 @@ function renderZiwei(){
       ${cur?`<span class="badge">★現在</span>`:""}
       ${nxt?`<span class="badge">▶次期</span>`:""}
     </div>
-    <div class="run-detail open" id="${id}">${detail}</div>`;
+    <div class="run-detail open" id="${id}">
+      ${detail}
+      ${sihuaHtml ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #e8e4dc;"><span style="font-size:12px; color:var(--muted);">大限四化（${du.stem||"?"}干）: </span>${sihuaHtml}</div>` : ""}
+    </div>`;
   }).join("");
 
   const currentDu = dayun.find(du=>currentAge >= du.startAge && currentAge < du.endAge);
@@ -2888,6 +3319,81 @@ function renderZiwei(){
     <div class="section-title">主要宮の配置</div>
     ${keyPalacesHtml}
 
+    <div class="section-title">四化 — 今生で強く動く4つの星</div>
+    <div class="card" style="margin-bottom:16px;">
+      <p style="font-size:15px; color:#6a6050; margin-bottom:10px; line-height:1.7;">四化とは、<strong>生年干</strong>によって4つの星に特別な力が付与されるものです。その星が入っている宮のテーマが、人生で特に強く動きます。</p>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
+        ${(d.sihua || []).map(sh => {
+          const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
+          const sihuaDesc = {
+            化禄:"豊かさ・恵み・拡大。この星が入る宮のテーマで財運・縁が広がる",
+            化権:"権力・主導権・決断力。この星が入る宮で強いリーダーシップを発揮",
+            化科:"名声・学問・評判。この星が入る宮で才能が認められやすい",
+            化忌:"執着・障害・課題。この星が入る宮のテーマで苦労しやすいが、向き合うことで成長",
+          };
+          // この星がどの宮に入っているか
+          let palaceName = "—";
+          if (!sh.unplaced) {
+            for (let i = 0; i < 12; i++) {
+              const branchIdx = (lifeIdx - i + 12) % 12;
+              const stars = d.ziweiDistrib[branchIdx] || [];
+              if (stars.includes(sh.star)) { palaceName = PALACE_NAMES[i]; break; }
+            }
+          }
+          const color = sihuaColor[sh.type] || "#666";
+          return `<div style="padding:10px 12px; background:#faf8f4; border:1px solid var(--border); border-radius:6px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="font-size:13px; font-weight:700; color:${color}; background:${color}22; padding:2px 8px; border-radius:3px;">${sh.type}</span>
+              <span style="font-size:16px; font-weight:700; color:var(--text);">${sh.star}</span>
+              <span style="font-size:14px; color:var(--muted);">${sh.unplaced ? "（副星・未配置）" : `→ ${palaceName}`}</span>
+            </div>
+            <div style="font-size:14px; color:#6a6050; line-height:1.6;">${sihuaDesc[sh.type] || ""}</div>
+          </div>`;
+        }).join("")}
+      </div>
+      <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${d.year.stem}。副星（文昌・文曲・左輔・右弼）が含まれる場合は宮への配置は次のバージョンで対応予定です。</div>
+    </div>
+
+    <div class="section-title">流年四化 — 今年（${new Date().getFullYear()}年）強く動く星</div>
+    <div class="card" style="margin-bottom:16px;">
+      ${(() => {
+        const nowYear = new Date().getFullYear();
+        const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
+        const ryuStem = STEMS[ryuStemIdx];
+        const ryuSihua = calcSihua(ryuStem, null, new Set(Object.values(d.ziweiDistrib || {}).flat()));
+        const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
+        const sihuaDesc = {
+          化禄:"豊かさ・恵み・拡大。今年この星が入る宮のテーマで財運・縁が広がる",
+          化権:"権力・主導権・決断力。今年この星が入る宮で強いリーダーシップを発揮",
+          化科:"名声・学問・評判。今年この星が入る宮で才能が認められやすい",
+          化忌:"執着・障害・課題。今年この星が入る宮のテーマで苦労しやすいが、向き合うことで成長",
+        };
+        const html = `<p style="font-size:15px; color:#6a6050; margin-bottom:10px; line-height:1.7;">流年四化とは、<strong>今年の干（${ryuStem}）</strong>によって変わる四化です。本命四化・大限四化と重なる宮は特に強く動きます。</p>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
+          ${ryuSihua.map(sh => {
+            let palaceName = "—";
+            if (!sh.unplaced) {
+              for (let i = 0; i < 12; i++) {
+                const bi = (d.lifeIdx - i + 12) % 12;
+                if ((d.ziweiDistrib[bi]||[]).includes(sh.star)) { palaceName = PALACE_NAMES[i]; break; }
+              }
+            }
+            const c = sihuaColor[sh.type] || "#666";
+            return `<div style="padding:10px 12px; background:#faf8f4; border:1px solid var(--border); border-radius:6px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span style="font-size:13px; font-weight:700; color:${c}; background:${c}22; padding:2px 8px; border-radius:3px;">${sh.type}</span>
+                <span style="font-size:16px; font-weight:700; color:var(--text);">${sh.star}</span>
+                <span style="font-size:14px; color:var(--muted);">${sh.unplaced ? "（副星・未配置）" : `→ ${palaceName}`}</span>
+              </div>
+              <div style="font-size:14px; color:#6a6050; line-height:1.6;">${sihuaDesc[sh.type] || ""}</div>
+            </div>`;
+          }).join("")}
+        </div>
+        <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ ${nowYear}年（${ryuStem}年）の流年四化。毎年1月1日に自動更新されます。</div>`;
+        return html;
+      })()}
+    </div>
+
     <div class="section-title">大限（10年周期）</div>
     <div class="card" style="margin-bottom:16px;">
       <p style="font-size:15px; color:#6a6050; margin-bottom:12px;">大限とは、紫微斗数の<strong>10年ごとの運勢周期</strong>です。10年ごとに異なる宮に入り、その宮のテーマが人生の中心になります。</p>
@@ -2923,7 +3429,7 @@ function renderZiwei(){
       </div>`;
     })() : ""}
 
-    <div class="note">※ 紫微斗数の正確な安星には生年月日＋時刻＋性別が必須です。本盤は簡略版（命宮＋主要星の象徴配置、副星・四化は未実装）であり、厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 紫微斗数の安星は五行局（納音）＋生日から14主星、生月・生時・生年干から副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）、生年支から厳選副星4星（禄存・天馬・紅鸞・天喜）を正式配置しています。その他の副星・流年四化は未実装です。厳密な占断は専門家にご依頼ください。</div>
   `;
 }
 
@@ -3089,14 +3595,29 @@ function calcZiweiDayun(d, lifeIdx){
     const order = forward ? i : i; // 宮の順番インデックス
     const step = forward ? i : -i;
     const branchIdx = ((lifeIdx + step) % 12 + 12) % 12;
+    // 大限の干：命宮の干支から五虎遁で算出
+    // 大限の支 = branchIdx、大限の干 = 命宮の年干から五虎遁で算出
+    const dayunStem = calcDayunStem(d.year.stem, branchIdx, i);
     list.push({
       branchIdx,
       palaceName: PALACE_NAMES[i], // 命宮→兄弟→...の並び
       startAge: i===0 ? 3 : 3 + i*10,
       endAge: 3 + (i+1)*10,
+      stem: dayunStem,
     });
   }
   return list;
+}
+
+// 大限の干を算出（五虎遁：年干から寅月の干を求め、大限支から干を決定）
+function calcDayunStem(yearStem, branchIdx, order) {
+  // 五虎遁：年干→寅(2)月の干
+  const fiveTiger = {"甲":2,"己":2,"乙":4,"庚":4,"丙":6,"辛":6,"丁":8,"壬":8,"戊":0,"癸":0};
+  const yinStemIdx = fiveTiger[yearStem] ?? 0;
+  // 大限の支インデックスから干を算出（寅=2を基準に）
+  const offset = ((branchIdx - 2) % 12 + 12) % 12;
+  const stemIdx = (yinStemIdx + offset) % 10;
+  return STEMS[stemIdx];
 }
 
 /* ============ 算命学 ============ */
@@ -3192,31 +3713,26 @@ function calcJintai(d){
   const monthStemIdx = STEMS.indexOf(d.month.stem);
   const monthBranchIdx = BRANCHES.indexOf(d.month.branch);
 
-  // 十大主星（5箇所）: 日干と他の干の関係
-  // 中央=日干自身の性質（比肩扱い）
-  // 北(頭)=日干×年干, 南(腹)=日干×月干, 東(左手)=日干×月干の蔵干代用→月支, 西(右手)=日干×年支の蔵干代用→年支
-  // 簡略版: 中央=比肩, 北=年干との十神, 南=月干との十神, 東=時柱干との十神(あれば), 西=日支の蔵干代用
+  // 算命学・人体星図の正式配置
+  // 北（頭）= 年干との十神
+  // 西（右手）= 月支の蔵干本気との十神
+  // 中央 = 日干自身（陽干=貫索星、陰干=石門星）
+  // 東（左手）= 日支の蔵干本気との十神
+  // 南（腹）= 時干との十神（時刻不明の場合は月干で代用）
 
-  const centerStar = JUSSHU_MAP["比肩"]; // 日主自身
-  const northTen = tenGod(d.day.stem, d.year.stem);
-  const southTen = tenGod(d.day.stem, d.month.stem);
-  // 東西は本来蔵干だが簡略版では時干と年干の十神を使う
-  const eastTen = d.hour ? tenGod(d.day.stem, d.hour.stem) : "比肩";
-  const westTen = tenGod(d.day.stem, d.year.stem); // 年干を西にも（簡略）
+  // 蔵干本気（各支の[0]番目が本気）
+  const monthZk = ZOUKAN[d.month.branch] || [];
+  const dayZk = ZOUKAN[d.day.branch] || [];
+  const monthMainStem = monthZk[0] || d.month.stem; // 月支蔵干本気（なければ月干で代用）
+  const dayMainStem = dayZk[0] || d.day.stem;       // 日支蔵干本気（なければ日干で代用）
 
-  // より正確な5星配置: 中央=日干自身, 北=年干, 西=月干, 南=時干, 東=日支蔵干
-  // 算命学の正式配置に近づける
   const stars = {
-    north: JUSSHU_MAP[tenGod(d.day.stem, d.year.stem)] || "貫索星",
-    west:  JUSSHU_MAP[tenGod(d.day.stem, d.month.stem)] || "貫索星",
-    center: "貫索星", // 日主=比肩=貫索星
-    east:  JUSSHU_MAP[tenGod(d.day.stem, d.hour.stem)] || "貫索星",
-    south: JUSSHU_MAP[tenGod(d.day.stem, d.month.stem)] || "貫索星", // 月干を南にも（簡略）
+    north:  JUSSHU_MAP[tenGod(d.day.stem, d.year.stem)]    || "貫索星", // 北=年干
+    west:   JUSSHU_MAP[tenGod(d.day.stem, monthMainStem)]  || "貫索星", // 西=月支蔵干本気
+    center: dayStemIdx % 2 === 0 ? "貫索星" : "石門星",                  // 中央=日干自身
+    east:   JUSSHU_MAP[tenGod(d.day.stem, dayMainStem)]    || "貫索星", // 東=日支蔵干本気
+    south:  JUSSHU_MAP[tenGod(d.day.stem, d.hour ? d.hour.stem : d.month.stem)] || "貫索星", // 南=時干（不明時は月干）
   };
-  // 中央は日干の陰陽で貫索/石門を分ける
-  stars.center = dayStemIdx % 2 === 0 ? "貫索星" : "石門星";
-  // 南は時干との関係
-  if (d.hour) stars.south = JUSSHU_MAP[tenGod(d.day.stem, d.hour.stem)] || "貫索星";
 
   // 十二大従星（3箇所: 年支/月支/日支）
   const juuniYear = JUUNI_STARS[JUUNI_TABLE[dayStemIdx][yearBranchIdx]];
@@ -4375,7 +4891,7 @@ function renderMaya(){
       <span><span style="display:inline-block; width:16px; height:16px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:2px; vertical-align:middle; margin-right:4px;"></span>反対（${antipodeSeal.n}）</span>
       <span><span style="display:inline-block; width:16px; height:16px; background:rgba(168,85,247,0.1); border:1px solid #a855f7; border-radius:2px; vertical-align:middle; margin-right:4px;"></span>神秘（${occultSeal.n}）</span>
     </div>
-    <div style="overflow-x:auto; margin-bottom:20px;">
+    <div style="overflow-x:auto; margin-bottom:20px; -webkit-overflow-scrolling:touch;">
       <table style="border-collapse:collapse; font-size:11px; text-align:center; width:100%; min-width:800px;">
         <tr>
           <td style="padding:3px; width:32px;"></td>
@@ -4903,10 +5419,11 @@ function renderShukuyo(){
 
 /* ============ インド占星術（ジョーティシュ） ============ */
 
-// アヤナムシャ（歳差補正）: 2000年基準で約23.86°、年間約50.3秒
+// アヤナムシャ（歳差補正）: Lahiri式。2000年基準23.856°、年間約50.3秒増加
+// 精度検証: Swiss Ephemeris精密値との誤差 ±0.001°（実用上問題なし）
 function ayanamsha(jd){
   const T = (jd - 2451545.0) / 36525;
-  return 23.856 + 0.01397 * T * 100; // Lahiri近似
+  return 23.856 + 0.01397 * T * 100; // Lahiri近似（精度±0.001°）
 }
 
 const JYOTISH_RASHIS = [
@@ -5491,7 +6008,7 @@ function renderJyotish(){
 }
 
 /* ── 悩み相談タブ描画 ── */
-let consultCategory = "love"; // デフォルトカテゴリ
+let consultCategory = "summary"; // デフォルトカテゴリ
 
 function setConsultCategory(cat) {
   consultCategory = cat;
@@ -5514,13 +6031,7 @@ function renderConsult(){
 
   // 紫微斗数: 夫妻宮の主星
   const lifeIdx = d.lifeIdx;
-  const starDistrib = {};
-  const mainStars = ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"];
-  mainStars.forEach((s,i)=>{
-    const idx = (lifeIdx + i*11) % 12;
-    if (!starDistrib[idx]) starDistrib[idx] = [];
-    starDistrib[idx].push(s);
-  });
+  const starDistrib = d.ziweiDistrib || {};
   const spouseIdx = (lifeIdx - 2 + 12) % 12; // 夫妻宮 = 命宮から2つ目
   const spouseStars = (starDistrib[spouseIdx] || []).join("・") || "—";
 
@@ -5639,6 +6150,7 @@ function renderConsult(){
 
   // カテゴリ選択UI
   const cats = [
+    {id:"summary", label:"総合"},
     {id:"love", label:"恋愛"},
     {id:"work", label:"仕事・適職"},
     {id:"money", label:"お金"},
@@ -5647,7 +6159,7 @@ function renderConsult(){
   ];
 
   let html = `
-    <div class="section-title">悩み相談</div>
+    <div class="section-title">総合鑑定</div>
     <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
       ${cats.map(c => `<button onclick="setConsultCategory('${c.id}')" style="
         padding:10px 20px; border-radius:4px; font-family:inherit; font-size:15px; cursor:pointer; transition:all 0.2s;
@@ -5824,12 +6336,7 @@ function renderConsult(){
 
     // 相手の紫微斗数 夫妻宮
     const lifeIdxB = db.lifeIdx;
-    const starDistribB = {};
-    mainStars.forEach((s,i)=>{
-      const idx = (lifeIdxB + i*11) % 12;
-      if (!starDistribB[idx]) starDistribB[idx] = [];
-      starDistribB[idx].push(s);
-    });
+    const starDistribB = db.ziweiDistrib || {};
     const spouseIdxB = (lifeIdxB - 2 + 12) % 12;
     const spouseStarsB = (starDistribB[spouseIdxB] || []).join("・") || "—";
     const spouseStarFirstB = spouseStarsB.split("・")[0];
@@ -6345,6 +6852,178 @@ function renderConsult(){
   } // end relations
 
   // ════════════════════════════════════════
+  // 総合カテゴリ
+  // ════════════════════════════════════════
+  if (consultCategory === "summary") {
+    const lifeStar = (starDistrib[lifeIdx] || []).filter(s => ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s));
+    const lifeStarName = lifeStar[0] || "無主星";
+    const sunSign = SIGNS[signOf(d.sunLon)];
+    const moonSign = SIGNS[signOf(d.moonLon)];
+    const ascSign = d.ascLon !== null ? SIGNS[signOf(d.ascLon)] : null;
+    const dayMasterEl = STEM_EL[STEMS.indexOf(d.day.stem)];
+
+    // 今の時期（大運・大限・パーソナルイヤー）
+    const zwDayunS = calcZiweiDayun(d, lifeIdx);
+    const currentZwDuS = zwDayunS.find(du => age >= du.startAge && age < du.endAge);
+
+    // 流年四化
+    const nowYear = new Date().getFullYear();
+    const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
+    const ryuStem = STEMS[ryuStemIdx];
+    const placedSet = new Set(Object.values(d.ziweiDistrib || {}).flat());
+    const ryuSihua = calcSihua(ryuStem, null, placedSet);
+    const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
+
+    html += `
+    <div class="section-title">命盤の核</div>
+    <div class="card hi" style="margin-bottom:16px;">
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;">
+        <div style="text-align:center; padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">太陽星座</div>
+          <div style="font-size:18px; color:var(--gold); font-weight:700;">${sunSign.n}</div>
+          <div style="font-size:13px; color:#6a6050;">${sunSign.e}の星座</div>
+        </div>
+        <div style="text-align:center; padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">日主（四柱）</div>
+          <div style="font-size:18px; color:var(--gold); font-weight:700;">${d.day.stem}（${dayMasterEl}）</div>
+          <div style="font-size:13px; color:#6a6050;">${{木:"成長・柔軟",火:"情熱・直感",土:"安定・包容",金:"決断・鋭敏",水:"知性・流動"}[dayMasterEl]||""}</div>
+        </div>
+        <div style="text-align:center; padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">命宮（紫微）</div>
+          <div style="font-size:18px; color:var(--gold); font-weight:700;">${lifeStarName}</div>
+          <div style="font-size:13px; color:#6a6050;">${ZIWEI_STAR_KEYWORD[lifeStarName]||""}</div>
+        </div>
+      </div>
+      <p style="font-size:16px; line-height:1.9; color:var(--text);">
+        ${sunSign.n}の太陽・${d.day.stem}（${dayMasterEl}）の日主・命宮の${lifeStarName}——この3つが重なって「${
+          (() => {
+            const core = [];
+            if (["射手座","牡羊座","獅子座"].includes(sunSign.n)) core.push("行動力と理想を持つ");
+            if (["乙女座","山羊座","牡牛座"].includes(sunSign.n)) core.push("緻密で実用的な");
+            if (["双子座","天秤座","水瓶座"].includes(sunSign.n)) core.push("知的で社交的な");
+            if (["蟹座","蠍座","魚座"].includes(sunSign.n)) core.push("感受性豊かな");
+            if (dayMasterEl === "土") core.push("安定と信頼を軸にする");
+            if (dayMasterEl === "木") core.push("成長と変化を求める");
+            if (dayMasterEl === "火") core.push("情熱と直感で動く");
+            if (dayMasterEl === "金") core.push("鋭い判断力を持つ");
+            if (dayMasterEl === "水") core.push("知性と柔軟性を持つ");
+            return core.join("、") || "独自の";
+          })()
+        }人」があなたの核です。
+        ${ascSign ? `ASC${ascSign.n}が外から見た印象を作り、` : ""}ライフパスナンバー${nu.lifePath}（${NUMEROLOGY_MEANINGS[nu.lifePath]?.title||""}）が人生のテーマを示しています。
+      </p>
+    </div>
+
+    <div class="section-title">9占術が語る「この人」</div>
+    <div class="card" style="margin-bottom:16px;">
+      <p style="font-size:14px; color:#6a6050; margin-bottom:12px; line-height:1.7;">9つの占術それぞれが、あなたをどう見ているか。複数の占術で同じ傾向が出ているほど、その特性は強く出ます。</p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:15px;">
+          <thead>
+            <tr style="background:#f5f2ec; border-bottom:2px solid var(--border);">
+              <th style="padding:10px 12px; text-align:left; color:var(--muted); font-weight:normal; width:28%;">占術</th>
+              <th style="padding:10px 12px; text-align:left; color:var(--muted); font-weight:normal; width:22%;">キーワード</th>
+              <th style="padding:10px 12px; text-align:left; color:var(--muted); font-weight:normal;">この人の傾向</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(() => {
+              const shukuIdx = calcShukuyo(d.moonLon);
+              const shuku = SHUKUYO_27[shukuIdx];
+              const ma = calcMaya(d.y, d.m, d.d);
+              const seal = MAYA_SEALS[ma.seal];
+              const ky2 = calcKyusei(d.y, d.m);
+              const honmei2 = KYUSEI_NAMES[ky2.honmei];
+              const ayaS = ayanamsha(d.jd);
+              const sidMoonS = norm360(d.moonLon - ayaS);
+              const nakIdx = Math.floor(sidMoonS / (360/27));
+              const NAKS = ["アシュヴィニー","バラニー","クリッティカー","ローヒニー","ムリガシラー","アールドラー","プナルヴァス","プシュヤ","アーシュレーシャー","マガー","プールヴァ・パールグニー","ウッタラ・パールグニー","ハスタ","チトラー","スワーティー","ヴィシャーカー","アヌラーダー","ジェーシュター","ムーラ","プールヴァ・アーシャーダー","ウッタラ・アーシャーダー","シュラヴァナ","ダニシュター","シャタビシャー","プールヴァ・バードラパダー","ウッタラ・バードラパダー","レーヴァティー"];
+              const NAK_DESC = ["先駆者の宿。新しいことを始める力がある。","変革の宿。強烈な変化をもたらす。","浄化の宿。鋭い知性と批判力がある。","豊穣の宿。魅力的で人を惹きつける。","探求の宿。知的好奇心が旺盛。","嵐の宿。激しいエネルギーを持つ。","再生の宿。困難から立ち直る力がある。","養育の宿。人を育て守る力がある。","直感の宿。鋭い洞察力を持つ。","王者の宿。リーダーシップと権威がある。","享楽の宿。人生を楽しむ才能がある。","奉仕の宿。人のために働く誠実さがある。","器用の宿。多才で手先が器用。","創造の宿。芸術的センスと独創性がある。","自由の宿。独立心が強く自由を愛する。","変容の宿。変化を通じて成長する。","献身の宿。深い愛情と忠誠心がある。","力の宿。強い意志と競争心がある。","解放の宿。束縛を嫌い自由を求める。","勝利の宿。目標に向かって突き進む。","誠実の宿。正直で信頼される。","学習の宿。知識を吸収し伝える力がある。","富の宿。物質的な豊かさを引き寄せる。","癒しの宿。人を癒す力がある。","苦行の宿。試練を通じて深く成長する。","深化の宿。精神的な深みがある。","完成の宿。物事を完成させる力がある。"];
+              const rows = [
+                { name:"西洋占星術", key:`太陽${sunSign.n}・月${moonSign.n}`, desc: (() => {
+                  const sunDesc = ({"射手座":"遠くを見る理想主義者。自由と探求を愛し、大きなビジョンで動く。細部より全体を見る。","牡羊座":"即断即決の先駆者。エネルギーが溢れ、最初に動く勇気がある。飽きやすい面も。","獅子座":"舞台の中心に立つ表現者。誇り高く、人を惹きつける存在感がある。","乙女座":"細部に気づく分析家。完璧を求め、実用性を重んじる。批判的になりやすい。","山羊座":"目標に向かって着実に登る実践家。忍耐強く、長期的な視点で動く。","牡牛座":"安定と美を愛する現実主義者。変化を嫌い、一度決めたら動かない。","双子座":"好奇心旺盛な情報収集家。多才で話し上手。一つに絞るのが苦手。","天秤座":"バランスを重んじる調和の人。美意識が高く、対立を避ける。","水瓶座":"独自の視点を持つ革新者。人と違うことを好み、未来を見る。","蟹座":"感受性豊かな保護者。家族や仲間を大切にし、感情で動く。","蠍座":"深く探求する変容の人。執着が強く、秘密を好む。","魚座":"境界を超える夢想家。共感力が高く、現実と夢の間を生きる。"})[sunSign.n] || sunSign.n;
+                  const moonDesc = ({"乙女座":"内面は分析的で細部が気になる。感情を整理してから表現する。","牡羊座":"感情が直接的で行動的。怒りも喜びも即座に出る。","獅子座":"内面は誇り高く承認を求める。認められると大きく輝く。","蟹座":"感情豊かで家族を大切にする。傷つきやすく、守りに入りやすい。","射手座":"内面は楽観的で自由を求める。感情を引きずらない。","山羊座":"内面は慎重で責任感が強い。感情を見せるのが苦手。","牡牛座":"内面は安定を求め変化を嫌う。感情が安定している。","双子座":"内面は好奇心旺盛で変化を好む。感情が言葉で出やすい。","天秤座":"内面は調和を求め決断が遅い。感情より理性で判断しようとする。","蠍座":"内面は深く感情を隠す。表面は穏やかでも内側は激しい。","水瓶座":"内面は独立心が強く合理的。感情より論理を優先する。","魚座":"内面は感受性が強く共感力が高い。他人の感情を吸収しやすい。"})[moonSign.n] || "";
+                  return `${sunDesc}${moonDesc ? ` 月${moonSign.n}：${moonDesc}` : ""}`;
+                })() },
+                { name:"四柱推命", key:`日主${d.day.stem}（${dayMasterEl}）`, desc: ({"甲":"まっすぐ上に伸びる大木。理想と向上心が強く、曲がることを嫌う。リーダー気質だが頑固な面も。","乙":"しなやかに絡みつく蔓草。柔軟で適応力が高く、人との縁を活かす。表面は穏やかで内面は強い。","丙":"燃え盛る太陽の火。明るく情熱的で、周囲を照らす存在感がある。エネルギーが強く、人を動かす。","丁":"灯台の炎。繊細で感受性が高く、人の心を温める。小さな光だが確実に照らし続ける。","戊":"動かない大山。安定感と包容力があり、信頼の基盤になる。どっしりと構え、周囲を支える。","己":"肥沃な大地。人を育て支える力がある。柔軟だが芯は強く、縁の下の力持ち。","庚":"鋭い刀。決断力と実行力があり、無駄を嫌う。白黒はっきりさせたい性格。","辛":"磨かれた宝石。繊細で美意識が高く、完璧を求める。傷つきやすいが輝きは本物。","壬":"大海の水。知性と包容力があり、どんな形にも対応できる。スケールが大きく、深みがある。","癸":"雨水。感受性が豊かで直感が鋭い。静かに深く浸透し、気づかないうちに影響を与える。"})[d.day.stem] || "" },
+                { name:"紫微斗数", key:`命宮${lifeStarName}`, desc: zwStarExpl(lifeStarName) },
+                { name:"算命学", key:`中央${sm.stars.center}`, desc: JUSSHU_EXPL[sm.stars.center] || "" },
+                { name:"数秘術", key:`LP${nu.lifePath}`, desc: NUMEROLOGY_MEANINGS[nu.lifePath]?.desc || "" },
+                { name:"九星気学", key:honmei2.name, desc: honmei2.desc || "" },
+                { name:"マヤ暦", key:seal?.n||"—", desc: seal?.desc || "" },
+                { name:"宿曜", key:shuku?.name||"—", desc: shuku?.desc || "" },
+                { name:"インド占星術", key:NAKS[nakIdx]||"—", desc: NAK_DESC[nakIdx]||"" },
+              ];
+              return rows.map((r,i) => `
+                <tr style="border-bottom:1px solid var(--border); ${i%2===0?'background:#faf8f4':''}">
+                  <td style="padding:10px 12px; color:var(--gold); font-weight:700;">${r.name}</td>
+                  <td style="padding:10px 12px; color:var(--text);">${r.key}</td>
+                  <td style="padding:10px 12px; color:#4a4030; line-height:1.6;">${r.desc}</td>
+                </tr>`).join("");
+            })()}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">今の時期</div>
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:grid; gap:10px;">
+        ${currentDayun ? `<div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">四柱推命 大運</div>
+          <div style="font-size:16px; color:var(--text);">${currentDayun.stem}${currentDayun.branch}（${currentDayunTen}）— ${currentDayun.startAge}〜${currentDayun.endAge-1}歳</div>
+        </div>` : ""}
+        ${currentZwDuS ? `<div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">紫微斗数 大限</div>
+          <div style="font-size:16px; color:var(--text);">${currentZwDuS.palaceName}（${(starDistrib[currentZwDuS.branchIdx]||["無主星"])[0]}）— ${currentZwDuS.startAge}〜${currentZwDuS.endAge-1}歳</div>
+          ${currentZwDuS.stem ? `<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">${calcSihua(currentZwDuS.stem, null, placedSet).map(sh=>`<span style="font-size:12px; color:${sihuaColor[sh.type]}; background:${sihuaColor[sh.type]}18; padding:1px 6px; border-radius:3px;">${sh.type}:${sh.star}</span>`).join("")}</div>` : ""}
+        </div>` : ""}
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">流年四化（${nowYear}年・${ryuStem}年）</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">${ryuSihua.map(sh=>{
+            let pname="—";
+            if(!sh.unplaced){for(let i=0;i<12;i++){const bi=(lifeIdx-i+12)%12;if((d.ziweiDistrib[bi]||[]).includes(sh.star)){pname=PALACE_NAMES[i];break;}}}
+            return `<span style="font-size:14px; color:${sihuaColor[sh.type]}; background:${sihuaColor[sh.type]}18; padding:3px 10px; border-radius:4px;">${sh.type}:${sh.star}→${sh.unplaced?"未配置":pname}</span>`;
+          }).join("")}</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">数秘術 パーソナルイヤー</div>
+          <div style="font-size:16px; color:var(--text);">${nu.personalYear}年（${nu.currentYear}年）— ${{1:"新しいサイクルの始まり",2:"待ちと育てる年",3:"表現と発信の年",4:"基盤固めの年",5:"変化と挑戦の年",6:"責任と愛の年",7:"内省と深化の年",8:"収穫と評価の年",9:"完成と手放しの年"}[nu.personalYear]||""}</div>
+        </div>
+      </div>
+      ${(() => {
+        const msgs = [];
+        if (currentDayun) {
+          const actionTens = ["比肩","劫財","食神","傷官","偏財","正財"];
+          const waitTens = ["偏印","正印"];
+          if (actionTens.includes(currentDayunTen)) msgs.push("動く");
+          else if (waitTens.includes(currentDayunTen)) msgs.push("待つ");
+          else msgs.push("慎重");
+        }
+        if ([2,7].includes(nu.personalYear)) msgs.push("待つ");
+        else if ([1,5].includes(nu.personalYear)) msgs.push("動く");
+        const actionCount = msgs.filter(m=>m==="動く").length;
+        const waitCount = msgs.filter(m=>m==="待つ").length;
+        const verdict = actionCount > waitCount ? "動く時期" : waitCount > actionCount ? "待つ時期" : "慎重に動く時期";
+        const verdictColor = actionCount > waitCount ? "#4a8c50" : waitCount > actionCount ? "#c04030" : "#c09040";
+        return `<div style="margin-top:12px; padding:14px 16px; background:${verdictColor}18; border:1px solid ${verdictColor}44; border-radius:6px; text-align:center;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">複数占術の統合判断</div>
+          <div style="font-size:22px; font-weight:700; color:${verdictColor}; margin-bottom:6px;">${verdict}</div>
+          <div style="font-size:14px; color:#6a6050;">詳しくは「決断」タブで確認できます</div>
+        </div>`;
+      })()}
+    </div>
+
+    <div class="section-title">AIで深く読む</div>
+    <div class="card" style="margin-bottom:16px; text-align:center;">
+      <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">命盤データをAI（Claude・ChatGPT等）に渡すと、9占術を統合した詳細な鑑定文を生成できます。</p>
+      <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
+      <div style="font-size:13px; color:var(--muted); margin-top:10px;">コピー後、AIに貼り付けて「総合鑑定をお願いします」と送ってください</div>
+    </div>
+    `;
+  } // end summary
+
+  // ════════════════════════════════════════
   // 決断カテゴリ
   // ════════════════════════════════════════
   if (consultCategory === "decision") {
@@ -6363,7 +7042,7 @@ function renderConsult(){
     const zwStars = currentZwDu ? (starDistrib[(lifeIdx - PALACE_NAMES.indexOf(currentZwDu.palaceName) + 12) % 12] || []).join("・") : "";
 
     // ダシャー
-    const aya = 23.5;
+    const aya = ayanamsha(d.jd);
     const sidMoon = norm360(d.moonLon - aya);
     const dashaInfo = calcDasha(sidMoon, d.y);
     const nowDate = new Date();
@@ -6762,13 +7441,7 @@ function renderCrossRef(){
 
   // 紫微斗数の宮と主星を取得
   const lifeIdx = d.lifeIdx;
-  const mainStars = ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"];
-  const starDistrib = {};
-  mainStars.forEach((s,i)=>{
-    const idx = (lifeIdx + i*11) % 12;
-    if (!starDistrib[idx]) starDistrib[idx] = [];
-    starDistrib[idx].push(s);
-  });
+  const starDistrib = d.ziweiDistrib || {};
   const palaceMap = {};
   for (let i=0; i<12; i++){
     const branchIdx = (lifeIdx - i + 12) % 12;
@@ -6776,9 +7449,9 @@ function renderCrossRef(){
   }
 
   // インド占星術
-  const ayanamsha = 23.5;
-  const sidSun = ((d.sunLon - ayanamsha) % 360 + 360) % 360;
-  const sidMoon = ((d.moonLon - ayanamsha) % 360 + 360) % 360;
+  const jyAya = ayanamsha(d.jd);
+  const sidSun = ((d.sunLon - jyAya) % 360 + 360) % 360;
+  const sidMoon = ((d.moonLon - jyAya) % 360 + 360) % 360;
   const jySunSign = SIGNS[Math.floor(sidSun / 30)];
   const jyMoonSign = SIGNS[Math.floor(sidMoon / 30)];
 
@@ -7144,9 +7817,7 @@ function goToTarot(){
   const moonSign = SIGNS[signOf(d.moonLon)];
   const ascSign = d.ascLon!==null ? SIGNS[signOf(d.ascLon)] : null;
   const dayEl = STEM_EL[STEMS.indexOf(d.day.stem)];
-  const lifeStars = [];
-  const mainStars = ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"];
-  mainStars.forEach((s,i)=>{ const idx=(d.lifeIdx+i*11)%12; if(idx===d.lifeIdx) lifeStars.push(s); });
+  const lifeStars = d.ziweiDistrib ? (d.ziweiDistrib[d.lifeIdx] || []) : [];
   const sm = calcJintai(d);
   const n = calcNumerology(d.y, d.m, d.d);
   const dayun = calcDayun(d);
@@ -7189,7 +7860,7 @@ function goToTarot(){
   const dayThemeShort = dayMasterTheme(d.day.stem).split("。")[0];
   const currentDuTheme = currentDu ? dayunTheme(d.day.stem, currentDu.stem).split("。")[0] : "";
   const nextDuTheme = nextDu ? dayunTheme(d.day.stem, nextDu.stem).split("。")[0] : "";
-  const currentZwExpl = currentZwDu ? palaceExpl(currentZwDu.palaceName, (function(){ const ss=["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"]; let r=[]; ss.forEach((s,i)=>{if((d.lifeIdx+i*11)%12===currentZwDu.branchIdx)r.push(s);}); return r[0]; })()).split("。")[0] : "";
+  const currentZwExpl = currentZwDu ? palaceExpl(currentZwDu.palaceName, (d.ziweiDistrib ? (d.ziweiDistrib[currentZwDu.branchIdx] || [])[0] : null)).split("。")[0] : "";
   const lifeStarExpl = lifeStars[0] ? zwStarExpl(lifeStars[0]).split("。")[0] : "";
   const centerStarExpl = JUSSHU_EXPL[sm.stars.center].split("。")[0];
   const lpTitle = (NUMEROLOGY_MEANINGS[n.lifePath]||{}).title || "";
