@@ -69,7 +69,7 @@
     font-size:14px; color:#8a8070;
   }
 
-  .tabs{ display:flex; background:#f0ede6; border-bottom:1px solid var(--border); overflow-x:auto; -webkit-overflow-scrolling:touch; position:sticky; z-index:10; }
+  .tabs{ display:flex; background:#f0ede6; border-bottom:1px solid var(--border); overflow-x:auto; -webkit-overflow-scrolling:touch; position:sticky; top:0; z-index:10; box-shadow:0 3px 8px rgba(0,0,0,.12); }
   .tabs button{
     flex:0 0 auto; padding:12px 16px; background:none; border:none;
     border-bottom:3px solid transparent; color:var(--muted);
@@ -7915,8 +7915,280 @@ function renderConsult(){
             return core.join("、") || "独自の";
           })()
         }人」があなたの核です。
-        ${ascSign ? `ASC${ascSign.n}が外から見た印象を作り、` : ""}ライフパスナンバー${nu.lifePath}（${NUMEROLOGY_MEANINGS[nu.lifePath]?.title||""}）が人生のテーマを示しています。
+        ${ascSign ? `初対面では${(() => {
+          const ascDesc = {"牡羊座":"元気で行動的","牡牛座":"穏やかで落ち着いた","双子座":"話しやすく軽やか","蟹座":"優しく親しみやすい","獅子座":"華やかで存在感のある","乙女座":"きちんとして知的","天秤座":"上品でバランスの取れた","蠍座":"ミステリアスで深みのある","射手座":"明るくオープン","山羊座":"しっかりして頼れる","水瓶座":"個性的で自由な","魚座":"柔らかく優しそうな"};
+          return ascDesc[ascSign.n] || ascSign.n + "的な";
+        })()}印象を与え、` : ""}人生を通じて${(() => {
+          const lpTheme = {"1":"自分の力で道を切り拓くこと","2":"人との関係の中で力を発揮すること","3":"表現し、楽しみ、人を巻き込むこと","4":"地道に積み上げて形にすること","5":"変化と自由の中で成長すること","6":"人を支え、責任を果たすこと","7":"深く考え、本質を追求すること","8":"目標を現実にし、成果を出すこと","9":"広い視野で人のために動くこと","11":"直感を信じ、人を導くこと","22":"大きなビジョンを形にすること","33":"無条件の愛で人を癒すこと"};
+          return lpTheme[nu.lifePath] || "自分らしく生きること";
+        })()}がテーマになります。
       </p>
+    </div>
+
+    <div class="section-title">人生タイムライン — 5占術が語る時間の流れ</div>
+    <div class="card" style="margin-bottom:20px; overflow-x:auto;">
+      <p style="font-size:14px; color:#6a6050; margin-bottom:16px; line-height:1.7;">5つの占術が持つ「大運」を時間軸で並べました。複数の占術が同時に「変化」を示す時期は、人生の転換点になりやすい時期です。</p>
+      ${(() => {
+        const currentAge = getCurrentAge(d.y, d.m, d.d);
+        const maxAge = 80;
+
+        // 十神の意味マップ
+        const tenMeaning = {"比肩":"自立","劫財":"競争","食神":"楽しみ","傷官":"才能爆発","偏財":"チャンス","正財":"安定収入","偏官":"試練","正官":"地位","偏印":"学び直し","正印":"知恵"};
+        const tenIsChange = ten => ["偏官","傷官","劫財","偏印"].includes(ten);
+
+        // ダシャーの意味マップ
+        const dashaChange = lord => ["ラーフ","ケートゥ","土星","火星"].includes(lord);
+        const dashaMeaning = {"太陽":"自己表現","月":"感情・家庭","火星":"行動・闘争","水星":"知性・仕事","木星":"拡大・幸運","金星":"愛・豊かさ","土星":"試練・忍耐","ラーフ":"執着・変容","ケートゥ":"解放・悟り"};
+
+        // 紫微の変化宮
+        const ziweiIsChange = palaceName => ["遷移宮","疾厄宮","官禄宮","命宮"].includes(palaceName);
+
+        // 各占術のデータ収集＋変化フラグ
+        const shichuDayun = calcDayun(d);
+        const ziweiDayun = calcZiweiDayun(d, d.lifeIdx);
+        const aya = ayanamsha(d.jd);
+        const moonSid = norm360(d.moonLon - aya);
+        const dashaData = calcDasha(moonSid, d.y);
+
+        // 年齢ごとの「変化スコア」を計算（0〜maxAge）
+        const changeScore = new Array(maxAge).fill(0);
+        shichuDayun.forEach(du => {
+          const ten = tenGod(d.day.stem, du.stem);
+          if (tenIsChange(ten)) {
+            for (let a = Math.max(0,du.startAge); a < Math.min(maxAge,du.endAge); a++) changeScore[a]++;
+          }
+        });
+        ziweiDayun.forEach(du => {
+          if (ziweiIsChange(du.palaceName)) {
+            for (let a = Math.max(0,du.startAge); a < Math.min(maxAge,du.endAge); a++) changeScore[a]++;
+          }
+        });
+        dashaData.dashas.forEach(ds => {
+          if (dashaChange(ds.lord)) {
+            for (let a = Math.max(0,Math.floor(ds.startAge)); a < Math.min(maxAge,Math.floor(ds.endAge)); a++) changeScore[a]++;
+          }
+        });
+
+        // 転換期を検出（スコア2以上の連続区間）
+        const turningPoints = [];
+        let inTP = false, tpStart = 0;
+        for (let a = 0; a <= maxAge; a++) {
+          if (a < maxAge && changeScore[a] >= 2) {
+            if (!inTP) { inTP = true; tpStart = a; }
+          } else {
+            if (inTP) {
+              turningPoints.push({start:tpStart, end:a});
+              inTP = false;
+            }
+          }
+        }
+
+        // タイムラインHTML
+        const colWidth = 100 / maxAge;
+        const rows = [];
+
+        // 四柱推命
+        let shichuCells = '';
+        shichuDayun.forEach(du => {
+          if (du.startAge >= maxAge || du.endAge <= 0) return;
+          const start = Math.max(0, du.startAge);
+          const end = Math.min(maxAge, du.endAge);
+          const left = (start / maxAge * 100).toFixed(1);
+          const width = ((end - start) / maxAge * 100).toFixed(1);
+          const isCur = currentAge >= du.startAge && currentAge < du.endAge;
+          const ten = tenGod(d.day.stem, du.stem);
+          const meaning = tenMeaning[ten] || ten;
+          const isChange = tenIsChange(ten);
+          const bg = isCur ? '#f0ede6' : isChange ? '#f0d0c0' : '#f5f2ec';
+          const color = isCur ? 'var(--text)' : isChange ? '#a03020' : 'var(--text)';
+          shichuCells += '<div style="position:absolute; left:'+left+'%; width:'+width+'%; top:0; height:100%; background:'+bg+'; color:'+color+'; border-right:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; overflow:hidden; white-space:nowrap; padding:0 2px;" title="'+du.startAge+'〜'+(du.endAge-1)+'歳: '+ten+'（'+meaning+'）">'+meaning+'</div>';
+        });
+        rows.push({label:'四柱推命', cells:shichuCells});
+
+        // 紫微斗数
+        let ziweiCells = '';
+        ziweiDayun.forEach(du => {
+          if (du.startAge >= maxAge || du.endAge <= 0) return;
+          const start = Math.max(0, du.startAge);
+          const end = Math.min(maxAge, du.endAge);
+          const left = (start / maxAge * 100).toFixed(1);
+          const width = ((end - start) / maxAge * 100).toFixed(1);
+          const isCur = currentAge >= du.startAge && currentAge < du.endAge;
+          const isChange = ziweiIsChange(du.palaceName);
+          const bg = isCur ? '#f0ede6' : isChange ? '#f0d0c0' : '#f5f2ec';
+          const color = isCur ? 'var(--text)' : isChange ? '#a03020' : 'var(--text)';
+          const short = du.palaceName.replace("宮","");
+          ziweiCells += '<div style="position:absolute; left:'+left+'%; width:'+width+'%; top:0; height:100%; background:'+bg+'; color:'+color+'; border-right:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; overflow:hidden; white-space:nowrap; padding:0 2px;" title="'+du.startAge+'〜'+(du.endAge-1)+'歳: '+du.palaceName+'">'+short+'</div>';
+        });
+        rows.push({label:'紫微斗数', cells:ziweiCells});
+
+        // インド占星術
+        let dashaCells = '';
+        dashaData.dashas.forEach(ds => {
+          if (ds.startAge >= maxAge || ds.endAge <= 0) return;
+          const start = Math.max(0, ds.startAge);
+          const end = Math.min(maxAge, ds.endAge);
+          const left = (start / maxAge * 100).toFixed(1);
+          const width = ((end - start) / maxAge * 100).toFixed(1);
+          const isCur = currentAge >= ds.startAge && currentAge < ds.endAge;
+          const isChange = dashaChange(ds.lord);
+          const meaning = dashaMeaning[ds.lord] || ds.lord;
+          const bg = isCur ? '#f0ede6' : isChange ? '#f0d0c0' : '#f5f2ec';
+          const color = isCur ? 'var(--text)' : isChange ? '#a03020' : 'var(--text)';
+          dashaCells += '<div style="position:absolute; left:'+left+'%; width:'+width+'%; top:0; height:100%; background:'+bg+'; color:'+color+'; border-right:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:10px; overflow:hidden; white-space:nowrap; padding:0 2px;" title="'+Math.floor(ds.startAge)+'〜'+Math.floor(ds.endAge)+'歳: '+ds.lord+'（'+meaning+'）">'+meaning+'</div>';
+        });
+        rows.push({label:'印度占星術', cells:dashaCells});
+
+        // 数秘術（年単位）
+        const nu = calcNumerology(d.y, d.m, d.d);
+        let numCells = '';
+        const pyMeaning = {1:"始",2:"待",3:"表",4:"基",5:"変",6:"責",7:"省",8:"穫",9:"了"};
+        const pyIsChange = py => py === 5 || py === 9;
+        for (let age = 0; age < maxAge; age++) {
+          // その年のPYを計算（誕生日基準の9年周期）
+          const py = ((age % 9) + 1);
+          const left = (age / maxAge * 100).toFixed(2);
+          const width = (1 / maxAge * 100).toFixed(2);
+          const isCur = age === currentAge;
+          const isChange = pyIsChange(py);
+          if (isChange) changeScore[age]++;
+          const bg = isCur ? '#f0ede6' : isChange ? '#f0d0c0' : (age % 9 === 0 ? '#ede8e0' : '#f5f2ec');
+          const color = isCur ? 'var(--text)' : isChange ? '#a03020' : 'var(--muted)';
+          numCells += '<div style="position:absolute; left:'+left+'%; width:'+width+'%; top:0; height:100%; background:'+bg+'; color:'+color+'; border-right:1px solid rgba(216,208,196,.3); display:flex; align-items:center; justify-content:center; font-size:9px;" title="'+age+'歳: PY'+py+'（'+({"1":"始まり","2":"待つ","3":"表現","4":"基盤","5":"変化","6":"責任","7":"内省","8":"収穫","9":"完成"}[py])+'）">'+pyMeaning[py]+'</div>';
+        }
+        rows.push({label:'数秘術', cells:numCells});
+
+        // 九星気学（年単位）
+        let kyuseiCells = '';
+        const kData = calcKyusei(d.y, d.m);
+        const KAIZA_SHORT = {1:"坎",2:"坤",3:"震",4:"巽",5:"中",6:"乾",7:"兌",8:"艮",9:"離"};
+        const kyuseiIsChange = kaiza => kaiza === 1 || kaiza === 5; // 坎宮(北・低迷) or 中宮(停滞)
+        for (let age = 0; age < maxAge; age++) {
+          const yearForAge = d.y + age;
+          const yearStar = ((11 - (yearForAge - 2) % 9) % 9) || 9;
+          // 本命星の回座位置を算出
+          const diff = ((yearStar - kData.honmei) % 9 + 9) % 9;
+          const kaizaNum = ((5 + diff - 1) % 9) + 1; // 簡易計算
+          const left = (age / maxAge * 100).toFixed(2);
+          const width = (1 / maxAge * 100).toFixed(2);
+          const isCur = age === currentAge;
+          const isChange = kyuseiIsChange(kaizaNum);
+          if (isChange) changeScore[age]++;
+          const bg = isCur ? '#f0ede6' : isChange ? '#f0d0c0' : '#f5f2ec';
+          const color = isCur ? 'var(--text)' : isChange ? '#a03020' : 'var(--muted)';
+          kyuseiCells += '<div style="position:absolute; left:'+left+'%; width:'+width+'%; top:0; height:100%; background:'+bg+'; color:'+color+'; border-right:1px solid rgba(216,208,196,.3); display:flex; align-items:center; justify-content:center; font-size:9px;" title="'+age+'歳（'+yearForAge+'年）: '+(KAIZA_SHORT[kaizaNum]||"?")+'宮">'+(KAIZA_SHORT[kaizaNum]||"")+'</div>';
+        }
+        rows.push({label:'九星気学', cells:kyuseiCells});
+
+        // 「今ここ」マーカーの位置
+        const nowLeft = (currentAge / maxAge * 100).toFixed(1);
+        const rowHeight = 28;
+        const totalRowsHeight = rows.length * (rowHeight + 3);
+
+        // テーブル生成
+        let html = '<div style="position:relative; width:100%;">';
+
+        // 転換期ハイライト帯（背景に薄い赤帯）
+        turningPoints.forEach(tp => {
+          const left = (tp.start / maxAge * 100).toFixed(1);
+          const width = ((tp.end - tp.start) / maxAge * 100).toFixed(1);
+          html += '<div style="position:absolute; left:calc(80px + '+left+'%); width:'+width+'%; top:20px; height:'+totalRowsHeight+'px; background:rgba(192,64,48,.08); border-left:1px dashed rgba(192,64,48,.3); border-right:1px dashed rgba(192,64,48,.3); z-index:0; pointer-events:none;"></div>';
+        });
+
+        // 年齢軸
+        html += '<div style="display:flex; margin-bottom:4px; padding-left:80px;">';
+        for (let a = 0; a <= maxAge; a += 10) {
+          html += '<div style="flex:0 0 '+(10/maxAge*100).toFixed(1)+'%; font-size:11px; color:var(--muted);">'+a+'歳</div>';
+        }
+        html += '</div>';
+
+        // 各行
+        rows.forEach(row => {
+          html += '<div style="display:flex; align-items:center; margin-bottom:3px; position:relative; z-index:1;">';
+          html += '<div style="width:80px; flex-shrink:0; font-size:11px; color:var(--gold); font-weight:700; padding-right:8px; text-align:right;">'+row.label+'</div>';
+          html += '<div style="flex:1; position:relative; height:'+rowHeight+'px; background:#f8f6f0; border:1px solid var(--border); border-radius:3px; overflow:hidden;">'+row.cells+'</div>';
+          html += '</div>';
+        });
+
+        // 「今ここ」赤線
+        html += '<div style="position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none;"><div style="position:absolute; left:calc(80px + (100% - 80px) * '+currentAge+' / '+maxAge+'); top:20px; width:3px; height:'+totalRowsHeight+'px; background:rgba(192,64,48,.7); z-index:2;"></div></div>';
+
+        // ▲マーカー
+        html += '<div style="padding-left:80px; margin-top:4px; position:relative;">';
+        html += '<div style="position:absolute; left:calc(80px + (100% - 80px) * '+currentAge+' / '+maxAge+' - 14px); font-size:11px; color:#c04030; font-weight:700;">▲'+currentAge+'歳</div>';
+        html += '</div>';
+
+        html += '</div>';
+
+        // 転換期サマリー
+        if (turningPoints.length > 0) {
+          html += '<div style="margin-top:16px; padding:12px 14px; background:#fdf0ee; border-radius:6px; border:1px solid #e8c8c0;">';
+          html += '<div style="font-size:14px; color:#a03020; font-weight:700; margin-bottom:6px;">▲ 転換期（複数占術が同時に変化を示す時期）</div>';
+          html += '<div style="font-size:15px; color:var(--text); line-height:1.8;">';
+          turningPoints.forEach(tp => {
+            const isPast = tp.end <= currentAge;
+            const isCurrent = currentAge >= tp.start && currentAge < tp.end;
+            const label = isCurrent ? '← 今ここ' : isPast ? '過去' : '未来';
+            // その時期にどの占術が変化を示しているか調べる
+            const midAge = Math.floor((tp.start + tp.end) / 2);
+            const reasons = [];
+            const positives = [];
+            shichuDayun.forEach(du => {
+              if (midAge >= du.startAge && midAge < du.endAge) {
+                const ten = tenGod(d.day.stem, du.stem);
+                if (tenIsChange(ten)) reasons.push({art:'四柱', ten:ten, meaning:tenMeaning[ten]});
+                else positives.push({art:'四柱', ten:ten, meaning:tenMeaning[ten]});
+              }
+            });
+            ziweiDayun.forEach(du => {
+              if (midAge >= du.startAge && midAge < du.endAge) {
+                if (ziweiIsChange(du.palaceName)) reasons.push({art:'紫微', ten:du.palaceName, meaning:du.palaceName.replace('宮','')+'のテーマが前面に'});
+                else positives.push({art:'紫微', ten:du.palaceName, meaning:du.palaceName.replace('宮','')});
+              }
+            });
+            dashaData.dashas.forEach(ds => {
+              if (midAge >= ds.startAge && midAge < ds.endAge) {
+                if (dashaChange(ds.lord)) reasons.push({art:'印度', ten:ds.lord, meaning:dashaMeaning[ds.lord]||ds.lord});
+                else positives.push({art:'印度', ten:ds.lord, meaning:dashaMeaning[ds.lord]||ds.lord});
+              }
+            });
+            // 具体的な出来事の例を生成（変化＋ポジティブ両面）
+            const changeExamples = [];
+            const growthExamples = [];
+            reasons.forEach(r => {
+              if (r.ten === '偏官') changeExamples.push('環境からの圧力が成長を促す');
+              else if (r.ten === '傷官') changeExamples.push('才能が溢れ出し、新しい表現の場が開ける');
+              else if (r.ten === '劫財') changeExamples.push('競争の中で自分の強みが明確になる');
+              else if (r.ten === '偏印') changeExamples.push('価値観が変わり、新しい学びが始まる');
+              else if (r.meaning && r.meaning.includes('命')) changeExamples.push('自分自身の根本的な変革・再出発');
+              else if (r.meaning && r.meaning.includes('官禄')) changeExamples.push('キャリアの大きな転機・新しい役割');
+              else if (r.meaning && r.meaning.includes('遷移')) changeExamples.push('環境が変わり、新しい世界が広がる');
+              else if (r.ten === 'ラーフ') changeExamples.push('強い欲求に突き動かされ、大きく動く時期');
+              else if (r.ten === '土星') changeExamples.push('忍耐の先に確かな実りがある時期');
+              else if (r.ten === '火星') changeExamples.push('行動力が高まり、勝負に出る時期');
+              else if (r.ten === 'ケートゥ') changeExamples.push('不要なものを手放し、身軽になる時期');
+            });
+            positives.forEach(r => {
+              if (r.ten === '正財' || r.ten === '正官') growthExamples.push('安定した地位と収入が築かれる');
+              else if (r.ten === '食神') growthExamples.push('楽しみと創造性に恵まれる');
+              else if (r.ten === '正印') growthExamples.push('知恵と学びが深まる');
+              else if (r.ten === '偏財') growthExamples.push('チャンスと人脈が広がる');
+              else if (r.meaning === '拡大・幸運') growthExamples.push('木星の恩恵で物事が拡大する');
+              else if (r.meaning === '愛・豊かさ') growthExamples.push('愛情と豊かさに恵まれる');
+            });
+            const allExamples = [];
+            if (changeExamples.length) allExamples.push(changeExamples[0]);
+            if (growthExamples.length) allExamples.push(growthExamples[0]);
+            if (allExamples.length === 0) allExamples.push('複合的な変化の時期');
+            const exampleText = allExamples.join('。また、');
+            const timeLabel = isPast ? 'こんなことがあったかも：' : isCurrent ? '今こんな状況かも：' : 'こんなことが起きやすい：';
+            html += '<div style="margin-bottom:10px;"><strong>◆ '+tp.start+'〜'+(tp.end-1)+'歳頃</strong>（'+label+'）<br><span style="font-size:14px; color:#6a6050; padding-left:16px;">'+timeLabel+exampleText+'</span></div>';
+          });
+          html += '</div></div>';
+        }
+
+        return html;
+      })()}
     </div>
 
     <div class="section-title">9占術が語る「この人」</div>
