@@ -508,7 +508,7 @@
               <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:4px;">干支から運命を読む東洋の王道</div>
             </div>
             <div style="padding:10px; border:1px solid var(--border); border-radius:4px;">
-              <div style="font-size:14px; color:var(--gold); font-weight:700;">⭐ 紫微斗数</div>
+              <div style="font-size:14px; color:var(--gold); font-weight:700;">✦ 紫微斗数</div>
               <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:4px;">12の宮で人生の各領域を読む</div>
             </div>
             <div style="padding:10px; border:1px solid var(--border); border-radius:4px;">
@@ -1399,7 +1399,7 @@ function introCard(key){
   if (!info) return "";
   return `<details style="margin-bottom:20px; border:1px solid var(--border); border-radius:8px; background:#f8f6f0;">
     <summary style="padding:12px 16px; cursor:pointer; font-size:15px; color:var(--gold); font-weight:700; list-style:none;">
-      ℹ️ ${info.title}とは？ <span style="font-size:12px; color:var(--muted); font-weight:normal;">（クリックで開く）</span>
+      ◇ ${info.title}とは？ <span style="font-size:12px; color:var(--muted); font-weight:normal;">（クリックで開く）</span>
     </summary>
     <div style="padding:4px 16px 16px; font-size:15px; line-height:1.8; color:var(--text);">
       <div style="margin-bottom:8px;"><strong style="color:var(--gold);">起源:</strong> ${info.origin}</div>
@@ -1888,7 +1888,7 @@ function compatHeader(tabKey) {
   if (currentMode !== "compat" || !dataB) return "";
   const d = currentData;
   const db = dataB;
-  const relLabel = {love:"💕 恋愛", friend:"🤝 友人", work:"💼 仕事"}[db.relType] || "相性";
+  const relLabel = {love:"恋愛", friend:"友人", work:"仕事"}[db.relType] || "相性";
 
   // タブ別の比較データ
   const rows = (() => {
@@ -2132,9 +2132,9 @@ function compatHeader(tabKey) {
   const summaryHtml = (summary.good.length || summary.bad.length || summary.careful.length) ? `
   <div style="background:#faf8f4; border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:12px;">
     <div style="font-size:18px; color:var(--gold); font-weight:700; letter-spacing:1px; margin-bottom:10px;">${relLabel}における2人の相性</div>
-    ${summary.good.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#4a8c50; font-weight:700;">✅ 良い点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.good.join("・")}</span></div>` : ""}
-    ${summary.bad.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#c04030; font-weight:700;">⚠️ 注意点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.bad.join("・")}</span></div>` : ""}
-    ${summary.careful.length ? `<div><span style="font-size:16px; color:#c09040; font-weight:700;">💡 気をつけたいこと：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.careful.join("・")}</span></div>` : ""}
+    ${summary.good.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#4a8c50; font-weight:700;">○ 良い点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.good.join("・")}</span></div>` : ""}
+    ${summary.bad.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#c04030; font-weight:700;">▲ 注意点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.bad.join("・")}</span></div>` : ""}
+    ${summary.careful.length ? `<div><span style="font-size:16px; color:#c09040; font-weight:700;">◇ 気をつけたいこと：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.careful.join("・")}</span></div>` : ""}
   </div>` : "";
 
   return `
@@ -2396,7 +2396,7 @@ function renderWest(){
       const crossNote = sunMoonCross===0||sunMoonCross===12?"あなたの太陽とお相手の月が同じ星座。相手はあなたの本質を無意識に理解している。深い縁。":"";
       return `
       <div class="card hi" style="margin-bottom:16px;">
-        <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+        <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
         <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
       </div>
       <div class="card" style="margin-bottom:16px;">
@@ -2999,7 +2999,7 @@ function renderShichu(){
     const sentences = dmTheme.split("。").filter(s=>s.trim());
     const partnerDesc = sentences.length >= 2 ? sentences[1] + "。" + (sentences[2] ? sentences[2] + "。" : "") : sentences[0] + "。";
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -3045,7 +3045,7 @@ function renderShichu(){
       ${currentDu ? `<br><strong style="color:var(--gold)">今（${currentDu.startAge}〜${currentDu.endAge-1}歳）</strong>: ${dayunTheme(dayStem, currentDu.stem).split("。")[0]}。` : ""}</p>
       ${(prevDu || currentDu || nextDu) ? `
       <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 人生の時間軸（大運10年周期）</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— 人生の時間軸（大運10年周期）</div>
         ${prevDu ? `<div style="font-size:14px; color:#888; line-height:1.8;">◀ ${prevDu.startAge}〜${prevDu.endAge-1}歳：${dayunTheme(dayStem, prevDu.stem).split("。")[0]}（${tenGod(dayStem, prevDu.stem)}）</div>` : ""}
         ${currentDu ? `<div style="font-size:15px; color:var(--gold); font-weight:600; line-height:1.8; padding:4px 8px; background:#f8f0e0; border-radius:4px; margin:4px 0;">● ${currentDu.startAge}〜${currentDu.endAge-1}歳：${dayunTheme(dayStem, currentDu.stem).split("。")[0]}（${tenGod(dayStem, currentDu.stem)}）← いま</div>` : ""}
         ${nextDu ? `<div style="font-size:14px; color:#888; line-height:1.8;">▶ ${nextDu.startAge}〜${nextDu.endAge-1}歳：${dayunTheme(dayStem, nextDu.stem).split("。")[0]}（${tenGod(dayStem, nextDu.stem)}）</div>` : ""}
@@ -3634,7 +3634,7 @@ function renderZiwei(){
     const spouseBranch = (lifeIdxB - 6 + 12) % 12;
     const spouseStarsB = starDistrib[spouseBranch] || ["無主星"];
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -3681,7 +3681,7 @@ function renderZiwei(){
       })()}</p>
       ${(prevDuZw || currentDu || nextDuZw) ? `
       <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 人生の時間軸（大限10年周期）</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— 人生の時間軸（大限10年周期）</div>
         ${prevDuZw ? `<div style="font-size:14px; color:#888; line-height:1.8;">◀ ${prevDuZw.startAge}〜${prevDuZw.endAge-1}歳：${prevDuZw.palaceName}（${(starDistrib[prevDuZw.branchIdx]||["無主星"])[0]}）— ${palaceExpl(prevDuZw.palaceName, (starDistrib[prevDuZw.branchIdx]||[])[0]).split("。")[0]}</div>` : ""}
         ${currentDu ? `<div style="font-size:15px; color:var(--gold); font-weight:600; line-height:1.8; padding:4px 8px; background:#f8f0e0; border-radius:4px; margin:4px 0;">● ${currentDu.startAge}〜${currentDu.endAge-1}歳：${currentDu.palaceName}（${(starDistrib[currentDu.branchIdx]||["無主星"])[0]}）← いま</div>` : ""}
         ${nextDuZw ? `<div style="font-size:14px; color:#888; line-height:1.8;">▶ ${nextDuZw.startAge}〜${nextDuZw.endAge-1}歳：${nextDuZw.palaceName}（${(starDistrib[nextDuZw.branchIdx]||["無主星"])[0]}）— ${palaceExpl(nextDuZw.palaceName, (starDistrib[nextDuZw.branchIdx]||[])[0]).split("。")[0]}</div>` : ""}
@@ -4206,7 +4206,7 @@ function renderSanmei(){
     const tenchuDesc = smB.tenchuType.desc.split("。").filter(s=>s.trim());
     const partnerDesc = (centerSentences[1] || centerSentences[0] || "") + "。" + (tenchuDesc[0] || "") + "。（中心星: " + smB.stars.center + " / " + smB.tenchuType.name + "）";
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -4240,7 +4240,7 @@ function renderSanmei(){
       <br><strong style="color:var(--gold)">エネルギー</strong>: ${totalEnergy >= 28 ? "非常に強い。大きなことを動かせるが、使いこなすのが課題" : totalEnergy >= 20 ? "強い。普通の人より多くのことを同時にこなせる" : totalEnergy >= 12 ? "バランスが取れている。無理なく自分のペースで進める" : "省エネ型。少ない燃料で効率的に動く"}（${totalEnergy}/36点）。
       <br><strong style="color:var(--gold)">人生の構造的テーマ（${sm.tenchuType.name}）</strong>: ${sm.tenchuType.desc.split("。")[0]}。</p>
       <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 人生のエネルギー曲線</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— 人生のエネルギー曲線</div>
         <div style="font-size:14px; color:#888; line-height:1.8;">◀ 前半生：${sm.juuniYear.ex.split("。")[0]}（${sm.juuniYear.n}・${sm.juuniYear.e}点）</div>
         <div style="font-size:15px; color:var(--gold); font-weight:600; line-height:1.8; padding:4px 8px; background:#f8f0e0; border-radius:4px; margin:4px 0;">● 中盤：${sm.juuniMonth.ex.split("。")[0]}（${sm.juuniMonth.n}・${sm.juuniMonth.e}点）← いま</div>
         <div style="font-size:14px; color:#888; line-height:1.8;">▶ 後半生：${sm.juuniDay.ex.split("。")[0]}（${sm.juuniDay.n}・${sm.juuniDay.e}点）</div>
@@ -4557,7 +4557,7 @@ function renderNumerology(){
     const key1 = Math.min(n.lifePath, nB.lifePath) + "-" + Math.max(n.lifePath, nB.lifePath);
     const compatText = compatMap[key1] || "この組み合わせの詳細な相性は、AI鑑定で深く読み解けます。";
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -4583,7 +4583,7 @@ function renderNumerology(){
       <p><strong style="color:var(--gold)">ライフパスナンバー ${n.lifePath}</strong>: ${lp.title}。${lp.desc.split("。")[0]}。
       <br><strong style="color:var(--gold)">今年（${n.currentYear}年）</strong>: パーソナルイヤー${n.personalYear}。${py}</p>
       <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 9年周期の流れ</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— 9年周期の流れ</div>
         ${(() => {
           const prevPY = n.personalYear === 1 ? 9 : n.personalYear - 1;
           const nextPY = n.personalYear === 9 ? 1 : n.personalYear + 1;
@@ -4853,7 +4853,7 @@ function renderKyusei(){
       return sentences.slice(0, 2).join("。") + "。（" + honmeiB.name + "）";
     })();
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -4876,7 +4876,7 @@ function renderKyusei(){
       <br><strong style="color:var(--gold)">月命星</strong>: ${getsu.name}。${getsu.desc.split("。")[0]}。
       <br><strong style="color:var(--gold)">今年（${thisYear}年）</strong>: ${honmei.name}は${kaiza.n}に回座。${kaiza.desc.split("。")[0]}。</p>
       <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 9年周期の流れ（${honmei.name}の回座位置）</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— 9年周期の流れ（${honmei.name}の回座位置）</div>
         ${(() => {
           const years = [-1, 0, 1];
           return years.map(offset => {
@@ -5296,7 +5296,7 @@ function renderMaya(){
       return sentences.slice(0, 2).join("。") + "。（" + sealB.n + "・音" + mB.tone + "）";
     })();
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -5327,7 +5327,7 @@ function renderMaya(){
         const yrSeal = MAYA_SEALS[yrM.seal];
         const reborn = 52 - currentAge;
         let timeline = '<div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">';
-        timeline += '<div style="font-size:14px; color:var(--muted); margin-bottom:8px;">📅 マヤ暦の時間軸</div>';
+        timeline += '<div style="font-size:14px; color:var(--muted); margin-bottom:8px;">— マヤ暦の時間軸</div>';
         timeline += '<div style="font-size:15px; color:var(--gold); font-weight:600; line-height:1.8; padding:4px 8px; background:#f8f0e0; border-radius:4px; margin:4px 0;">● 今年のテーマ紋章: ' + yrSeal.n + '（' + yrSeal.k.split("・")[0] + '）← いま</div>';
         if (reborn >= -3 && reborn <= 5) {
           timeline += '<div style="font-size:14px; color:#888; line-height:1.8;">' + (reborn === 0 ? '★ 今年が52歳＝マヤ暦の「生まれ直し」の年' : reborn < 0 ? '★ ' + Math.abs(reborn) + '年前に52歳＝第二の人生が始まっている' : '★ あと' + reborn + '年で52歳＝「生まれ直し」') + '</div>';
@@ -5782,7 +5782,7 @@ function renderShukuyo(){
       return sentences.slice(0, 2).join("。") + "。（" + shukuB.n + "）";
     })();
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -5841,7 +5841,7 @@ function renderShukuyo(){
       const relColor = isSame ? 'var(--gold)' : (colors[rel.type] || 'var(--muted)');
 
       return `<div class="card" style="margin-bottom:20px; border-color:${relColor};">
-        <h3 style="color:${relColor}; margin-bottom:8px;">📅 今日の宿曜運勢 — ${dateStr}</h3>
+        <h3 style="color:${relColor}; margin-bottom:8px;">— 今日の宿曜運勢 — ${dateStr}</h3>
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px;">
           <div style="text-align:center;">
             <div style="font-size:13px; color:var(--muted);">あなたの宿</div>
@@ -6300,7 +6300,7 @@ function renderJyotish(){
       return (sentences.slice(0, 2).join("。") || moonRashiB.jp) + "。（月のラーシ: " + moonRashiB.jp + "）";
     })();
     return `<div class="card hi" style="margin-bottom:16px;">
-      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -7591,7 +7591,7 @@ function renderConsult(){
           const isShukuyo = r.name.includes("宿曜");
           return `<div style="padding:12px 16px; ${i>0?'border-top:1px solid var(--border)':''}; ${isShukuyo?'background:#fdf6e8;':''}">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-              <span style="font-size:14px; color:var(--gold); font-weight:700; min-width:120px;">${r.name}${isShukuyo?' ⭐':''}</span>
+              <span style="font-size:14px; color:var(--gold); font-weight:700; min-width:120px;">${r.name}${isShukuyo?' ★':''}</span>
               <span style="font-size:13px; color:var(--muted);">${r.key}</span>
               <span style="margin-left:auto; font-size:16px; font-weight:700; color:${barColor};">${r.score}</span>
             </div>
@@ -7655,7 +7655,7 @@ function renderConsult(){
           (WUXING_克[dayElA]===dayElB2||WUXING_克[dayElB2]===dayElA)?"行動パターンがぶつかり合う。どちらかが強い立場になりやすく、対等さを意識することが大切。":
           "大きな衝突ポイントは少ない。小さなすれ違いを放置しないことが大切。";
         return `
-      <div class="section-title">💕 恋愛（片思いの場合）</div>
+      <div class="section-title">恋愛（片思いの場合）</div>
       <details open style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#fdf6e8;">
         <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">相手はあなたをどう見ているか ▼</summary>
         <div style="padding:4px 16px 16px;">
@@ -7667,7 +7667,7 @@ function renderConsult(){
         </div>
       </details>
 
-      <div class="section-title">💑 恋愛（交際中・両思いの場合）</div>
+      <div class="section-title">恋愛（交際中・両思いの場合）</div>
       <details open style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#fdf6e8;">
         <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">この関係の強みと注意点 ▼</summary>
         <div style="padding:4px 16px 16px;">
@@ -7680,7 +7680,7 @@ function renderConsult(){
         </div>
       </details>
 
-      <div class="section-title">🤝 仕事・友人の場合</div>
+      <div class="section-title">仕事・友人の場合</div>
       <details style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#f5f2ec;">
         <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">信頼できるか・一緒にいて消耗するか ▼</summary>
         <div style="padding:4px 16px 16px;">
@@ -8351,7 +8351,7 @@ function renderCrossRef(){
         {art:"宿曜", val:`${shuku.n}`, level:"○"},
         {art:"印度", val:`月:${jyMoonSign.n}`, level:"○"},
       ]},
-    { label:"仕事・適職", icon:"💼",
+    { label:"仕事・適職", icon:"◆",
       items:[
         {art:"西洋", val:`MC/土星の配置`, level:"◎"},
         {art:"四柱", val:`官星: ${d.pillars.filter(p=>p.ten==="偏官"||p.ten==="正官").map(p=>p.ten).join("・")||"なし"}`, level:"◎"},
@@ -8375,7 +8375,7 @@ function renderCrossRef(){
         {art:"宿曜", val:`—`, level:"△"},
         {art:"印度", val:`2H・11H`, level:"○"},
       ]},
-    { label:"恋愛・結婚", icon:"💕",
+    { label:"恋愛・結婚", icon:"◇",
       items:[
         {art:"西洋", val:`♀${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].n}`, level:"◎"},
         {art:"四柱", val:`日支 ${d.day.branch}`, level:"○"},
@@ -8411,7 +8411,7 @@ function renderCrossRef(){
         {art:"宿曜", val:`—`, level:"△"},
         {art:"印度", val:`${currentDashaCR||"ダシャー"}`, level:"◎"},
       ]},
-    { label:"相性", icon:"🤝",
+    { label:"相性", icon:"○",
       items:[
         {art:"西洋", val:`シナストリー`, level:"◎"},
         {art:"四柱", val:`干支の相生・相剋（ぶつかる）`, level:"○"},
@@ -8488,7 +8488,7 @@ function renderReading(text){
   let titleDone = false;
 
   const sectionIcons = {
-    "1":"🔮", "2":"📅", "3":"💼", "4":"💑", "5":"⚡", "6":"✦"
+    "1":"◆", "2":"—", "3":"◆", "4":"◇", "5":"▲", "6":"✦"
   };
   const sectionColors = {
     "6": "var(--hi)" // 総合メッセージだけハイライト
