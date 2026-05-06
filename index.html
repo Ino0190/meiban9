@@ -485,7 +485,7 @@
     <div class="empty" id="empty" style="height:auto; padding:40px 32px;">
       <div class="sym" style="font-size:0; line-height:0; margin-bottom:10px;"><img src="icons/MeibanIcon01.png" alt="羅占盤" style="width:168px; height:auto; opacity:.7;"></div>
       <div style="font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:8px; font-family:'Noto Serif JP',serif; font-weight:700;">羅 占 盤</div>
-      <div style="font-size:15px; color:var(--muted); margin-bottom:28px;">9つの占術で、あなたの命盤を読み解きます。</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:28px;">複数の占術を横断的に分析します。</div>
 
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
@@ -8694,7 +8694,9 @@ function setTab(i){
     document.getElementById("tab"+j).classList.toggle("hide", j!==i);
   });
   if (i===9) loadReading();
-  window.scrollTo(0, 0);
+  // タブバーの位置までスクロール（タブから表示開始）
+  const tabsEl = document.querySelector('.tabs');
+  if (tabsEl) tabsEl.scrollIntoView({behavior:'instant', block:'start'});
 }
 
 /* ── 九占術クロスリファレンス表 ── */
