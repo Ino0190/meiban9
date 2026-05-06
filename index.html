@@ -55,7 +55,7 @@
   .hint{ font-size:13px; color:#6a6050; margin-top:10px; line-height:1.7; }
 
   /* ── Main ── */
-  main{ padding:0; }
+  main{ padding:0; overflow-x:hidden; width:100%; }
   .header{
     background:linear-gradient(180deg,#f5f2ec 0%,#faf8f4 100%);
     border-bottom:1px solid var(--border); padding:26px 32px; text-align:center;
@@ -274,6 +274,14 @@
     /* テーブルははみ出しを許容してスクロール */
     table { min-width: unset !important; font-size: 13px !important; }
     .overflow-scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    /* mainとpanelの幅を確実に画面内に収める */
+    main { width: 100vw !important; max-width: 100vw !important; overflow-x: hidden !important; }
+    .panel { width: 100% !important; max-width: 100% !important; overflow-x: hidden !important; padding: 16px 12px !important; }
+    .header { width: 100% !important; max-width: 100% !important; }
+    /* 固定幅のSVGチャートを縮小 */
+    .chart-wrap svg { width: 100% !important; max-width: 100% !important; height: auto !important; }
+    /* zwgridのセンターを修正 */
+    .zwcenter { grid-column: 1/3 !important; }
 
     .shell{ grid-template-columns:1fr; }
     aside{
@@ -460,11 +468,6 @@
     </button>
     <div id="export-msg" style="font-size:13px; color:#22c55e; margin-top:6px; display:none;">✓ クリップボードにコピーしました</div>
 
-    <div class="hint">
-      ※ 天体位置はSwiss Ephemeris精密暦（±0.01°）。<br>
-      ※ 時刻不明の場合、ASC・月・紫微命宮は概算になります。<br>
-      ※ 日本時間（JST）として解釈します。
-    </div>
   </aside>
 
   <main id="main">
@@ -539,7 +542,7 @@
       <!-- 易経クイック結果エリア（初期非表示） -->
       <div id="quick-oracle" style="display:none; width:100%; margin-top:20px;"></div>
     </div>
-    <div id="result" style="display:none;">
+    <div id="result" style="display:none; width:100%; max-width:100%; overflow-x:hidden;">
       <div class="header">
         <div class="small">NATAL CHART ANALYSIS</div>
         <div class="date" id="h-date">—</div>
@@ -1878,7 +1881,7 @@ function renderWest(){
   // アスペクト検出（SVG描画に使うため先に計算）
   const aspects = detectAspects(d.planets, d.ascLon);
 
-  let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="font-family:'Georgia','Times New Roman',serif;">`;
+  let svg = `<svg width="100%" height="auto" viewBox="0 0 ${size} ${size}" style="font-family:'Georgia','Times New Roman',serif; display:block; max-width:${size}px;">`;
   svg += `<circle cx="${cx}" cy="${cy}" r="236" fill="#faf8f4"/>`;
   // サイン扇
   SIGNS.forEach((sg,i)=>{
