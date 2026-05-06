@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>タロット占い 結果 — Divination</title>
 <style>
   :root {
@@ -17,7 +18,7 @@
     min-height:100vh;
   }
   html{ font-size:16px; }
-  .container{ max-width:1400px; margin:0 auto; padding:30px 24px 60px; }
+  .container{ max-width:1400px; margin:0 auto; padding:30px 24px 60px; overflow-x:hidden; }
   header{ text-align:center; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;}
   header .small{ font-size:13px; letter-spacing:5px; color:#6a7080; margin-bottom:6px;}
   header h1{ font-size:32px; color:var(--gold); letter-spacing:6px; margin:0 0 4px; font-weight:normal;}
@@ -148,6 +149,45 @@
     .main-layout{ grid-template-columns:1fr; }
     .left-pane{ position:static; }
     .spread-layout{ max-width:500px; margin:0 auto; }
+  }
+  @media (max-width: 760px){
+    html{ font-size:16px; }
+    body{ font-size:16px; }
+    .container{ padding:16px 12px 40px; }
+    header h1{ font-size:22px; letter-spacing:3px; }
+    header .sub{ font-size:14px; }
+    .meta-box{ padding:14px 16px; }
+    .meta-box .question{ font-size:16px; }
+    .spread-layout{
+      grid-template-columns:repeat(2, 1fr);
+      grid-template-rows:auto;
+      gap:6px; padding:12px 8px;
+      max-width:100%;
+    }
+    .drawn-card .pos-label{ font-size:12px; }
+    .drawn-card .card-name{ font-size:12px; }
+    .drawn-card .card-orient{ font-size:11px; }
+    .pos-1,.pos-2,.pos-3,.pos-4,.pos-5,.pos-6,.pos-7,.pos-8,.pos-9,.pos-10{
+      grid-column:auto; grid-row:auto; transform:none;
+    }
+    .pos-2{ transform:none; }
+    .pos-2:hover{ transform:none; }
+    .reversed .face img{ transform:rotate(180deg); }
+    .reading-item{ padding:16px 14px; }
+    .reading-item .reading-header{ gap:10px; }
+    .reading-item .mini-face{ width:50px; }
+    .reading-item .header-name{ font-size:16px; }
+    .reading-item h3{ font-size:16px; }
+    .reading-item p{ font-size:16px; line-height:1.8; }
+    .summary{ padding:18px 16px; }
+    .summary-title{ font-size:18px; }
+    .summary p{ font-size:16px; line-height:1.8; }
+    .summary blockquote{ padding:10px 14px; font-size:16px; }
+    .followup{ padding:16px 14px; }
+    .followup textarea{ font-size:16px; }
+    .followup .actions{ flex-direction:column; }
+    .followup button{ width:100%; }
+    .footer-links a{ display:block; margin:8px 0; }
   }
 
   .footer-links{
