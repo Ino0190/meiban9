@@ -15,7 +15,7 @@
     font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
     min-height:100vh;
   }
-  .container{ max-width:1100px; margin:0 auto; padding:30px 24px 60px; }
+  .container{ max-width:1100px; margin:0 auto; padding:30px 24px 60px; overflow-x:hidden; }
   header{ text-align:center; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;
     background:linear-gradient(180deg,#f5f2ec 0%,#faf8f4 100%); margin:-30px -24px 32px; padding:26px 32px 20px; }
   header .small{ font-size:12px; letter-spacing:5px; color:#8a8070; margin-bottom:6px;}
@@ -77,6 +77,35 @@
   }
   @media (max-width: 760px){
     .spread-choice-grid{ grid-template-columns:repeat(2,1fr); }
+    .container{ padding:16px 12px 40px; }
+    header{ margin:-16px -12px 24px; padding:20px 16px 16px; }
+    header h1{ font-size:20px; }
+    .spread-layout{
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: auto;
+      padding:16px 10px;
+    }
+    .drawn-card{ width:100%; }
+    .drawn-card.pos-1,
+    .drawn-card.pos-2,
+    .drawn-card.pos-3,
+    .drawn-card.pos-4,
+    .drawn-card.pos-5,
+    .drawn-card.pos-6,
+    .drawn-card.pos-7,
+    .drawn-card.pos-8,
+    .drawn-card.pos-9,
+    .drawn-card.pos-10{
+      grid-column:auto; grid-row:auto; transform:none;
+    }
+    .drawn-card.pos-2 { transform:none; }
+    .drawn-card.reversed .face img{ transform:rotate(180deg); }
+    .mini-row{ grid-template-columns:repeat(5, 1fr); }
+    .tab-bar{ flex-wrap:wrap; }
+    .tab-bar button{ flex:1 1 auto; font-size:13px; padding:8px 6px; }
+    .prompt-box{ font-size:12px; max-height:300px; }
+    .reading{ padding:14px 16px; font-size:16px; }
+    textarea{ font-size:16px; min-height:120px; }
   }
   .spread-card .name{ font-size:16px; color:var(--gold); margin-bottom:4px;}
   .spread-card .count{ font-size:14px; color:var(--muted);}
@@ -119,9 +148,9 @@
     transition: transform 0.4s cubic-bezier(.3,.7,.4,1);
   }
   .shuffle-card::after{
-    content:"✦"; position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    color:#ffffff; font-size:18px; opacity:.7;
+    content:""; position:absolute; inset:8px;
+    background:url('../icons/MeibanIcon01.png') center/contain no-repeat;
+    opacity:.5;
   }
   .shuffle-hint{
     font-size:14px; color:var(--muted); margin-top:10px; line-height:1.8;
@@ -205,29 +234,6 @@
     z-index:2;
   }
 
-  /* スマホ：ケルト十字は狭いので縦並び2列にフォールバック */
-  @media (max-width: 760px){
-    .spread-layout{
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: auto;
-      padding:16px 10px;
-    }
-    .drawn-card{ width:100%; }
-    .drawn-card.pos-1,
-    .drawn-card.pos-2,
-    .drawn-card.pos-3,
-    .drawn-card.pos-4,
-    .drawn-card.pos-5,
-    .drawn-card.pos-6,
-    .drawn-card.pos-7,
-    .drawn-card.pos-8,
-    .drawn-card.pos-9,
-    .drawn-card.pos-10{
-      grid-column:auto; grid-row:auto; transform:none;
-    }
-    .drawn-card.pos-2 { transform:none; }
-    .drawn-card.reversed .face img{ transform:rotate(180deg); }
-  }
 
   /* 解釈エリア */
   .reading{
@@ -284,9 +290,6 @@
     background:rgba(255,255,255,.85); padding:1px 3px; border-radius:2px;
     font-weight:bold; z-index:2; letter-spacing:0;
   }
-  @media (max-width: 760px){
-    .mini-row{ grid-template-columns:repeat(5, 1fr); }
-  }
 
   /* AI読み解き貼付エリア */
   .ai-reading-box{
@@ -305,15 +308,15 @@
 
   .prompt-box{
     background:#040608; border:1px solid var(--border); border-radius:6px;
-    padding:14px; font-family:"SF Mono","Menlo",monospace; font-size:22px;
+    padding:14px; font-family:"SF Mono","Menlo",monospace; font-size:13px;
     color:#a0a8b0; line-height:1.8; white-space:pre-wrap; max-height:400px;
     overflow-y:auto;
   }
   .copy-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
-  .copy-row .msg{ font-size:22px; color:var(--muted);}
+  .copy-row .msg{ font-size:14px; color:var(--muted);}
 
   .meta-log{
-    font-size:22px; color:#404858; margin-top:14px; padding:10px 14px;
+    font-size:13px; color:#404858; margin-top:14px; padding:10px 14px;
     background:#040608; border-radius:4px; border:1px solid #0e1420;
     line-height:1.8; font-family:"SF Mono","Menlo",monospace;
   }
@@ -429,6 +432,11 @@
       <button class="ghost" onclick="reset()">もう一度引く</button>
     </div>
   </div>
+
+<div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); line-height:1.8;">
+  Tarot images: Rider-Waite-Smith (public domain, 1909).<br>
+  Data structure: <a href="https://github.com/metabismuth/tarot-json" style="color:var(--muted);">metabismuth/tarot-json</a> (MIT License).
+</div>
 
 </div>
 
