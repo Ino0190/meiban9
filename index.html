@@ -1838,15 +1838,19 @@ function buildCompatExportText(){
   const shukuyoRel = shukuyoCompat(shukuIdxA, shukuIdxB);
   const shukuyoRelRev = shukuyoCompat(shukuIdxB, shukuIdxA);
   const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
-  const wxRel = dayElA === dayElB ? "比和（同じ五行）" :
-    WUXING_CYCLE[dayElA] === dayElB ? "相生（Aが育てる）" :
-    WUXING_CYCLE[dayElB] === dayElA ? "相生（Bが育てる）" : "ぶつかる関係";
+  // 干合（天干同士の特別な惹かれ合い）
+  const KANGO_PAIRS = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]];
+  const isKango = KANGO_PAIRS.some(([a,b]) => (dayStemA===a && dayStemB===b) || (dayStemA===b && dayStemB===a));
+  const wxRel = isKango ? "干合（強く惹かれ合う特別な関係）" :
+    dayElA === dayElB ? "比和（同じ五行）" :
+    WUXING_CYCLE[dayElA] === dayElB ? "相生（あなたが育てる）" :
+    WUXING_CYCLE[dayElB] === dayElA ? "相生（相手が育てる）" : "ぶつかる関係";
   const numKey = Math.min(nA.lifePath, nB.lifePath) + "-" + Math.max(nA.lifePath, nB.lifePath);
 
   return `以下は2人の九命盤データと相性判定結果です。このデータをもとに2人の相性を総合鑑定してください。
 
 ━━━━━━━━━━━━━━━━━━━━
-【Aさん】基本情報
+【あなた】基本情報
 ━━━━━━━━━━━━━━━━━━━━
 生年月日: ${d.y}年${d.m}月${d.d}日
 出生時刻: ${d.tm==="known" ? d.h+":"+String(d.mi).padStart(2,"0") : "不明"}
@@ -1863,7 +1867,7 @@ function buildCompatExportText(){
 ◆ インド占星術: 月ラーシ${moonRashiA.jp}
 
 ━━━━━━━━━━━━━━━━━━━━
-【Bさん】基本情報
+【相手の方】基本情報
 ━━━━━━━━━━━━━━━━━━━━
 生年月日: ${db.y}年${db.m}月${db.d}日
 出生時刻: ${db.tm==="known" ? db.h+":"+String(db.mi).padStart(2,"0") : "不明"}
@@ -1909,8 +1913,8 @@ function buildCompatExportText(){
 
 ◆ 宿曜占星術（最重要）
   ${shukuA.n} × ${shukuB.n}
-  A→B: ${shukuyoRel.name}（${shukuyoRel.type}）
-  B→A: ${shukuyoRelRev.name}（${shukuyoRelRev.type}）
+  あなた→相手: ${shukuyoRel.name}（${shukuyoRel.type}）
+  相手→あなた: ${shukuyoRelRev.name}（${shukuyoRelRev.type}）
   判定: ${shukuyoRel.desc}
 
 ◆ インド占星術
@@ -2077,7 +2081,9 @@ function compatHeader(tabKey) {
       const elA = STEM_EL[STEMS.indexOf(d.day.stem)], elB = STEM_EL[STEMS.indexOf(db.day.stem)];
       const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
       const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
-      const rel = elA===elB?"比和（同じ）":WUXING_CYCLE[elA]===elB?"相生（あなた→相手）":WUXING_CYCLE[elB]===elA?"相生（相手→あなた）":WUXING_克[elA]===elB?"ぶつかる関係（あなた→相手）":"ぶつかる関係（相手→あなた）";
+      const KANGO_PAIRS = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]];
+      const isKango = KANGO_PAIRS.some(([a,b]) => (d.day.stem===a && db.day.stem===b) || (d.day.stem===b && db.day.stem===a));
+      const rel = isKango?"干合（強く惹かれ合う）":elA===elB?"比和（同じ）":WUXING_CYCLE[elA]===elB?"相生（あなた→相手）":WUXING_CYCLE[elB]===elA?"相生（相手→あなた）":WUXING_克[elA]===elB?"ぶつかる関係（あなた→相手）":"ぶつかる関係（相手→あなた）";
       return [
         {label:"日主", a:`${d.day.stem}（${elA}）`, b:`${db.day.stem}（${elB}）`, note:rel},
         {label:"五行関係", a:rel, b:"", span:true},
@@ -3122,11 +3128,14 @@ function renderShichu(){
     const dayStemB = dataB.day.stem;
     const dayElB = STEM_EL[STEMS.indexOf(dayStemB)];
     const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+    const KANGO_PAIRS = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]];
+    const isKango = KANGO_PAIRS.some(([a,b]) => (dayStem===a && dayStemB===b) || (dayStem===b && dayStemB===a));
     const isSame = dayEl === dayElB;
     const isAgenB = WUXING_CYCLE[dayEl] === dayElB;
     const isBgenA = WUXING_CYCLE[dayElB] === dayEl;
     let compatType, compatDesc;
-    if (isSame) { compatType = "比和（同じ五行）"; compatDesc = `同じ${dayEl}同士。価値観が近く共感しやすい。ただし似すぎて刺激が少ない面も。競争関係になることもある。`; }
+    if (isKango) { compatType = "干合（強く惹かれ合う）"; compatDesc = `${dayStem}と${dayStemB}は干合の関係。天干同士が自然と引き合い、一緒にいると新しい気（エネルギー）が生まれる特別な組み合わせ。恋愛では強い縁を示す。`; }
+    else if (isSame) { compatType = "比和（同じ五行）"; compatDesc = `同じ${dayEl}同士。価値観が近く共感しやすい。ただし似すぎて刺激が少ない面も。競争関係になることもある。`; }
     else if (isAgenB) { compatType = "相生（あなたが育てる）"; compatDesc = `あなた（${dayEl}）が相手（${dayElB}）を生む関係。面倒見が良くなるが、消耗に注意。相手はあなたから力をもらっている。`; }
     else if (isBgenA) { compatType = "相生（相手が育てる）"; compatDesc = `相手（${dayElB}）があなた（${dayEl}）を生む関係。相手から力をもらえる。感謝を忘れずに。`; }
     else { compatType = "ぶつかる関係（刺激の関係）"; compatDesc = `${dayEl}と${dayElB}はぶつかり合う関係。緊張感があるが、それが互いの成長を促す。ビジネスでは良い緊張感になることも。`; }
