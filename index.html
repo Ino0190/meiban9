@@ -97,9 +97,9 @@
   }
   .card.hi{ background:var(--hi); border-color:var(--gold); }
   .card.nxt{ background:var(--nxt); border-color:#c0c8d8; }
-  .card h3{ margin:0 0 6px; font-size:16px; color:var(--gold); font-weight:normal; }
+  .card h3{ margin:0 0 6px; font-size:20px; color:var(--gold); font-weight:normal; }
   .card.nxt h3{ color:#4a6090; }
-  .card p{ margin:0; font-size:18px; color:var(--text); line-height:1.8; }
+  .card p{ margin:0; font-size:16px; color:var(--text); line-height:1.8; }
 
   /* Western chart */
   .chart-wrap{ display:flex; justify-content:center; }
@@ -263,7 +263,13 @@
     height:70vh; color:#8a8070; text-align:center;
   }
   .empty .sym{ font-size:56px; color:var(--gold); opacity:.4; margin-bottom:20px; }
-  .empty .msg{ font-size:14px; letter-spacing:2px; }
+  .empty .msg{ font-size:16px; letter-spacing:2px; }
+
+  /* フォントサイズ統一ルール（全体適用） */
+  /* 本文系で16px未満を禁止 */
+  [style*="font-size:13px"],[style*="font-size: 13px"] { font-size: 16px !important; }
+  [style*="font-size:14px"],[style*="font-size: 14px"] { font-size: 16px !important; }
+  [style*="font-size:15px"],[style*="font-size: 15px"] { font-size: 16px !important; }
 
   /* ── Responsive: スマホ対応 ── */
   /* 全体のはみ出し防止 */
@@ -293,7 +299,7 @@
     .tabs{ flex-wrap:wrap; overflow-x:visible; position:sticky; top:0; z-index:10; }
     .tabs button{ padding:8px 10px; font-size:12px; flex:0 0 auto; border-bottom:2px solid transparent; }
     .panel{ padding:16px 14px; }
-    .section-title{ font-size:18px; margin:28px 0 12px; }
+    .section-title{ font-size:20px; margin:28px 0 12px; }
     .card p{ font-size:16px; }
     .header{ padding:18px 16px; }
     .header .date{ font-size:20px; }
@@ -383,8 +389,13 @@
 <div class="shell">
 
   <aside>
-    <div class="brand">NINE CHARTS</div>
-    <div class="brand-title">九 命 盤</div>
+    <div style="display:flex; align-items:center; gap:2px; margin-bottom:20px; cursor:pointer;" onclick="goHome()">
+      <img src="icons/MeibanIcon01.png" alt="九命盤" style="width:88px; height:88px; opacity:.7; border-radius:50%; object-fit:cover;">
+      <div>
+        <div class="brand">NINE CHARTS</div>
+        <div class="brand-title" style="margin-bottom:0; margin-top:-3px;">九 命 盤</div>
+      </div>
+    </div>
 
     <!-- モード選択 -->
     <div style="display:flex; gap:6px; margin-bottom:16px;">
@@ -429,13 +440,6 @@
     <div id="partner-form" style="display:none; margin-top:16px; padding-top:16px; border-top:2px solid var(--gold);">
       <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:10px; letter-spacing:2px;">お相手の情報</div>
 
-      <div class="label">関係</div>
-      <div class="gender">
-        <label><input type="radio" name="reltype" value="love" checked><span>💕 恋愛</span></label>
-        <label><input type="radio" name="reltype" value="friend"><span>🤝 友人</span></label>
-        <label><input type="radio" name="reltype" value="work"><span>💼 仕事</span></label>
-      </div>
-
       <div class="label">お相手の生年月日</div>
       <div style="display:flex; gap:6px; align-items:center;">
         <input type="date" id="birthdate-b" min="1900-01-01" max="2099-12-31" style="flex:1;">
@@ -476,7 +480,7 @@
 
   <main id="main">
     <div class="empty" id="empty" style="height:auto; padding:40px 32px;">
-      <div class="sym">✦</div>
+      <div class="sym" style="font-size:0; line-height:0; margin-bottom:10px;"><img src="icons/MeibanIcon01.png" alt="九命盤" style="width:168px; height:auto; opacity:.7;"></div>
       <div style="font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:8px; font-family:'Noto Serif JP',serif; font-weight:700;">九 命 盤</div>
       <div style="font-size:15px; color:var(--muted); margin-bottom:28px;">9つの占術で、あなたの命盤を読み解きます。</div>
 
@@ -547,7 +551,7 @@
       <div id="quick-oracle" style="display:none; width:100%; margin-top:20px;"></div>
     </div>
     <div id="result" style="display:none; width:100%; max-width:100%; overflow-x:hidden;">
-      <div class="header">
+      <div class="header" style="display:none;">
         <div class="small">NATAL CHART ANALYSIS</div>
         <div class="date" id="h-date">—</div>
         <div class="meta" id="h-meta">—</div>
@@ -1402,12 +1406,25 @@ function introCard(key){
   </details>`;
 }
 
+function goHome(){
+  document.getElementById("empty").style.display = "";
+  document.getElementById("result").style.display = "none";
+  const tabsEl = document.querySelector('.tabs');
+  if (tabsEl) tabsEl.style.display = "none";
+  const headerEl = document.querySelector('.header');
+  if (headerEl) headerEl.style.display = "none";
+}
+
 function renderAll(){
   document.getElementById("empty").style.display = "none";
   document.getElementById("result").style.display = "block";
 
-  // スマホ（768px以下）は総合鑑定タブ、PCは西洋占星術タブをデフォルトで開く
-  const defaultTab = window.innerWidth <= 768 ? 10 : 0;
+  const tabsEl = document.querySelector('.tabs');
+
+  // 相性モード・通常モード共通：タブを表示
+  if (tabsEl) tabsEl.style.display = "";
+  // 常に総合鑑定タブをデフォルトで開く
+  const defaultTab = 10;
   setTab(defaultTab);
 
   const d = currentData;
@@ -1861,6 +1878,295 @@ function highlightAspect(hitEl, on) {
 }
 
 /* ── 西洋占星術描画 ── */
+
+// 相性モード時の各タブ先頭に表示する比較表ヘルパー
+function compatHeader(tabKey) {
+  try {
+  if (currentMode !== "compat" || !dataB) return "";
+  const d = currentData;
+  const db = dataB;
+  const relLabel = {love:"💕 恋愛", friend:"🤝 友人", work:"💼 仕事"}[db.relType] || "相性";
+
+  // タブ別の比較データ
+  const rows = (() => {
+    if (tabKey === "western") {
+      const sunA = SIGNS[signOf(d.sunLon)].n, sunB = SIGNS[signOf(db.sunLon)].n;
+      const moonA = SIGNS[signOf(d.moonLon)].n, moonB = SIGNS[signOf(db.moonLon)].n;
+      const venA = SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].n;
+      const venB = SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].n;
+      const marA = SIGNS[signOf(d.planets.find(p=>p.n==="火星").lon)].n;
+      const marB = SIGNS[signOf(db.planets.find(p=>p.n==="火星").lon)].n;
+      // 太陽同士の距離
+      const sunDist = Math.abs(signOf(d.sunLon) - signOf(db.sunLon));
+      const sunDistN = sunDist > 6 ? 12 - sunDist : sunDist;
+      const sunNote = sunDistN===0?"同じ星座。価値観が近く、話が合いやすい。":sunDistN===6?"正反対の星座。強烈に惹かれ合うが、ぶつかることも。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。自然と居心地が良い。":sunDistN===3||sunDistN===9?"刺激的な組み合わせ。互いに成長させ合う。":"異なる星座。違いが新鮮さになる。";
+      // 月同士（感情の相性）
+      const moonDist = Math.abs(signOf(d.moonLon) - signOf(db.moonLon));
+      const moonDistN = moonDist > 6 ? 12 - moonDist : moonDist;
+      const moonNote = moonDistN===0?"感情のリズムが同じ。一緒にいて疲れない。":moonDistN===6?"感情パターンが正反対。理解し合うのに時間がかかる。":moonDistN===4||moonDistN===8?"感情的に相性が良い。":moonDistN===3||moonDistN===9?"感情面で刺激し合う。":"感情の波長が少し違う。";
+      // 金星（愛し方の相性）
+      const vElA = SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].e;
+      const vElB = SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].e;
+      const venNote = vElA===vElB?"同じ元素。愛し方が似ていて、自然に気持ちが伝わる。":
+        (vElA==="火"&&vElB==="風")||(vElA==="風"&&vElB==="火")?"火と風。情熱と知性が共鳴する。":
+        (vElA==="土"&&vElB==="水")||(vElA==="水"&&vElB==="土")?"土と水。安定と感情が補い合う。":
+        "愛し方が違う。相手の愛情表現を理解する努力が必要。";
+      // 火星（行動・欲求の相性）
+      const mElA = SIGNS[signOf(d.planets.find(p=>p.n==="火星").lon)].e;
+      const mElB = SIGNS[signOf(db.planets.find(p=>p.n==="火星").lon)].e;
+      const marNote = mElA===mElB?"行動のテンポが合う。一緒に動きやすい。":
+        (mElA==="火"&&mElB==="風")||(mElA==="風"&&mElB==="火")?"エネルギーが共鳴する。":
+        "行動のテンポが違う。どちらかが合わせる必要がある。";
+      return [
+        {label:"太陽（価値観）", a:sunA, b:sunB, note:sunNote},
+        {label:"月（感情）", a:moonA, b:moonB, note:moonNote},
+        {label:"金星（愛し方）", a:venA, b:venB, note:venNote},
+        {label:"火星（行動力）", a:marA, b:marB, note:marNote},
+      ];
+    }
+    if (tabKey === "shichu") {
+      const elA = STEM_EL[STEMS.indexOf(d.day.stem)], elB = STEM_EL[STEMS.indexOf(db.day.stem)];
+      const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+      const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+      const rel = elA===elB?"比和（同じ）":WUXING_CYCLE[elA]===elB?"相生（あなた→相手）":WUXING_CYCLE[elB]===elA?"相生（相手→あなた）":WUXING_克[elA]===elB?"ぶつかる関係（あなた→相手）":"ぶつかる関係（相手→あなた）";
+      return [
+        {label:"日主", a:`${d.day.stem}（${elA}）`, b:`${db.day.stem}（${elB}）`, note:rel},
+        {label:"五行関係", a:rel, b:"", span:true},
+        {label:"年柱", a:`${d.year.stem}${d.year.branch}`, b:`${db.year.stem}${db.year.branch}`},
+        {label:"月柱", a:`${d.month.stem}${d.month.branch}`, b:`${db.month.stem}${db.month.branch}`},
+      ];
+    }
+    if (tabKey === "ziwei") {
+      const lsA = (d.ziweiDistrib[d.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"無主星";
+      const lsB = (db.ziweiDistrib[db.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"無主星";
+      const spouseIdxA = (d.lifeIdx - 2 + 12) % 12;
+      const spouseIdxB = (db.lifeIdx - 2 + 12) % 12;
+      const spA = (d.ziweiDistrib[spouseIdxA]||[]).join("・")||"無主星";
+      const spB = (db.ziweiDistrib[spouseIdxB]||[]).join("・")||"無主星";
+      return [
+        {label:"命宮主星", a:lsA, b:lsB, note:lsA===lsB?"同じ主星。性格の核が似ていて、深く理解し合える。":"異なる主星。互いにない資質を持ち、補い合える関係。"},
+        {label:"夫妻宮", a:spA, b:spB, note:"夫妻宮はパートナーシップの宮。ここの星が相手の命宮主星と重なると縁が深い。"},
+        {label:"命宮地支", a:BRANCHES[d.lifeIdx], b:BRANCHES[db.lifeIdx]},
+      ];
+    }
+    if (tabKey === "sanmei") {
+      const smA = calcJintai(d), smB = calcJintai(db);
+      return [
+        {label:"中心星", a:smA.stars.center, b:smB.stars.center, note:smA.stars.center===smB.stars.center?"同じ中心星。深く理解し合えるが、似すぎて衝突することも。":"異なる中心星。互いの視点の違いが刺激になる。"},
+        {label:"北（頭）", a:smA.stars.north, b:smB.stars.north},
+        {label:"天中殺", a:smA.tenchuType.name, b:smB.tenchuType.name, note:smA.tenchuType.name===smB.tenchuType.name?"同じ天中殺。人生の課題が似ていて、深く共感できる。":"異なる天中殺。互いの弱点が重ならず、補い合える。"},
+      ];
+    }
+    if (tabKey === "numerology") {
+      const nA = calcNumerology(d.y,d.m,d.d), nB = calcNumerology(db.y,db.m,db.d);
+      return [
+        {label:"ライフパス", a:`LP${nA.lifePath}`, b:`LP${nB.lifePath}`, note:nA.lifePath===nB.lifePath?"同じライフパス。人生のテーマが同じ。深く共感できる。":Math.abs(nA.lifePath-nB.lifePath)<=2?"近いライフパス。価値観が似ていて話が合いやすい。":"異なるライフパス。互いの人生観の違いが学びになる。"},
+        {label:"バースデー", a:`BD${nA.birthday}`, b:`BD${nB.birthday}`},
+      ];
+    }
+    if (tabKey === "kyusei") {
+      const kA = calcKyusei(d.y,d.m), kB = calcKyusei(db.y,db.m);
+      const hnA = KYUSEI_NAMES[kA.honmei], hnB = KYUSEI_NAMES[kB.honmei];
+      const kyNote = (() => {
+        const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+        const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+        const eA = hnA?.element, eB = hnB?.element;
+        if (!eA || !eB) return "";
+        if (eA===eB) return "同じ五行。気が合いやすく、一緒にいて楽。";
+        if (WUXING_CYCLE[eA]===eB) return `あなた（${eA}）が相手（${eB}）を育てる関係。`;
+        if (WUXING_CYCLE[eB]===eA) return `相手（${eB}）があなた（${eA}）を育てる関係。`;
+        if (WUXING_克[eA]===eB) return `あなた（${eA}）が相手（${eB}）を抑える。緊張感があるが成長を促す。`;
+        return `相手（${eB}）があなた（${eA}）を抑える。相手が強い立場になりやすい。`;
+      })();
+      return [
+        {label:"本命星", a:hnA?.name||"", b:hnB?.name||"", note:kyNote},
+        {label:"五行", a:hnA?.element||"", b:hnB?.element||""},
+      ];
+    }
+    if (tabKey === "maya") {
+      const mA = calcMaya(d.y,d.m,d.d), mB = calcMaya(db.y,db.m,db.d);
+      const sA = MAYA_SEALS[mA.seal], sB = MAYA_SEALS[mB.seal];
+      const kinDiff = Math.abs(mA.kin - mB.kin);
+      const mayaNote = kinDiff===0?"同じKIN。魂の双子。深い共鳴がある。":kinDiff===130?"対極のKIN。強烈に惹かれ合う。":kinDiff%20===0?"同じ紋章。本質が似ている。":kinDiff%13===0?"同じ音。リズムが合う。":"異なるKIN。互いの違いが学びになる。";
+      return [
+        {label:"太陽の紋章", a:sA?.n||"", b:sB?.n||"", note:mayaNote},
+        {label:"銀河の音", a:`音${mA.tone}`, b:`音${mB.tone}`},
+        {label:"KIN", a:`KIN${mA.kin}`, b:`KIN${mB.kin}`},
+      ];
+    }
+    if (tabKey === "shukuyo") {
+      const idxA = calcShukuyo(d.moonLon), idxB = calcShukuyo(db.moonLon);
+      const sA = SHUKUYO_27[idxA], sB = SHUKUYO_27[idxB];
+      const comp = shukuyoCompat(idxA, idxB);
+      return [
+        {label:"宿", a:sA?.name||"", b:sB?.name||"", note:`${comp.name}。${comp.desc}`},
+        {label:"相性", a:comp.name, b:"", span:true},
+      ];
+    }
+    if (tabKey === "jyotish") {
+      const ayaA = ayanamsha(d.jd), ayaB = ayanamsha(db.jd);
+      const mRA = JYOTISH_RASHIS[Math.floor(norm360(d.moonLon-ayaA)/30)];
+      const mRB = JYOTISH_RASHIS[Math.floor(norm360(db.moonLon-ayaB)/30)];
+      const sRA = JYOTISH_RASHIS[Math.floor(norm360(d.sunLon-ayaA)/30)];
+      const sRB = JYOTISH_RASHIS[Math.floor(norm360(db.sunLon-ayaB)/30)];
+      const moonDist2 = Math.abs(Math.floor(norm360(d.moonLon-ayaA)/30) - Math.floor(norm360(db.moonLon-ayaB)/30));
+      const moonNote2 = moonDist2===0?"同じ月のラーシ。感情のパターンが似ていて深く共感できる。":moonDist2===6?"正反対のラーシ。強烈に惹かれ合うが、感情のすれ違いも起きやすい。":[4,8].includes(moonDist2)?"トライン。自然な調和がある。一緒にいて楽。":[3,9].includes(moonDist2)?"スクエア。緊張感があるが、成長を促す。":"異なる感情パターン。理解し合うことで深まる関係。";
+      return [
+        {label:"太陽ラーシ", a:sRA?.jp||"", b:sRB?.jp||""},
+        {label:"月ラーシ", a:mRA?.jp||"", b:mRB?.jp||"", note:moonNote2},
+      ];
+    }
+    return [];
+  })();
+
+  // タブ別の総評（良い点・悪い点・注意点）
+  const summary = (() => {
+    if (tabKey === "western") {
+      const sunDistN = (() => { const d2=Math.abs(signOf(d.sunLon)-signOf(db.sunLon)); return d2>6?12-d2:d2; })();
+      const moonDistN = (() => { const d2=Math.abs(signOf(d.moonLon)-signOf(db.moonLon)); return d2>6?12-d2:d2; })();
+      const venA = d.planets.find(p=>p.n==="金星"), venB = db.planets.find(p=>p.n==="金星");
+      const vElA = SIGNS[signOf(venA.lon)].e, vElB = SIGNS[signOf(venB.lon)].e;
+      const marA = d.planets.find(p=>p.n==="火星"), marB = db.planets.find(p=>p.n==="火星");
+      const mElA = SIGNS[signOf(marA.lon)].e, mElB = SIGNS[signOf(marB.lon)].e;
+      const good = [], bad = [], careful = [];
+      if (sunDistN===0) good.push("価値観が同じで話が合う");
+      else if (sunDistN===4||sunDistN===8) good.push("太陽星座が調和的で自然と居心地が良い");
+      else if (sunDistN===6) { good.push("強烈に惹かれ合う"); bad.push("価値観が正反対でぶつかりやすい"); }
+      if (moonDistN===0||moonDistN===4||moonDistN===8) good.push("感情のリズムが合う");
+      if (moonDistN===6) { bad.push("感情パターンが正反対"); careful.push("感情のすれ違いを放置しない"); }
+      if (vElA===vElB) good.push("愛し方が似ていて気持ちが伝わりやすい");
+      if ((vElA==="火"&&vElB==="水")||(vElA==="水"&&vElB==="火")||(vElA==="風"&&vElB==="土")||(vElA==="土"&&vElB==="風")) { bad.push("愛情表現の違いが大きい"); careful.push("相手の愛情表現を受け取る練習を"); }
+      if (mElA!==mElB && !((mElA==="火"&&mElB==="風")||(mElA==="風"&&mElB==="火"))) careful.push("行動のテンポの違いに注意");
+      return {good,bad,careful};
+    }
+    if (tabKey === "shichu") {
+      const elA = STEM_EL[STEMS.indexOf(d.day.stem)], elB = STEM_EL[STEMS.indexOf(db.day.stem)];
+      const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+      const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+      const good = [], bad = [], careful = [];
+      if (elA===elB) { good.push("日主が同じ五行で価値観が近い"); careful.push("似すぎて刺激が少ない面も"); }
+      else if (WUXING_CYCLE[elA]===elB) { good.push("あなたが相手を育てる関係"); careful.push("尽くしすぎて消耗しないように"); }
+      else if (WUXING_CYCLE[elB]===elA) { good.push("相手があなたを育てる関係"); careful.push("感謝を忘れずに"); }
+      else if (WUXING_克[elA]===elB) { bad.push("あなたが相手を抑える関係"); careful.push("対等さを意識する"); }
+      else if (WUXING_克[elB]===elA) { bad.push("相手があなたを抑える関係"); careful.push("言いなりにならないこと"); }
+      return {good,bad,careful};
+    }
+    if (tabKey === "ziwei") {
+      const lsA = (d.ziweiDistrib[d.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0];
+      const lsB = (db.ziweiDistrib[db.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0];
+      return {
+        good: lsA===lsB ? ["命宮主星が同じで性格の核が似ている"] : ["互いにない資質を持ち補い合える"],
+        bad: [],
+        careful: lsA===lsB ? ["同じ弱点も共有しやすい"] : ["違いを理解する努力が必要"],
+      };
+    }
+    if (tabKey === "sanmei") {
+      const smA = calcJintai(d), smB = calcJintai(db);
+      const sameTenchu = smA.tenchuType.name === smB.tenchuType.name;
+      const sameCenter = smA.stars.center === smB.stars.center;
+      return {
+        good: [...(sameTenchu?["同じ天中殺で人生の課題が似ている"]:["異なる天中殺で互いの弱点を補える"]), ...(sameCenter?["中心星が同じで深く理解し合える"]:[])],
+        bad: sameCenter ? ["似すぎて衝突することも"] : [],
+        careful: ["天中殺の時期（寅卯/辰巳など該当期）は大きな決断を避ける"],
+      };
+    }
+    if (tabKey === "numerology") {
+      const nA = calcNumerology(d.y,d.m,d.d), nB = calcNumerology(db.y,db.m,db.d);
+      const diff = Math.abs(nA.lifePath - nB.lifePath);
+      return {
+        good: diff===0?["ライフパスが同じで人生観が共通"]:diff<=2?["ライフパスが近く価値観が合う"]:["異なるライフパスで互いに新しい視点をもらえる"],
+        bad: diff>=5?["価値観の違いが大きい"]:[],
+        careful: diff===0?["似すぎて成長が止まらないように"]:diff>=5?["相手の価値観を尊重する姿勢が大切"]:[],
+      };
+    }
+    if (tabKey === "kyusei") {
+      const kA = calcKyusei(d.y,d.m), kB = calcKyusei(db.y,db.m);
+      const hnA = KYUSEI_NAMES[kA.honmei], hnB = KYUSEI_NAMES[kB.honmei];
+      const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+      const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+      const eA = hnA?.element, eB = hnB?.element;
+      if (!eA||!eB) return {good:[],bad:[],careful:[]};
+      if (eA===eB) return {good:["同じ五行で気が合う"], bad:[], careful:["似すぎて成長の刺激が少ない"]};
+      if (WUXING_CYCLE[eA]===eB) return {good:["あなたが相手を育てる関係"], bad:[], careful:["消耗に注意"]};
+      if (WUXING_CYCLE[eB]===eA) return {good:["相手があなたを育てる関係"], bad:[], careful:["感謝を忘れずに"]};
+      if (WUXING_克[eA]===eB) return {good:["緊張感が成長を促す"], bad:["ぶつかり合う関係"], careful:["対等さを意識"]};
+      return {good:["緊張感が成長を促す"], bad:["相手が強い立場になりやすい"], careful:["言いなりにならない"]};
+    }
+    if (tabKey === "maya") {
+      const mA = calcMaya(d.y,d.m,d.d), mB = calcMaya(db.y,db.m,db.d);
+      const kinDiff = Math.abs(mA.kin - mB.kin);
+      if (kinDiff===0) return {good:["同じKIN。魂の双子"], bad:[], careful:["同じ弱点を共有する"]};
+      if (kinDiff===130) return {good:["対極のKIN。強烈に惹かれ合う"], bad:["価値観が正反対"], careful:["距離感を大切に"]};
+      if (kinDiff%20===0) return {good:["同じ紋章で本質が似ている"], bad:[], careful:[]};
+      if (kinDiff%13===0) return {good:["同じ音でリズムが合う"], bad:[], careful:[]};
+      return {good:["互いの違いが学びになる"], bad:[], careful:["違いを理解する時間が必要"]};
+    }
+    if (tabKey === "shukuyo") {
+      const idxA = calcShukuyo(d.moonLon), idxB = calcShukuyo(db.moonLon);
+      const comp = shukuyoCompat(idxA, idxB);
+      const GOOD_TYPES = {"栄":"発展と繁栄の関係","親":"親しみやすく安心感がある","友":"穏やかで居心地が良い","命":"深い縁で繋がっている"};
+      const BAD_TYPES = {"壊":"感情が揺れやすい","衰":"一方的になりやすい","危":"リスクを感じる","業":"試練の関係"};
+      const CAREFUL = {"安":"相手があなたに振り回される可能性","壊":"距離感を大切に","危":"近づきすぎると逆効果","業":"試練を通じて成長する関係","胎":"宿命的だが変化も激しい"};
+      return {
+        good: GOOD_TYPES[comp.type] ? [GOOD_TYPES[comp.type]] : [],
+        bad: BAD_TYPES[comp.type] ? [BAD_TYPES[comp.type]] : [],
+        careful: CAREFUL[comp.type] ? [CAREFUL[comp.type]] : [],
+      };
+    }
+    if (tabKey === "jyotish") {
+      const ayaA = ayanamsha(d.jd), ayaB = ayanamsha(db.jd);
+      const moonDist = Math.abs(Math.floor(norm360(d.moonLon-ayaA)/30) - Math.floor(norm360(db.moonLon-ayaB)/30));
+      const dN = moonDist > 6 ? 12 - moonDist : moonDist;
+      if (dN===0) return {good:["月のラーシが同じ。感情で深く共感"], bad:[], careful:["似すぎて成長が止まらないように"]};
+      if (dN===4||dN===8) return {good:["トラインで自然な調和"], bad:[], careful:[]};
+      if (dN===6) return {good:["強烈に惹かれ合う"], bad:["感情のすれ違い"], careful:["価値観の違いを認める"]};
+      if (dN===3||dN===9) return {good:["スクエアで成長を促す"], bad:["緊張感がある"], careful:["感情のぶつかりに注意"]};
+      return {good:[], bad:[], careful:["違いを理解することが関係の鍵"]};
+    }
+    return {good:[],bad:[],careful:[]};
+  })();
+
+  const summaryHtml = (summary.good.length || summary.bad.length || summary.careful.length) ? `
+  <div style="background:#faf8f4; border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:12px;">
+    <div style="font-size:18px; color:var(--gold); font-weight:700; letter-spacing:1px; margin-bottom:10px;">${relLabel}における2人の相性</div>
+    ${summary.good.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#4a8c50; font-weight:700;">✅ 良い点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.good.join("・")}</span></div>` : ""}
+    ${summary.bad.length ? `<div style="margin-bottom:8px;"><span style="font-size:16px; color:#c04030; font-weight:700;">⚠️ 注意点：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.bad.join("・")}</span></div>` : ""}
+    ${summary.careful.length ? `<div><span style="font-size:16px; color:#c09040; font-weight:700;">💡 気をつけたいこと：</span><span style="font-size:16px; color:#4a4030; line-height:1.7;">${summary.careful.join("・")}</span></div>` : ""}
+  </div>` : "";
+
+  return `
+  ${summaryHtml}
+  <div style="background:linear-gradient(135deg,#fdf6e8,#f5f0e8); border:2px solid var(--gold); border-radius:8px; padding:16px; margin-bottom:20px;">
+    <div style="font-size:13px; color:var(--gold); font-weight:700; letter-spacing:2px; margin-bottom:12px;">${relLabel} 相性比較</div>
+    <table style="width:100%; border-collapse:collapse; font-size:15px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="padding:6px 8px; text-align:left; color:var(--muted); font-weight:normal; width:28%;"></th>
+          <th style="padding:6px 8px; text-align:center; color:var(--gold); font-weight:700; width:36%;">あなた</th>
+          <th style="padding:6px 8px; text-align:center; color:#4a6090; font-weight:700; width:36%;">お相手</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r,i) => r.span
+          ? `<tr style="${i%2===0?'background:rgba(201,147,58,0.05)':''}">
+              <td style="padding:7px 8px; color:var(--muted);">${r.label}</td>
+              <td colspan="2" style="padding:7px 8px; text-align:center; color:var(--text); font-weight:700;">${r.a}</td>
+             </tr>`
+          : `<tr style="${i%2===0?'background:rgba(201,147,58,0.05)':''}">
+              <td style="padding:7px 8px; color:var(--muted); vertical-align:top;">${r.label}</td>
+              <td style="padding:7px 8px; text-align:center; color:var(--gold); vertical-align:top;">${r.a}</td>
+              <td style="padding:7px 8px; text-align:center; color:#4a6090; vertical-align:top;">${r.b}</td>
+             </tr>
+             ${r.note ? `<tr style="${i%2===0?'background:rgba(201,147,58,0.05)':''}">
+              <td colspan="3" style="padding:2px 8px 8px 8px; font-size:13px; color:#6a6050; font-style:italic;">→ ${r.note}</td>
+             </tr>` : ""}`
+        ).join("")}
+      </tbody>
+    </table>
+  </div>`;
+  } catch(e) { console.error("compatHeader error in", tabKey, ":", e.message, e.stack); return ""; }
+}
+
 function renderWest(){
   const d = currentData;
   const cx=242, cy=242, size=484;
@@ -1889,7 +2195,7 @@ function renderWest(){
   // アスペクト検出（SVG描画に使うため先に計算）
   const aspects = detectAspects(d.planets, d.ascLon);
 
-  let svg = `<svg width="100%" height="auto" viewBox="0 0 ${size} ${size}" style="font-family:'Georgia','Times New Roman',serif; display:block; max-width:${size}px;">`;
+  let svg = `<svg width="100%" viewBox="0 0 ${size} ${size}" style="font-family:'Georgia','Times New Roman',serif; display:block; max-width:${size}px;">`;
   svg += `<circle cx="${cx}" cy="${cy}" r="236" fill="#faf8f4"/>`;
   // サイン扇
   SIGNS.forEach((sg,i)=>{
@@ -2062,6 +2368,56 @@ function renderWest(){
 
   document.getElementById("tab0").innerHTML = `
     ${introCard("western")}
+    ${compatHeader("western")}
+    ${currentMode === "compat" && dataB ? (() => {
+      // 相性モード：お相手の紹介＋2人の相性
+      const sunSignB = SIGNS[signOf(dataB.sunLon)];
+      const moonSignB = SIGNS[signOf(dataB.moonLon)];
+      const ascSignB = dataB.ascLon !== null ? SIGNS[signOf(dataB.ascLon)] : null;
+      const sunDesc = {"牡羊座":"情熱的で行動が速い","牡牛座":"穏やかで五感が鋭い","双子座":"好奇心旺盛で話し上手","蟹座":"面倒見がよく家庭的","獅子座":"堂々として人を惹きつける","乙女座":"几帳面で気配り上手","天秤座":"バランス感覚に優れ社交的","蠍座":"洞察力が鋭く情が深い","射手座":"自由を愛し知的好奇心が強い","山羊座":"責任感が強く目標に向かって粘る","水瓶座":"独創的で常識にとらわれない","魚座":"共感力が高く想像力豊か"};
+      const moonDesc = {"牡羊座":"せっかちで白黒はっきりしたい","牡牛座":"のんびりマイペース","双子座":"あれこれ考えて落ち着かない","蟹座":"家族や身近な人を大切にする","獅子座":"褒められると元気が出る","乙女座":"細かいことが気になる","天秤座":"人の目が気になりやすい","蠍座":"感情が深く執着しやすい","射手座":"楽観的で細かいことは気にしない","山羊座":"自分に厳しく真面目","水瓶座":"感情より理屈で考えがち","魚座":"感受性が強く影響を受けやすい"};
+      const ascDesc = {"牡羊座":"元気で行動的な人","牡牛座":"落ち着いていて穏やかな人","双子座":"話しやすくて軽やかな人","蟹座":"優しくて親しみやすい人","獅子座":"華やかで存在感のある人","乙女座":"きちんとしていて知的な人","天秤座":"上品でバランスの取れた人","蠍座":"ミステリアスで深みのある人","射手座":"明るくてオープンな人","山羊座":"しっかりしていて頼れる人","水瓶座":"個性的で自由な雰囲気の人","魚座":"柔らかくて優しそうな人"};
+      let partnerDesc = (sunDesc[sunSignB.n]||"") + "人（太陽" + sunSignB.n + "）。";
+      partnerDesc += "家では" + (moonDesc[moonSignB.n]||"—") + "（月" + moonSignB.n + "）。";
+      if (ascSignB) partnerDesc += "初対面の印象は「" + (ascDesc[ascSignB.n]||"—") + "」（ASC" + ascSignB.n + "）。";
+      // 2人の相性
+      const sunDistN = (() => { const d2=Math.abs(signOf(d.sunLon)-signOf(dataB.sunLon)); return d2>6?12-d2:d2; })();
+      const moonDistN = (() => { const d2=Math.abs(signOf(d.moonLon)-signOf(dataB.moonLon)); return d2>6?12-d2:d2; })();
+      const venA = d.planets.find(p=>p.n==="金星"), venB = dataB.planets.find(p=>p.n==="金星");
+      const vElA = SIGNS[signOf(venA.lon)].e, vElB = SIGNS[signOf(venB.lon)].e;
+      const sunCompat = sunDistN===0?"同じ太陽星座。価値観が近く、話が合いやすい。":sunDistN===6?"正反対の太陽星座。強烈に惹かれ合うが、ぶつかることも。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。自然と居心地が良い。":"刺激的な組み合わせ。互いに成長させ合う。";
+      const moonCompat = moonDistN===0?"感情のリズムが同じ。一緒にいて疲れない。":moonDistN===6?"感情パターンが正反対。理解し合うのに時間がかかる。":moonDistN===4||moonDistN===8?"感情的に相性が良い。":"感情の波長が少し違う。";
+      const venCompat = vElA===vElB?"同じ元素。愛し方が似ていて、自然に気持ちが伝わる。":(vElA==="火"&&vElB==="風")||(vElA==="風"&&vElB==="火")?"火と風。情熱と知性が共鳴する。":(vElA==="土"&&vElB==="水")||(vElA==="水"&&vElB==="土")?"土と水。安定と感情が補い合う。":"愛し方が違う。相手の愛情表現を理解する努力が必要。";
+      // 太陽×月クロス
+      const sunMoonCross = Math.abs(signOf(d.sunLon) - signOf(dataB.moonLon));
+      const crossNote = sunMoonCross===0||sunMoonCross===12?"あなたの太陽とお相手の月が同じ星座。相手はあなたの本質を無意識に理解している。深い縁。":"";
+      return `
+      <div class="card hi" style="margin-bottom:16px;">
+        <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+        <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">💫 2人の西洋占星術相性</h3>
+        <div style="display:grid; gap:10px;">
+          <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+            <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">価値観（太陽同士）</div>
+            <div style="font-size:16px; line-height:1.7;">${sunCompat}</div>
+          </div>
+          <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+            <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">感情の相性（月同士）</div>
+            <div style="font-size:16px; line-height:1.7;">${moonCompat}</div>
+          </div>
+          <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+            <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">愛し方（金星の元素）</div>
+            <div style="font-size:16px; line-height:1.7;">${venCompat}</div>
+          </div>
+          ${crossNote ? `<div style="padding:10px 14px; background:#fdf6e8; border:1px solid var(--gold); border-radius:6px;">
+            <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">✨ 特別な縁</div>
+            <div style="font-size:16px; line-height:1.7;">${crossNote}</div>
+          </div>` : ""}
+        </div>
+      </div>`;
+    })() : `
     <div class="card hi" style="margin-bottom:20px;">
       <h3>☉ あなたの西洋占星術 — ひとことで言うと</h3>
       <table style="width:100%; border-collapse:collapse; font-size:15px; line-height:1.8;">
@@ -2260,34 +2616,8 @@ function renderWest(){
     </div>
 
     <div class="note">※ 太陽位置は±0.5°、月は±1°、外惑星は±3-8°程度の概算です。アスペクトのオーブ（許容誤差）は6°で判定しています。</div>
-
-    ${dataB ? (() => {
-      const sunSignA = SIGNS[signOf(d.sunLon)].n;
-      const moonSignA = SIGNS[signOf(d.moonLon)].n;
-      const sunSignB = SIGNS[signOf(dataB.sunLon)].n;
-      const moonSignB = SIGNS[signOf(dataB.moonLon)].n;
-      const sunDistSign = Math.abs(signOf(d.sunLon) - signOf(dataB.sunLon));
-      const moonDistSign = Math.abs(signOf(d.moonLon) - signOf(dataB.moonLon));
-      const sunMoonCross = Math.abs(signOf(d.sunLon) - signOf(dataB.moonLon));
-      let sunCompat = sunDistSign===0?"同じ太陽星座。価値観が近い。":sunDistSign===6?"正反対の太陽星座。強烈に惹かれ合う。":(sunDistSign%4===0)?"調和的な太陽星座の組み合わせ。":(sunDistSign%3===0)?"刺激的な太陽星座の組み合わせ。":"異なる太陽星座。互いの違いが学びになる。";
-      let crossCompat = sunMoonCross===0?"あなたの太陽とお相手の月が同じ星座＝深い縁。相手はあなたの本質を無意識に理解している。":"";
-      return `<div class="section-title">お相手との西洋占星術相性</div>
-      <div class="card hi">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px;">
-          <div>
-            <div style="font-size:14px; color:var(--muted); margin-bottom:4px;">あなた</div>
-            <div style="font-size:16px;">☉ ${sunSignA} ／ ☽ ${moonSignA}</div>
-          </div>
-          <div>
-            <div style="font-size:14px; color:var(--muted); margin-bottom:4px;">お相手</div>
-            <div style="font-size:16px;">☉ ${sunSignB} ／ ☽ ${moonSignB}</div>
-          </div>
-        </div>
-        <p><strong style="color:var(--gold);">太陽同士:</strong> ${sunCompat}</p>
-        ${crossCompat ? `<p style="margin-top:8px;"><strong style="color:var(--gold);">太陽×月:</strong> ${crossCompat}</p>` : ""}
-      </div>`;
-    })() : ""}
-  `;
+  `}
+`;
 }
 
 /* ── 西洋解釈ヘルパー ── */
@@ -2638,9 +2968,67 @@ function renderShichu(){
     </div>
   </div>`;
 
+  // 相性特化モード用コンテンツ
+  const shichuCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const dayStemB = dataB.day.stem;
+    const dayElB = STEM_EL[STEMS.indexOf(dayStemB)];
+    const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+    const isSame = dayEl === dayElB;
+    const isAgenB = WUXING_CYCLE[dayEl] === dayElB;
+    const isBgenA = WUXING_CYCLE[dayElB] === dayEl;
+    let compatType, compatDesc;
+    if (isSame) { compatType = "比和（同じ五行）"; compatDesc = `同じ${dayEl}同士。価値観が近く共感しやすい。ただし似すぎて刺激が少ない面も。競争関係になることもある。`; }
+    else if (isAgenB) { compatType = "相生（あなたが育てる）"; compatDesc = `あなた（${dayEl}）が相手（${dayElB}）を生む関係。面倒見が良くなるが、消耗に注意。相手はあなたから力をもらっている。`; }
+    else if (isBgenA) { compatType = "相生（相手が育てる）"; compatDesc = `相手（${dayElB}）があなた（${dayEl}）を生む関係。相手から力をもらえる。感謝を忘れずに。`; }
+    else { compatType = "ぶつかる関係（刺激の関係）"; compatDesc = `${dayEl}と${dayElB}はぶつかり合う関係。緊張感があるが、それが互いの成長を促す。ビジネスでは良い緊張感になることも。`; }
+    const brA = BRANCHES.indexOf(currentData.day.branch);
+    const brB = BRANCHES.indexOf(dataB.day.branch);
+    const SAN_HE = [[2,6,10],[5,9,1],[8,0,4],[11,3,7]];
+    const LIU_HE = {0:1,1:0,2:11,3:10,4:9,5:8,6:7,7:6,8:5,9:4,10:3,11:2};
+    const CHONG = {0:6,1:7,2:8,3:9,4:10,5:11,6:0,7:1,8:2,9:3,10:4,11:5};
+    let brCompat = "";
+    if (brA === brB) brCompat = "日支が同じ＝内面の波長が合う。";
+    else if (LIU_HE[brA] === brB) brCompat = "日支が六合＝深い縁。自然と惹かれ合う関係。結婚相性◎。";
+    else if (CHONG[brA] === brB) brCompat = "日支が冲（ちゅう）＝正反対の性質。刺激的だが衝突も多い。";
+    else if (SAN_HE.some(g => g.includes(brA) && g.includes(brB))) brCompat = "日支が三合＝協力関係。チームワークが良い。";
+    // お相手はこういう人（平易な説明）
+    const dmTheme = dayMasterTheme(dayStemB);
+    const sentences = dmTheme.split("。").filter(s=>s.trim());
+    const partnerDesc = sentences.length >= 2 ? sentences[1] + "。" + (sentences[2] ? sentences[2] + "。" : "") : sentences[0] + "。";
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">☯ 2人の四柱推命相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">日主の関係（${compatType}）</div>
+          <div style="font-size:16px; line-height:1.7;">${compatDesc}</div>
+        </div>
+        ${brCompat ? `<div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">日支の関係</div>
+          <div style="font-size:16px; line-height:1.7;">${brCompat}</div>
+        </div>` : ""}
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">五行バランスの補完</div>
+          <div style="font-size:16px; line-height:1.7;">${(() => {
+            const wxB = dataB.wx;
+            const maxElB = Object.keys(wxB).reduce((a,b)=>wxB[a]>wxB[b]?a:b);
+            const minElB = Object.keys(wxB).reduce((a,b)=>wxB[a]<wxB[b]?a:b);
+            if (minEl === maxElB || minElB === maxEl) return "互いの弱い五行を相手が補っている。バランスの良い組み合わせ。";
+            if (maxEl === maxElB) return "同じ五行が強い者同士。共感しやすいが、同じ弱点も共有する。";
+            return "五行バランスが異なる。互いにない視点を持っている。";
+          })()}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab1").innerHTML = `
     ${introCard("shichu")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("shichu")}
+    ${currentMode === "compat" && dataB ? shichuCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの四柱推命 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本質</strong>: ${dayMasterTheme(dayStem).split("。")[0]}（日主${dayStem}＝${dayEl}）。
       <br><strong style="color:var(--gold)">バランス</strong>: ${max>=4 ? `${maxEl}が${max}と多め（${({"木":"考えすぎ注意","火":"焦り注意","土":"頑固注意","金":"批判的になりすぎ注意","水":"堂々巡り注意"})[maxEl]}）` : `比較的バランスが取れている`}。${min===0 ? `${minEl}がゼロ（意識的に補うと◎）` : `${minEl}が少なめ`}。
@@ -2688,47 +3076,6 @@ function renderShichu(){
     <div class="section-title">日主 ${dayStem}（${dayEl}）</div>
     <div class="card hi"><p>${nisshuTheme}</p></div>
 
-    ${dataB ? (() => {
-      const dayStemB = dataB.day.stem;
-      const dayElB = STEM_EL[STEMS.indexOf(dayStemB)];
-      const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
-      const isSame = dayEl === dayElB;
-      const isAgenB = WUXING_CYCLE[dayEl] === dayElB;
-      const isBgenA = WUXING_CYCLE[dayElB] === dayEl;
-      let compatType, compatDesc;
-      if (isSame) { compatType = "比和（同じ五行）"; compatDesc = `同じ${dayEl}同士。価値観が近く共感しやすい。ただし似すぎて刺激が少ない面も。競争関係になることもある。`; }
-      else if (isAgenB) { compatType = "相生（あなたが育てる）"; compatDesc = `あなた（${dayEl}）が相手（${dayElB}）を生む関係。面倒見が良くなるが、消耗に注意。相手はあなたから力をもらっている。`; }
-      else if (isBgenA) { compatType = "相生（相手が育てる）"; compatDesc = `相手（${dayElB}）があなた（${dayEl}）を生む関係。相手から力をもらえる。感謝を忘れずに。`; }
-      else { compatType = "相剋（刺激の関係）"; compatDesc = `${dayEl}と${dayElB}は剋し合う関係。緊張感があるが、それが互いの成長を促す。ビジネスでは良い緊張感になることも。`; }
-      // 日支の関係
-      const brA = dataB ? BRANCHES.indexOf(currentData.day.branch) : -1;
-      const brB = dataB ? BRANCHES.indexOf(dataB.day.branch) : -1;
-      const SAN_HE = [[2,6,10],[5,9,1],[8,0,4],[11,3,7]];
-      const LIU_HE = {0:1,1:0,2:11,3:10,4:9,5:8,6:7,7:6,8:5,9:4,10:3,11:2};
-      const CHONG = {0:6,1:7,2:8,3:9,4:10,5:11,6:0,7:1,8:2,9:3,10:4,11:5};
-      let brCompat = "";
-      if (brA === brB) brCompat = "日支が同じ＝内面の波長が合う。";
-      else if (LIU_HE[brA] === brB) brCompat = "日支が六合＝深い縁。自然と惹かれ合う関係。結婚相性◎。";
-      else if (CHONG[brA] === brB) brCompat = "日支が冲（ちゅう）＝正反対の性質。刺激的だが衝突も多い。";
-      else if (SAN_HE.some(g => g.includes(brA) && g.includes(brB))) brCompat = "日支が三合＝協力関係。チームワークが良い。";
-      return `<div class="section-title">お相手との四柱推命相性</div>
-      <div class="card hi">
-        <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:12px;">
-          <div style="text-align:center;">
-            <div style="font-size:28px; color:var(--gold); font-weight:700;">${dayStem}</div>
-            <div style="font-size:14px; color:var(--muted);">${dayEl} ／ あなた</div>
-          </div>
-          <div style="font-size:18px; color:var(--muted);">⇄</div>
-          <div style="text-align:center;">
-            <div style="font-size:28px; color:var(--gold); font-weight:700;">${dayStemB}</div>
-            <div style="font-size:14px; color:var(--muted);">${dayElB} ／ お相手</div>
-          </div>
-        </div>
-        <p><strong style="color:var(--gold);">日主の関係: ${compatType}</strong><br>${compatDesc}</p>
-        ${brCompat ? `<p style="margin-top:8px;"><strong style="color:var(--gold);">日支の関係:</strong> ${brCompat}</p>` : ""}
-      </div>`;
-    })() : ""}
-
     ${phasesHtml}
     ${guardianHtml}
 
@@ -2737,6 +3084,7 @@ function renderShichu(){
     ${dayunHtml}
 
     <div class="note">※ 算命学の人体星図は月支・日支の蔵干本気を正式使用しています。十二大従星・天中殺は正式算出済みです。</div>
+    `}
   `;
 }
 
@@ -2747,10 +3095,10 @@ function tenGodMeaning(ten){
     "劫財":"自分と同じ五行・異陰陽。活発な競争心、財を巡る駆け引き。",
     "食神":"自分が生む五行・同陰陽。楽しみ・創造・衣食住の豊かさ。",
     "傷官":"自分が生む五行・異陰陽。才能と表現、ただし衝突もしやすい。",
-    "偏財":"自分が剋す五行・同陰陽。流動的な財、ビジネス・人脈。",
-    "正財":"自分が剋す五行・異陰陽。堅実な収入・配偶者・資産。",
-    "偏官":"自分を剋す五行・同陰陽（七殺）。権威・試練・変化。鋭いリーダーシップ。",
-    "正官":"自分を剋す五行・異陰陽。地位・名誉・規律。公的な立場。",
+    "偏財":"自分が抑える五行・同陰陽。流動的な財、ビジネス・人脈。",
+    "正財":"自分が抑える五行・異陰陽。堅実な収入・配偶者・資産。",
+    "偏官":"自分を抑える五行・同陰陽（七殺）。権威・試練・変化。鋭いリーダーシップ。",
+    "正官":"自分を抑える五行・異陰陽。地位・名誉・規律。公的な立場。",
     "偏印":"自分を生む五行・同陰陽（梟神）。独自の知性・霊性・研究心。",
     "正印":"自分を生む五行・異陰陽。知識・母性・受け継がれる恩恵。",
   };
@@ -2793,8 +3141,8 @@ function wuxingBalance(wx, dayEl){
   const cycle = ["木","火","土","金","水"];
   const dayIdx = cycle.indexOf(dayEl);
   const generates = cycle[(dayIdx+1)%5]; // 日主が生む=食傷
-  const wealth = cycle[(dayIdx+2)%5];    // 日主が剋す=財
-  const power = cycle[(dayIdx+3)%5];     // 日主を剋す=官
+  const wealth = cycle[(dayIdx+2)%5];    // 日主が抑える=財
+  const power = cycle[(dayIdx+3)%5];     // 日主を抑える=官
   const resource = cycle[(dayIdx+4)%5];  // 日主を生む=印
 
   const zeroMeaning = {
@@ -3090,7 +3438,7 @@ function calcGuardianGod(d) {
   const WUXING_KOKU = {木:"土",火:"金",土:"水",金:"木",水:"火"};
   let guardian, guardianDesc;
   if (strength === "身強") {
-    // 強すぎ→洩らす（食傷）か剋す五行が守護神
+    // 強すぎ→洩らす（食傷）か抑える五行が守護神
     guardian = WUXING_CYCLE[dayEl]; // 日主が生む五行＝洩らす
     guardianDesc = `${dayEl}の力が強いため、${guardian}（${dayEl}が生む五行）でエネルギーを発散させるのが吉。表現・創造・アウトプットが開運の鍵。`;
   } else if (strength === "身弱") {
@@ -3108,8 +3456,8 @@ function calcGuardianGod(d) {
     enemy = GEN_MAP[dayEl]; // 日主を生む五行＝さらに強める→忌
     enemyDesc = `${enemy}は日主をさらに強めるため忌神。${enemy}の年や大運では独善的になりやすい。`;
   } else if (strength === "身弱") {
-    enemy = WUXING_KOKU[dayEl]; // 日主を剋す五行→忌
-    enemyDesc = `${enemy}は日主を剋すため忌神。${enemy}の年や大運ではプレッシャーが増す。`;
+    enemy = WUXING_KOKU[dayEl]; // 日主を抑える五行→忌
+    enemyDesc = `${enemy}は日主を抑えるため忌神。${enemy}の年や大運ではプレッシャーが増す。`;
   }
 
   return { elPoints, supportPoints, totalPoints, ratio, strength, strengthDesc, guardian, guardianDesc, enemy, enemyDesc, hasMonthSupport };
@@ -3269,9 +3617,45 @@ function renderZiwei(){
   const prevDuZw = currentDu ? dayun[dayun.indexOf(currentDu)-1] : null;
   const nextDuZw = currentDu ? dayun[dayun.indexOf(currentDu)+1] : null;
 
+  // 相性特化モード用コンテンツ
+  const ziweiCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const lifeIdxB = ziweiLife(dataB.month.branch, dataB.hour.branch);
+    const lifeStarsB = starDistrib[lifeIdxB] || ["無主星"];
+    const lifeStarB = lifeStarsB[0] || "無主星";
+    const partnerDesc = (() => {
+      const expl = zwStarExpl(lifeStarB);
+      if (!expl) return lifeStarB + "が命宮の人。";
+      const sentences = expl.split("。").filter(s=>s.trim());
+      return sentences.slice(1).join("。") + "。（命宮主星: " + lifeStarB + "）";
+    })();
+    const spouseBranch = (lifeIdxB - 6 + 12) % 12;
+    const spouseStarsB = starDistrib[spouseBranch] || ["無主星"];
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">✦ 2人の紫微斗数相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">命宮主星の組み合わせ</div>
+          <div style="font-size:16px; line-height:1.7;">${
+            lifeStars[0] === lifeStarB ? "同じ主星。性格の核が似ていて共感しやすい。ただし同じ弱点も共有する。" :
+            "異なる主星（" + (lifeStars[0]||"無主星") + " × " + lifeStarB + "）。互いにない資質を持っている。補い合える関係。"
+          }</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">夫妻宮の星</div>
+          <div style="font-size:16px; line-height:1.7;">あなたの夫妻宮: ${(starDistrib[(lifeIdx-6+12)%12]||["無主星"]).join("・")}。お相手の夫妻宮: ${spouseStarsB.join("・")}。</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab2").innerHTML = `
     ${introCard("ziwei")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("ziwei")}
+    ${currentMode === "compat" && dataB ? ziweiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>✦ あなたの紫微斗数 — ひとことで言うと</h3>
       <p>${(() => {
         const lifeStar = lifeStars[0] || "";
@@ -3417,30 +3801,8 @@ function renderZiwei(){
     </div>
     ${dayunHtml}
 
-    ${dataB ? (() => {
-      const lifeIdxB = ziweiLife(dataB.month.branch, dataB.hour.branch);
-      const lifeStarsB = starDistrib[lifeIdxB] || ["無主星"];
-      return `<div class="section-title">お相手との紫微斗数相性</div>
-      <div class="card hi">
-        <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:12px;">
-          <div style="text-align:center;">
-            <div style="font-size:18px; color:var(--gold); font-weight:700;">${lifeStars.join("・")||"無主星"}</div>
-            <div style="font-size:13px; color:var(--muted);">あなたの命宮</div>
-          </div>
-          <div style="font-size:18px; color:var(--muted);">⇄</div>
-          <div style="text-align:center;">
-            <div style="font-size:18px; color:var(--gold); font-weight:700;">${lifeStarsB.join("・")||"無主星"}</div>
-            <div style="font-size:13px; color:var(--muted);">お相手の命宮</div>
-          </div>
-        </div>
-        <p><strong style="color:var(--gold);">命宮主星の組み合わせ:</strong> ${
-          lifeStars[0] === lifeStarsB[0] ? "同じ主星。性格の核が似ていて共感しやすい。ただし同じ弱点も共有する。" :
-          "異なる主星。互いにない資質を持っている。補い合える関係。"
-        }</p>
-      </div>`;
-    })() : ""}
-
     <div class="note">※ 紫微斗数の安星は五行局（納音）＋生日から14主星、生月・生時・生年干から副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）、生年支から厳選副星4星（禄存・天馬・紅鸞・天喜）を正式配置しています。その他の副星・流年四化は未実装です。厳密な占断は専門家にご依頼ください。</div>
+    `}
   `;
 }
 
@@ -3832,9 +4194,43 @@ function renderSanmei(){
   allStars.forEach(s => { starCount[s] = (starCount[s]||0) + 1; });
   const dominant = Object.entries(starCount).sort((a,b)=>b[1]-a[1])[0];
 
+  // 相性特化モード用コンテンツ
+  const sanmeiCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const smB = calcJintai(dataB);
+    const sameTenchu = sm.tenchuType.name === smB.tenchuType.name;
+    const centerExplB = (JUSSHU_EXPL[smB.stars.center] || "");
+    const centerSentences = centerExplB.split("。").filter(s=>s.trim());
+    const tenchuDesc = smB.tenchuType.desc.split("。").filter(s=>s.trim());
+    const partnerDesc = (centerSentences[1] || centerSentences[0] || "") + "。" + (tenchuDesc[0] || "") + "。（中心星: " + smB.stars.center + " / " + smB.tenchuType.name + "）";
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">☯ 2人の算命学相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">中心星の組み合わせ</div>
+          <div style="font-size:16px; line-height:1.7;">${
+            sm.stars.center === smB.stars.center ? "同じ中心星。深く理解し合えるが、似すぎて衝突することも。" :
+            "異なる中心星（" + sm.stars.center + " × " + smB.stars.center + "）。互いにない視点を持っている。違いが刺激になる。"
+          }</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">天中殺の組み合わせ</div>
+          <div style="font-size:16px; line-height:1.7;">${
+            sameTenchu ? "同じ" + sm.tenchuType.name + "。人生の「枠が外れる領域」が同じ＝深い理解がある。" :
+            "あなた＝" + sm.tenchuType.name + "、お相手＝" + smB.tenchuType.name + "。異なる天中殺＝互いの弱点を補い合える関係。"
+          }</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab3").innerHTML = `
     ${introCard("sanmei")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("sanmei")}
+    ${currentMode === "compat" && dataB ? sanmeiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの算命学 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本質（日主${d.day.stem}＝${STEM_EL[STEMS.indexOf(d.day.stem)]}）</strong>: ${dayMasterTheme(d.day.stem).split("。")[0]}。
       <br><strong style="color:var(--gold)">行動パターンの核（中心星＝${sm.stars.center}）</strong>: ${JUSSHU_EXPL[sm.stars.center].split("。")[0]}。
@@ -4071,31 +4467,11 @@ function renderSanmei(){
     ${dataB ? (() => {
       const smB = calcJintai(dataB);
       const sameTenchu = sm.tenchuType.name === smB.tenchuType.name;
-      return `<div class="section-title">お相手との算命学相性</div>
-      <div class="card hi">
-        <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:12px;">
-          <div style="text-align:center;">
-            <div style="font-size:18px; color:var(--gold); font-weight:700;">${sm.stars.center}</div>
-            <div style="font-size:13px; color:var(--muted);">あなたの中心星</div>
-          </div>
-          <div style="font-size:18px; color:var(--muted);">⇄</div>
-          <div style="text-align:center;">
-            <div style="font-size:18px; color:var(--gold); font-weight:700;">${smB.stars.center}</div>
-            <div style="font-size:13px; color:var(--muted);">お相手の中心星</div>
-          </div>
-        </div>
-        <p><strong style="color:var(--gold);">中心星の組み合わせ:</strong> ${
-          sm.stars.center === smB.stars.center ? "同じ中心星。深く理解し合えるが、似すぎて衝突することも。" :
-          "異なる中心星。互いにない視点を持っている。違いが刺激になる。"
-        }</p>
-        <p style="margin-top:8px;"><strong style="color:var(--gold);">天中殺の組み合わせ:</strong> ${
-          sameTenchu ? `同じ${sm.tenchuType.name}。人生の「枠が外れる領域」が同じ＝深い理解がある。同じ課題を共有できる仲間。` :
-          `あなた＝${sm.tenchuType.name}、お相手＝${smB.tenchuType.name}。異なる天中殺＝互いの弱点を補い合える関係。`
-        }</p>
-      </div>`;
+      return ``;
     })() : ""}
 
     <div class="note">※ 蔵干は実装済みです（各柱の地支に含まれる隠れた干を表示＋四柱推命の五行バランスに反映）。位相法（十二支同士の関係判定）・守護神法（日主の強弱判定＋命式のバランス調整）は未実装です。厳密な占断は専門家にご依頼ください。</div>
+    `}
   `;
 }
 
@@ -4165,9 +4541,41 @@ function renderNumerology(){
   const lp = NUMEROLOGY_MEANINGS[n.lifePath] || NUMEROLOGY_MEANINGS[reduceToSingle(n.lifePath)];
   const py = PERSONAL_YEAR_MEANINGS[n.personalYear] || "";
 
+  // 相性特化モード用コンテンツ
+  const numCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const nB = calcNumerology(dataB.y, dataB.m, dataB.d);
+    const lpB = NUMEROLOGY_MEANINGS[nB.lifePath] || NUMEROLOGY_MEANINGS[reduceToSingle(nB.lifePath)];
+    const partnerDesc = (() => {
+      if (!lpB) return "ライフパス" + nB.lifePath + "の人。";
+      const sentences = lpB.desc.split("。").filter(s=>s.trim());
+      return sentences.slice(0, 2).join("。") + "。（ライフパス" + nB.lifePath + "「" + lpB.title + "」）";
+    })();
+    const compatMap = {"1-1":"互いに独立心が強く、リーダー同士。尊重し合えれば最強のパートナー。","1-2":"1が引っ張り、2が支える。理想的な補完関係。","1-3":"エネルギッシュで楽しい関係。互いに刺激し合える。","1-4":"1の冒険心と4の堅実さ。バランスが取れる。","1-5":"自由を愛する者同士。刺激的だが安定感に欠ける。","1-6":"1の独立心と6の責任感。家庭を築くなら良い組み合わせ。","1-7":"知的な刺激がある関係。互いの内面を尊重できる。","1-8":"パワフルな組み合わせ。ビジネスパートナーとして最強。","1-9":"1が始め、9がまとめる。大きなビジョンを共有できる。","2-2":"繊細さを共有できる。穏やかだが決断力に欠けることも。","2-3":"2の繊細さと3の明るさ。互いに補い合える。","2-4":"安定志向同士。堅実な関係を築ける。","2-5":"正反対の性質。補完し合えれば成長できる。","2-6":"愛情深い組み合わせ。家庭的で温かい関係。","2-7":"内面を大切にする者同士。深い精神的な繋がり。","2-8":"2が支え、8が成果を出す。機能する関係。","2-9":"共感力の高い組み合わせ。","3-3":"楽しさ全開。創造的なエネルギーが溢れる。","3-4":"3の自由さと4の規律。バランスが取れる。","3-5":"冒険と楽しみの組み合わせ。刺激的。","3-6":"3の表現力と6の愛情。芸術的な家庭を築ける。","3-7":"表面的な3と深い7。互いに学ぶことが多い。","3-8":"3の創造性と8のビジネスセンス。成功する組み合わせ。","3-9":"創造的で人道的。大きなビジョンを共有できる。","4-4":"堅実で安定。信頼関係が強い。","4-5":"正反対。学び合えるがストレスも大きい。","4-6":"家庭的で堅実。最も安定した組み合わせの一つ。","4-7":"知的で堅実。研究のパートナーとして最適。","4-8":"ビジネスの最強コンビ。","4-9":"4の現実主義と9の理想主義。補完し合える。","5-5":"自由と冒険の極み。刺激的だが安定感ゼロ。","5-6":"5の自由と6の責任。バランスが鍵。","5-7":"知的好奇心を共有。互いの自由を尊重できる。","5-8":"ダイナミックな組み合わせ。大きなことを成し遂げられる。","5-9":"変化と完成。人道的な活動で力を合わせられる。","6-6":"愛情の塊。互いに尽くし合える。","6-7":"6の愛情と7の知性。深い関係を築ける。","6-8":"6が家庭を守り、8が外で稼ぐ。機能する組み合わせ。","6-9":"愛と奉仕。人のために動く者同士。","7-7":"精神世界の深い繋がり。","7-8":"7の知恵と8の実行力。互いに尊重できれば強力。","7-9":"精神的な深さを共有。哲学的な対話が尽きない。","8-8":"パワフルすぎる組み合わせ。成功するか激突するか。","8-9":"8の物質と9の精神。補完し合える。","9-9":"包容力の極み。互いに許し合える。","1-11":"1の独立心と11の直感力。ビジョンを共有できれば強力。","1-22":"大きなことを成し遂げられる組み合わせ。","2-11":"深い共感で繋がれる。繊細さが共鳴しすぎることも。","2-22":"2が22の壮大な夢を日常レベルで支える。","3-11":"創造的なインスピレーションが溢れる関係。","4-22":"壮大な構想を堅実に実現する最強の組み合わせ。","5-11":"刺激的で予測不能な関係。","6-11":"深い愛で結ばれる。","7-11":"精神世界の最深部で繋がれる。","8-11":"ビジネスと直感の融合。","9-11":"人道的な活動で力を合わせられる。","11-11":"直感と直感の共鳴。","11-22":"夢を形にする最高の組み合わせ。","22-22":"世界を変えるプロジェクトを共に。","22-33":"人類規模の奉仕を形にできる。","33-33":"無条件の愛が二重。"};
+    const key1 = Math.min(n.lifePath, nB.lifePath) + "-" + Math.max(n.lifePath, nB.lifePath);
+    const compatText = compatMap[key1] || "この組み合わせの詳細な相性は、AI鑑定で深く読み解けます。";
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">🔢 2人の数秘術相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">ライフパスの組み合わせ（${n.lifePath} × ${nB.lifePath}）</div>
+          <div style="font-size:16px; line-height:1.7;">${compatText}</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">バースデーナンバー</div>
+          <div style="font-size:16px; line-height:1.7;">あなた: ${n.birthday}　お相手: ${nB.birthday}。${n.birthday === nB.birthday ? "同じバースデーナンバー。才能の方向性が似ている。" : "異なる才能の方向性。互いの得意分野が違うので補い合える。"}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab4").innerHTML = `
     ${introCard("numerology")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("numerology")}
+    ${currentMode === "compat" && dataB ? numCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>🔢 あなたの数秘術 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">ライフパスナンバー ${n.lifePath}</strong>: ${lp.title}。${lp.desc.split("。")[0]}。
       <br><strong style="color:var(--gold)">今年（${n.currentYear}年）</strong>: パーソナルイヤー${n.personalYear}。${py}</p>
@@ -4219,7 +4627,7 @@ function renderNumerology(){
     <div class="section-title">人間関係の傾向</div>
     <div class="card"><p>${lp.relationship || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}「${lp.title}」の対人パターンから）</span></p></div>
 
-    ${dataB ? (() => {
+    ${dataB && currentMode !== "compat" ? (() => {
       const nB = calcNumerology(dataB.y, dataB.m, dataB.d);
       const lpB = NUMEROLOGY_MEANINGS[nB.lifePath] || NUMEROLOGY_MEANINGS[reduceToSingle(nB.lifePath)];
       const compatMap = {
@@ -4344,6 +4752,7 @@ function renderNumerology(){
     })()}
 
     <div class="note">※ 数秘術はピタゴラス式（モダン数秘術）に基づく簡略版です。姓名数（Expression Number）等は名前の入力が必要なため未実装です。</div>
+    `}
   `;
 }
 
@@ -4421,9 +4830,44 @@ function renderKyusei(){
   const kaizaNum = KAIZA_ORDER[kaizaIdx];
   const kaiza = KAIZA_NAMES[kaizaNum];
 
+  // 相性特化モード用コンテンツ
+  const kyuseiCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const kB = calcKyusei(dataB.y, dataB.m);
+    const honmeiB = KYUSEI_NAMES[kB.honmei];
+    const elA = honmei.element;
+    const elB = honmeiB.element;
+    const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+    const isAgenB = WUXING_CYCLE[elA] === elB;
+    const isBgenA = WUXING_CYCLE[elB] === elA;
+    const isSame = elA === elB;
+    let compatType, compatDesc;
+    if (isSame) { compatType = "比和（同じ気）"; compatDesc = "同じ五行同士。共感しやすく、価値観が近い。ただし似すぎて成長の刺激が少ない面も。"; }
+    else if (isAgenB) { compatType = "相生（あなたが育てる）"; compatDesc = "あなた（" + elA + "）が相手（" + elB + "）を育てる関係。面倒見が良くなるが、消耗に注意。"; }
+    else if (isBgenA) { compatType = "相生（相手が育てる）"; compatDesc = "相手（" + elB + "）があなた（" + elA + "）を育てる関係。相手から力をもらえる。感謝を忘れずに。"; }
+    else { compatType = "ぶつかる関係（刺激の関係）"; compatDesc = "五行がぶつかり合う関係。緊張感があるが、それが互いの成長を促す。距離感が大切。"; }
+    const partnerDesc = (() => {
+      const sentences = honmeiB.desc.split("。").filter(s=>s.trim());
+      return sentences.slice(0, 2).join("。") + "。（" + honmeiB.name + "）";
+    })();
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">☯ 2人の九星気学相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">本命星の関係（${compatType}）</div>
+          <div style="font-size:16px; line-height:1.7;">${compatDesc}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab5").innerHTML = `
     ${introCard("kyusei")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("kyusei")}
+    ${currentMode === "compat" && dataB ? kyuseiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの九星気学 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本命星</strong>: ${honmei.name}。${honmei.desc.split("。")[0]}。
       <br><strong style="color:var(--gold)">月命星</strong>: ${getsu.name}。${getsu.desc.split("。")[0]}。
@@ -4483,7 +4927,7 @@ function renderKyusei(){
     <div class="section-title">人間関係の傾向</div>
     <div class="card"><p>${honmei.relationship || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の対人パターンから）</span></p></div>
 
-    ${dataB ? (() => {
+    ${dataB && currentMode !== "compat" ? (() => {
       const kB = calcKyusei(dataB.y, dataB.m);
       const honmeiB = KYUSEI_NAMES[kB.honmei];
       const elA = honmei.element;
@@ -4496,7 +4940,7 @@ function renderKyusei(){
       if (isSame) { compatType = "比和（同じ気）"; compatDesc = "同じ五行同士。共感しやすく、価値観が近い。ただし似すぎて成長の刺激が少ない面も。"; }
       else if (isAgenB) { compatType = "相生（あなたが育てる）"; compatDesc = `あなた（${elA}）が相手（${elB}）を育てる関係。面倒見が良くなるが、消耗に注意。`; }
       else if (isBgenA) { compatType = "相生（相手が育てる）"; compatDesc = `相手（${elB}）があなた（${elA}）を育てる関係。相手から力をもらえる。感謝を忘れずに。`; }
-      else { compatType = "相剋（刺激の関係）"; compatDesc = `五行が剋し合う関係。緊張感があるが、それが互いの成長を促す。距離感が大切。`; }
+      else { compatType = "ぶつかる関係（刺激の関係）"; compatDesc = `五行がぶつかり合う関係。緊張感があるが、それが互いの成長を促す。距離感が大切。`; }
       return `<div class="section-title">お相手との九星相性</div>
       <div class="card hi">
         <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:12px;">
@@ -4524,6 +4968,7 @@ function renderKyusei(){
     <div class="card"><p>${honmei.caution || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の裏面＝${honmei.element}の気が行きすぎた時に出る傾向）</span></p></div>
 
     <div class="note">※ 九星気学の正確な算出には立春（2月4日頃）を年の切り替えとします。本盤は簡略版のため、1-2月生まれの方は前年の星になる場合があります。方位の吉凶・日盤・傾斜法は未実装です。</div>
+    `}
   `;
 }
 
@@ -4827,9 +5272,49 @@ function renderMaya(){
   const antipodeSeal = MAYA_SEALS[m.antipodeSeal];
   const occultSeal = MAYA_SEALS[m.occultSeal];
 
+  // 相性特化モード用コンテンツ
+  const mayaCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const mB = calcMaya(dataB.y, dataB.m, dataB.d);
+    const sealB = MAYA_SEALS[mB.seal];
+    const isGuide = mB.seal === m.guideSeal;
+    const isAnalog = mB.seal === m.analogSeal;
+    const isAnti = mB.seal === m.antipodeSeal;
+    const isOccult = mB.seal === m.occultSeal;
+    const isSame = mB.seal === m.seal;
+    let relType = "特別な関係KINではない";
+    let relDesc = "紋章の直接的な関係はありませんが、音の組み合わせや色グループで共鳴する部分があるかもしれません。";
+    if (isSame) { relType = "同じ紋章"; relDesc = "同じ紋章を持つ魂の仲間。深い共感と理解がある。"; }
+    else if (isGuide) { relType = "ガイドKINの関係"; relDesc = "お相手はあなたの人生を導く存在。進むべき方向を照らしてくれる。"; }
+    else if (isAnalog) { relType = "類似KINの関係"; relDesc = "似た性質を持つ存在。一緒にいると居心地がよく、自然体でいられる。"; }
+    else if (isAnti) { relType = "反対KINの関係"; relDesc = "正反対の性質。刺激と学びを与え合い、成長を促す関係。"; }
+    else if (isOccult) { relType = "神秘KINの関係"; relDesc = "不思議な引力。理屈を超えた深い縁で、予想外の化学反応が起きる。"; }
+    const partnerDesc = (() => {
+      const sentences = sealB.desc.split("。").filter(s=>s.trim());
+      return sentences.slice(0, 2).join("。") + "。（" + sealB.n + "・音" + mB.tone + "）";
+    })();
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">🌀 2人のマヤ暦相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">紋章の関係（${relType}）</div>
+          <div style="font-size:16px; line-height:1.7;">${relDesc}</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">銀河の音</div>
+          <div style="font-size:16px; line-height:1.7;">あなた: 音${m.tone}　お相手: 音${mB.tone}。${Math.abs(m.tone - mB.tone) <= 2 ? "近い音同士。リズムが合いやすい。" : m.tone + mB.tone === 14 ? "合計14の補完関係。互いに足りないものを補い合う。" : "異なるリズム。互いの違いが新鮮さを生む。"}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab6").innerHTML = `
     ${introCard("maya")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("maya")}
+    ${currentMode === "compat" && dataB ? mayaCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>🌀 あなたのマヤ暦 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">KIN ${m.kin}</strong> — ${seal.n}・銀河の音${m.tone}。${seal.desc.split("。")[0]}。</p>
       ${(() => {
@@ -5138,7 +5623,7 @@ function renderMaya(){
       return html;
     })()}
 
-    ${dataB ? (() => {
+    ${dataB && currentMode !== "compat" ? (() => {
       const mB = calcMaya(dataB.y, dataB.m, dataB.d);
       const sealB = MAYA_SEALS[mB.seal];
       const isGuide = mB.seal === m.guideSeal;
@@ -5193,6 +5678,7 @@ function renderMaya(){
     }<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽の紋章「${seal.n}」の裏面＝強みが行きすぎた時に出る傾向）</span></p></div>
 
     <div class="note">※ マヤ暦（ツォルキン暦）の簡略版です。</div>
+    `}
   `;
 }
 
@@ -5282,9 +5768,39 @@ function renderShukuyo(){
   const idx = calcShukuyo(d.moonLon);
   const shuku = SHUKUYO_27[idx];
 
+  // 相性特化モード用コンテンツ
+  const shukuyoCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const idxB = calcShukuyo(dataB.moonLon);
+    const shukuB = SHUKUYO_27[idxB];
+    const compat = shukuyoCompat(idx, idxB);
+    const compatReverse = shukuyoCompat(idxB, idx);
+    const partnerDesc = (() => {
+      const sentences = shukuB.desc.split("。").filter(s=>s.trim());
+      return sentences.slice(0, 2).join("。") + "。（" + shukuB.n + "）";
+    })();
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:${compat.color};">☽ 2人の宿曜相性 — ${compat.name}</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">あなた → お相手（${compat.type}）</div>
+          <div style="font-size:16px; line-height:1.7;">${compat.desc}</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">お相手 → あなた（${compatReverse.type}）</div>
+          <div style="font-size:16px; line-height:1.7;">${compatReverse.desc}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab7").innerHTML = `
     ${introCard("shukuyo")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("shukuyo")}
+    ${currentMode === "compat" && dataB ? shukuyoCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☽ あなたの宿曜占星術 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">${shuku.n}（${shuku.k}）</strong>。${shuku.desc.split("。")[0]}。</p>
     </div>
@@ -5382,7 +5898,7 @@ function renderShukuyo(){
     }<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の属性「${shuku.element}」の対人パターンから）</span></p></div>
 
     <div class="section-title">相性について</div>
-    ${dataB ? (() => {
+    ${dataB && currentMode !== "compat" ? (() => {
       const idxB = calcShukuyo(dataB.moonLon);
       const shukuB = SHUKUYO_27[idxB];
       const compat = shukuyoCompat(idx, idxB);
@@ -5425,6 +5941,7 @@ function renderShukuyo(){
     <div class="card"><p>宿曜では月の位置が全てを決めるため、「感情」と「無意識の反応パターン」に最も強く影響します。ストレスを感じた時の反応パターンを自覚しておくと、人間関係のトラブルを未然に防げます。<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の裏面＝${shuku.element}の属性が行きすぎた時に出る傾向）</span></p></div>
 
     <div class="note">※ 宿曜占星術の簡易版です。相性占い（栄親・安壊・友衰・危成・命業胎）＋今日の宿曜運勢を実装済み。精密天文暦（Swiss Ephemeris）による月の位置計算を使用しています。</div>
+    `}
   `;
 }
 
@@ -5759,9 +6276,49 @@ function renderJyotish(){
     </div>`;
   }).join("");
 
+  // 相性特化モード用コンテンツ
+  const jyotishCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    const ayaB = ayanamsha(dataB.jd);
+    const moonSidB = norm360(dataB.moonLon - ayaB);
+    const moonRashiB = JYOTISH_RASHIS[Math.floor(moonSidB / 30)];
+    const sunSidB = norm360(dataB.sunLon - ayaB);
+    const sunRashiB = JYOTISH_RASHIS[Math.floor(sunSidB / 30)];
+    const dist = Math.abs(Math.floor(moonSidB/30) - Math.floor(norm360(d.moonLon - aya)/30));
+    let compat = "";
+    if (dist === 0) compat = "同じ月のラーシ。感情のパターンが似ていて、深く共感できる。";
+    else if (dist === 1 || dist === 11) compat = "隣り合うラーシ。似た感性を持ちつつ、微妙な違いが新鮮さを生む。";
+    else if (dist === 5 || dist === 7) compat = "トライン（120°）の関係。自然な調和がある。一緒にいて楽。";
+    else if (dist === 6) compat = "正反対のラーシ。強烈に惹かれ合うが、価値観の違いも大きい。補完関係。";
+    else if (dist === 3 || dist === 9) compat = "スクエア（90°）の関係。緊張感があるが、成長を促す。";
+    else compat = "異なる感情パターン。互いの違いを理解することが関係の鍵。";
+    const partnerDesc = (() => {
+      const desc = moonRashiB.desc || "";
+      const sentences = desc.split("。").filter(s=>s.trim());
+      return (sentences.slice(0, 2).join("。") || moonRashiB.jp) + "。（月のラーシ: " + moonRashiB.jp + "）";
+    })();
+    return `<div class="card hi" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px;">👤 お相手はこういう人</h3>
+      <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3 style="font-size:20px; margin-bottom:12px; color:var(--gold);">🙏 2人のインド占星術相性</h3>
+      <div style="display:grid; gap:10px;">
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">月のラーシの関係</div>
+          <div style="font-size:16px; line-height:1.7;">${compat}</div>
+        </div>
+        <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">太陽のラーシ</div>
+          <div style="font-size:16px; line-height:1.7;">あなた: ${sunRashi.jp}　お相手: ${sunRashiB.jp}。${sunRashi.jp === sunRashiB.jp ? "同じ太陽ラーシ。人生の方向性が似ている。" : "異なる太陽ラーシ。互いに違う視点を持っている。"}</div>
+        </div>
+      </div>
+    </div>`;
+  })() : "";
+
   document.getElementById("tab8").innerHTML = `
     ${introCard("jyotish")}
-    <div class="card hi" style="margin-bottom:20px;">
+    ${compatHeader("jyotish")}
+    ${currentMode === "compat" && dataB ? jyotishCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>🙏 あなたのインド占星術（ジョーティシュ）— ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">太陽</strong>: ${sunRashi.jp}（インド名: ${sunRashi.n}）— ${sunRashi.desc}
       <br><strong style="color:var(--gold)">月</strong>: ${moonRashi.jp}（インド名: ${moonRashi.n}）— ${moonRashi.desc}
@@ -5877,7 +6434,7 @@ function renderJyotish(){
       "感情の共有が関係の核。共感力が高く、相手の気持ちに敏感。"
     }<br><span style="color:var(--muted); font-size:14px;">（根拠：月のラーシ${moonRashi.jp}の支配星${moonRashi.lord}の対人パターンから）</span></p></div>
 
-    ${dataB ? (() => {
+    ${dataB && currentMode !== "compat" ? (() => {
       const ayaB = ayanamsha(dataB.jd);
       const moonSidB = norm360(dataB.moonLon - ayaB);
       const moonRashiB = JYOTISH_RASHIS[Math.floor(moonSidB / 30)];
@@ -6015,6 +6572,7 @@ function renderJyotish(){
     })()}
 
     <div class="note">※ インド占星術（ジョーティシュ）の簡易版です。精密天文暦（Swiss Ephemeris）による天体位置計算＋ラーフ・ケートゥ＋マハーダシャー＋アンタルダシャーを実装済み。ナヴァムシャ（分割図）、ヨーガ（惑星の組み合わせ）は未実装です。</div>
+    `}
   `;
 }
 
@@ -6170,15 +6728,15 @@ function renderConsult(){
   ];
 
   let html = `
-    <div class="section-title">総合鑑定</div>
-    <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+    <div class="section-title">${currentMode === "compat" && dataB ? "相性総合" : "総合鑑定"}</div>
+    ${currentMode === "compat" && dataB ? "" : `<div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
       ${cats.map(c => `<button onclick="setConsultCategory('${c.id}')" style="
         padding:10px 20px; border-radius:4px; font-family:inherit; font-size:15px; cursor:pointer; transition:all 0.2s;
         ${consultCategory === c.id
           ? 'background:var(--gold); color:#fff; border:1px solid var(--gold); font-weight:700;'
           : 'background:var(--surface); color:var(--muted); border:1px solid var(--border);'}
       ">${c.label}</button>`).join("")}
-    </div>
+    </div>`}
   `;
 
   // ════════════════════════════════════════
@@ -6394,8 +6952,8 @@ function renderConsult(){
       if (iA === iB) return {score:70, desc:"同じ五行（比和）。理解し合えるが刺激が少ない。"};
       if ((iA+1)%5 === iB) return {score:85, desc:`${dayElA}が${dayElB}を生む（相生）。自然に支え合える関係。`};
       if ((iB+1)%5 === iA) return {score:80, desc:`${dayElB}が${dayElA}を生む（相生）。相手があなたを支えてくれる。`};
-      if ((iA+2)%5 === iB) return {score:50, desc:`${dayElA}が${dayElB}を剋す（相剋）。あなたが主導権を握りやすい。緊張感がある。`};
-      return {score:50, desc:`${dayElB}が${dayElA}を剋す（相剋）。相手が強い立場になりやすい。対等さを意識して。`};
+      if ((iA+2)%5 === iB) return {score:50, desc:`${dayElA}が${dayElB}を抑える（ぶつかる関係）。あなたが主導権を握りやすい。緊張感がある。`};
+      return {score:50, desc:`${dayElB}が${dayElA}を抑える（ぶつかる関係）。相手が強い立場になりやすい。対等さを意識して。`};
     })();
     scores.push({name:"日主の五行", score: wxRel.score, weight:1.5});
 
@@ -6863,9 +7421,287 @@ function renderConsult(){
   } // end relations
 
   // ════════════════════════════════════════
-  // 総合カテゴリ
+  // 総合カテゴリ（相性モード時は相性総合に切り替え）
   // ════════════════════════════════════════
   if (consultCategory === "summary") {
+
+    // ── 相性モード時：相性総合を表示 ──
+    if (currentMode === "compat" && dataB) {
+      const db = dataB;
+      const sunSignA = SIGNS[signOf(d.sunLon)];
+      const sunSignB = SIGNS[signOf(db.sunLon)];
+      const moonSignA = SIGNS[signOf(d.moonLon)];
+      const moonSignB = SIGNS[signOf(db.moonLon)];
+      const venusA = d.planets.find(p=>p.n==="金星");
+      const venusB = db.planets.find(p=>p.n==="金星");
+      const marsA = d.planets.find(p=>p.n==="火星");
+      const marsB = db.planets.find(p=>p.n==="火星");
+
+      // 宿曜相性
+      const shukuIdxA = calcShukuyo(d.moonLon);
+      const shukuIdxB2 = calcShukuyo(db.moonLon);
+      const shukuA = SHUKUYO_27[shukuIdxA];
+      const shukuB2 = SHUKUYO_27[shukuIdxB2];
+      const shukuComp = shukuyoCompat(shukuIdxA, shukuIdxB2);
+      const shukuCompRev = shukuyoCompat(shukuIdxB2, shukuIdxA);
+
+      // 四柱推命相性
+      const dayElA = STEM_EL[STEMS.indexOf(d.day.stem)];
+      const dayElB2 = STEM_EL[STEMS.indexOf(db.day.stem)];
+      const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+      const WUXING_克 = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+      const isSameEl = dayElA === dayElB2;
+      const isAgenB2 = WUXING_CYCLE[dayElA] === dayElB2;
+      const isBgenA2 = WUXING_CYCLE[dayElB2] === dayElA;
+      const isAkillB = WUXING_克[dayElA] === dayElB2;
+      const isBkillA = WUXING_克[dayElB2] === dayElA;
+      const wxRelDesc = isSameEl ? `同じ${dayElA}同士。価値観が近く共感しやすい。` :
+        isAgenB2 ? `あなたの${dayElA}がお相手の${dayElB2}を生む（相生）。あなたが与える側。` :
+        isBgenA2 ? `お相手の${dayElB2}があなたの${dayElA}を生む（相生）。相手が与える側。` :
+        isAkillB ? `あなたの${dayElA}がお相手の${dayElB2}を抑える（ぶつかる関係）。あなたが強い立場になりやすい。` :
+        isBkillA ? `お相手の${dayElB2}があなたの${dayElA}を抑える（ぶつかる関係）。相手が強い立場になりやすい。` :
+        `${dayElA}と${dayElB2}の組み合わせ。`;
+
+      // 紫微斗数相性（命宮主星）
+      const lifeStarA = (d.ziweiDistrib[d.lifeIdx] || []).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0] || "無主星";
+      const lifeStarB2 = (db.ziweiDistrib[db.lifeIdx] || []).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0] || "無主星";
+
+      // 算命学相性（天中殺）
+      const smA = calcJintai(d);
+      const smB2 = calcJintai(db);
+      const tenchuA = smA.tenchuType.name;
+      const tenchuB2 = smB2.tenchuType.name;
+      const tenchuSame = tenchuA === tenchuB2;
+
+      // 数秘術相性
+      const nuA = calcNumerology(d.y, d.m, d.d);
+      const nuB2 = calcNumerology(db.y, db.m, db.d);
+      const lpA = nuA.lifePath, lpB = nuB2.lifePath;
+      const lpCompat = (() => {
+        const diff = Math.abs(lpA - lpB);
+        if (diff === 0) return {score:75, desc:`同じLP${lpA}。価値観が近い。`};
+        if ([1,2,3].includes(diff)) return {score:80, desc:`LP${lpA}とLP${lpB}は補い合う関係。`};
+        if (diff === 4 || diff === 5) return {score:60, desc:`LP${lpA}とLP${lpB}は刺激的な組み合わせ。`};
+        return {score:65, desc:`LP${lpA}とLP${lpB}の組み合わせ。`};
+      })();
+
+      // 九星気学相性
+      const kyA = calcKyusei(d.y, d.m);
+      const kyB2 = calcKyusei(db.y, db.m);
+      const kyNameA = KYUSEI_NAMES[kyA.honmei];
+      const kyNameB2 = KYUSEI_NAMES[kyB2.honmei];
+
+      // マヤ暦相性
+      const maA = calcMaya(d.y, d.m, d.d);
+      const maB2 = calcMaya(db.y, db.m, db.d);
+      const sealA = MAYA_SEALS[maA.seal];
+      const sealB2 = MAYA_SEALS[maB2.seal];
+      const kinDiff = Math.abs(maA.kin - maB2.kin);
+      const maCompat = kinDiff === 0 ? "同じKIN。魂の双子。" :
+        kinDiff === 130 ? "対極のKIN。強烈に惹かれ合う。" :
+        kinDiff % 20 === 0 ? "同じ紋章。本質が似ている。" :
+        kinDiff % 13 === 0 ? "同じ音。リズムが合う。" : "異なるKIN。互いの違いが学びになる。";
+
+      // 総合スコア計算
+      const sunDist = Math.abs(signOf(d.sunLon) - signOf(db.sunLon));
+      const sunDistN = sunDist > 6 ? 12 - sunDist : sunDist;
+      const sunScore = {0:75,1:50,2:80,3:55,4:90,5:45,6:65}[sunDistN] || 60;
+      const vElA2 = SIGNS[signOf(venusA.lon)].e, vElB2 = SIGNS[signOf(venusB.lon)].e;
+      const venusScore = vElA2===vElB2?80:((vElA2==="火"&&vElB2==="風")||(vElA2==="風"&&vElB2==="火")||(vElA2==="土"&&vElB2==="水")||(vElA2==="水"&&vElB2==="土"))?85:((vElA2==="火"&&vElB2==="水")||(vElA2==="水"&&vElB2==="火")||(vElA2==="風"&&vElB2==="土")||(vElA2==="土"&&vElB2==="風"))?40:55;
+      const wxScore = isSameEl?75:isAgenB2||isBgenA2?85:isAkillB||isBkillA?40:60;
+      const shukuScoreMap = {"命":70,"業":40,"胎":75,"栄":90,"親":85,"友":80,"衰":50,"安":85,"壊":35,"危":45,"成":75};
+      const shukuScore = shukuScoreMap[shukuComp.type] || 60;
+      const totalScore = Math.round((sunScore*2 + venusScore*2 + wxScore*1.5 + shukuScore*2 + lpCompat.score*1) / 8.5);
+      const scoreColor = totalScore >= 80 ? "#22c55e" : totalScore >= 65 ? "#c09040" : "#c04030";
+      const scoreLabel = totalScore >= 85 ? "非常に相性が良い" : totalScore >= 75 ? "相性が良い" : totalScore >= 65 ? "普通の相性" : totalScore >= 55 ? "やや難しい相性" : "難しい相性";
+
+      // 9占術テーブルの行データ
+      const compatRows = [
+        { name:"西洋占星術", key:`太陽${sunSignA.n}×${sunSignB.n}`, score: sunScore,
+          desc: `太陽同士の距離${sunDistN*30}°。${sunDistN===0?"同じ星座。価値観が近い。":sunDistN===6?"正反対の星座。強烈に惹かれ合う。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。":"刺激的な組み合わせ。"}` },
+        { name:"西洋占星術（金星）", key:`金星${SIGNS[signOf(venusA.lon)].n}×${SIGNS[signOf(venusB.lon)].n}`, score: venusScore,
+          desc: `金星の元素：${vElA2}×${vElB2}。${vElA2===vElB2?"同じ元素。愛し方が似ている。":(vElA2==="火"&&vElB2==="風")||(vElA2==="風"&&vElB2==="火")?"火と風。情熱と知性が共鳴する。":(vElA2==="土"&&vElB2==="水")||(vElA2==="水"&&vElB2==="土")?"土と水。安定と感情が補い合う。":"異なる元素。愛し方の違いが摩擦になることも。"}` },
+        { name:"四柱推命", key:`${d.day.stem}（${dayElA}）×${db.day.stem}（${dayElB2}）`, score: wxScore, desc: wxRelDesc },
+        { name:"紫微斗数", key:`命宮${lifeStarA}×${lifeStarB2}`, score: lifeStarA===lifeStarB2?75:70,
+          desc: lifeStarA===lifeStarB2?`同じ命宮主星。性格の核が似ている。`:`${lifeStarA}と${lifeStarB2}の組み合わせ。異なる資質が補い合う。` },
+        { name:"算命学（天中殺）", key:`${tenchuA}×${tenchuB2}`, score: tenchuSame?80:65,
+          desc: tenchuSame?`同じ天中殺。人生の課題が似ている。深く理解し合える。`:`異なる天中殺。互いの弱点が重ならない。補い合える関係。` },
+        { name:"数秘術", key:`LP${lpA}×LP${lpB}`, score: lpCompat.score, desc: lpCompat.desc },
+        { name:"九星気学", key:`${kyNameA?.name||""}×${kyNameB2?.name||""}`, score: kyA.honmei===kyB2.honmei?75:65,
+          desc: kyA.honmei===kyB2.honmei?`同じ本命星。性格が似ている。`:`異なる本命星。互いの個性が刺激になる。` },
+        { name:"マヤ暦", key:`${sealA?.n||""}×${sealB2?.n||""}`, score: kinDiff===0?90:kinDiff===130?85:kinDiff%20===0?80:65, desc: maCompat },
+        { name:"宿曜（最重要）", key:`${shukuA?.name||""}×${shukuB2?.name||""}`, score: shukuScore,
+          desc: `${shukuComp.name}。${shukuComp.desc}` },
+      ];
+
+      html += `
+      <div class="section-title">相性総合スコア</div>
+      <div class="card hi" style="text-align:center; margin-bottom:20px; padding:24px;">
+        <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">9占術の統合スコア</div>
+        <div style="font-size:56px; font-weight:700; color:${scoreColor}; line-height:1;">${totalScore}</div>
+        <div style="font-size:18px; color:${scoreColor}; margin:8px 0 16px;">${scoreLabel}</div>
+        ${(() => {
+          // スコアに応じた具体的な解説
+          const weakRows = compatRows.filter(r => r.score < 65);
+          const strongRows = compatRows.filter(r => r.score >= 80);
+          let challenge = "", advice = "";
+          if (totalScore >= 85) {
+            challenge = "大きな課題はありません。自然体でいられる関係です。";
+            advice = "相性の良さに甘えず、感謝を言葉にすることで関係がさらに深まります。";
+          } else if (totalScore >= 75) {
+            challenge = strongRows.length > 0 ? `${strongRows.map(r=>r.name.replace("（最重要）","")).join("・")}は相性が良いですが、${weakRows.length>0?weakRows.map(r=>r.name.replace("（最重要）","")).join("・")+"に課題があります":"全体的にバランスが取れています"}。` : "全体的にバランスの取れた相性です。";
+            advice = "互いの違いを「面白い」と思えるかどうかが鍵。違いを否定せず、学びとして受け取ることで関係が深まります。";
+          } else if (totalScore >= 65) {
+            challenge = weakRows.length > 0 ? `${weakRows.map(r=>r.name.replace("（最重要）","")).join("・")}の相性に課題があります。価値観や感情のリズムが異なる部分があり、すれ違いが起きやすい。` : "全体的に「普通」の相性で、良くも悪くもない関係です。";
+            advice = "意識的にコミュニケーションを取ることが大切。「言わなくても分かるだろう」は通用しない関係です。小さなすれ違いを放置しないこと。";
+          } else if (totalScore >= 55) {
+            challenge = weakRows.length > 0 ? `${weakRows.map(r=>r.name.replace("（最重要）","")).join("・")}で大きなギャップがあります。${weakRows.some(r=>r.name.includes("宿曜"))?"宿曜（月の相性）で「安壊」や「危成」の関係が出ており、強く惹かれ合う反面、感情が揺れやすい関係です。":"価値観や行動パターンの違いが大きく、理解し合うのに時間がかかります。"}` : "全体的に価値観の違いが大きい関係です。";
+            advice = "この関係を続けるには「違いを受け入れる覚悟」が必要です。相手を変えようとせず、自分が柔軟になること。距離感を大切にし、一人の時間も確保してください。";
+          } else {
+            challenge = "多くの占術で相性の課題が出ています。価値観・感情・行動パターンの違いが大きく、自然体でいるのが難しい関係です。";
+            advice = "この関係は「成長のための試練」と捉えてください。無理に合わせるのではなく、互いの違いを認めた上で「それでも一緒にいたいか」を自分に問うことが大切です。";
+          }
+          return `
+        <div style="text-align:left; margin-top:16px; padding:14px; background:#f8f6f0; border-radius:6px;">
+          <div style="font-size:14px; color:#6a6050; line-height:1.8; margin-bottom:8px;"><strong style="color:${scoreColor};">どういう関係か：</strong>${challenge}</div>
+          <div style="font-size:14px; color:#6a6050; line-height:1.8;"><strong style="color:var(--gold);">こうすればうまくいく：</strong>${advice}</div>
+        </div>`;
+        })()}
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:left; margin-top:16px;">
+          <div style="padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
+            <div style="font-size:13px; color:var(--muted);">あなた</div>
+            <div style="font-size:15px; color:var(--gold);">☉ ${sunSignA.n} ／ ${d.day.stem}（${dayElA}）</div>
+            <div style="font-size:14px; color:#6a6050;">${shukuA?.name||""}宿 ／ LP${lpA}</div>
+          </div>
+          <div style="padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
+            <div style="font-size:13px; color:var(--muted);">お相手</div>
+            <div style="font-size:15px; color:var(--gold);">☉ ${sunSignB.n} ／ ${db.day.stem}（${dayElB2}）</div>
+            <div style="font-size:14px; color:#6a6050;">${shukuB2?.name||""}宿 ／ LP${lpB}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">9占術の相性判定</div>
+      <div class="card" style="margin-bottom:16px; padding:0; overflow:hidden;">
+        ${compatRows.map((r,i) => {
+          const barColor = r.score >= 80 ? "#22c55e" : r.score >= 65 ? "#c09040" : "#c04030";
+          const isShukuyo = r.name.includes("宿曜");
+          return `<div style="padding:12px 16px; ${i>0?'border-top:1px solid var(--border)':''}; ${isShukuyo?'background:#fdf6e8;':''}">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+              <span style="font-size:14px; color:var(--gold); font-weight:700; min-width:120px;">${r.name}${isShukuyo?' ⭐':''}</span>
+              <span style="font-size:13px; color:var(--muted);">${r.key}</span>
+              <span style="margin-left:auto; font-size:16px; font-weight:700; color:${barColor};">${r.score}</span>
+            </div>
+            <div style="background:#f0ede6; border-radius:3px; height:6px; margin-bottom:6px;">
+              <div style="width:${r.score}%; height:100%; background:${barColor}; border-radius:3px; transition:width 0.5s;"></div>
+            </div>
+            <div style="font-size:14px; color:#4a4030; line-height:1.6;">${r.desc}</div>
+          </div>`;
+        }).join("")}
+      </div>
+
+      <div class="section-title">宿曜の詳細相性</div>
+      <div class="card hi" style="margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:16px;">
+          <div style="text-align:center; padding:12px; background:rgba(201,147,58,0.08); border-radius:6px;">
+            <div style="font-size:13px; color:var(--muted);">あなた</div>
+            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuA?.name||"—"}</div>
+            <div style="font-size:13px; color:#6a6050;">${shukuA?.k||""}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px; color:${shukuComp.color||"var(--gold)"}; font-weight:700;">${shukuComp.type}</div>
+            <div style="font-size:12px; color:var(--muted);">あなた→相手</div>
+          </div>
+          <div style="text-align:center; padding:12px; background:rgba(201,147,58,0.08); border-radius:6px;">
+            <div style="font-size:13px; color:var(--muted);">お相手</div>
+            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuB2?.name||"—"}</div>
+            <div style="font-size:13px; color:#6a6050;">${shukuB2?.k||""}</div>
+          </div>
+        </div>
+        <p style="font-size:16px; line-height:1.8; color:var(--text);">${shukuComp.desc}</p>
+        ${shukuComp.type !== shukuCompRev.type ? `
+        <div style="margin-top:12px; padding:10px 14px; background:#f5f2ec; border-radius:6px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">お相手から見たあなた：${shukuCompRev.name}</div>
+          <div style="font-size:14px; color:#4a4030;">${shukuCompRev.desc}</div>
+        </div>` : ""}
+      </div>
+
+      ${(() => {
+        const strongPoints = compatRows.filter(r => r.score >= 80).map(r => r.name.replace("（最重要）",""));
+        const weakPoints = compatRows.filter(r => r.score < 65).map(r => r.name.replace("（最重要）",""));
+        const isStrong = totalScore >= 75;
+        const shukuType = shukuComp.type;
+        const theirView = (() => {
+          const rev = shukuCompRev.type;
+          if (rev==="栄"||rev==="親") return "あなたに好意的で、一緒にいると居心地が良いと感じている可能性が高い。";
+          if (rev==="安") return "あなたに安心感を覚えている。ただし相手はあなたに振り回される面も感じているかもしれない。";
+          if (rev==="壊") return "あなたに強く惹かれているが、同時に不安定さも感じている。感情が揺れやすい関係。";
+          if (rev==="友") return "あなたを信頼できる存在として見ている。ただし恋愛感情に発展するには時間がかかるかも。";
+          if (rev==="衰") return "あなたに尽くしたいと感じている。相手はあなたのために動きやすい。";
+          if (rev==="危") return "あなたに刺激を感じている。リスクを感じながらも惹かれている状態。";
+          if (rev==="命") return "あなたに深い縁を感じている。魂レベルで繋がっている感覚がある。";
+          return "あなたに対して複雑な感情を持っている可能性がある。";
+        })();
+        const longevity = shukuType==="安"||shukuType==="壊"?"激しく惹かれ合うが感情の波が大きい。意識的に安定を作る努力が必要。":
+          totalScore>=80&&(shukuType==="栄"||shukuType==="親"||shukuType==="命")?"長続きしやすい関係。価値観が合い、一緒にいて自然体でいられる。":
+          totalScore>=70?"努力次第で長続きする関係。互いの違いを理解し合うことが鍵。":
+          "価値観の違いが大きい。深く理解し合うには時間と努力が必要。";
+        const moonDistN2 = (() => { const d2=Math.abs(signOf(d.moonLon)-signOf(db.moonLon)); return d2>6?12-d2:d2; })();
+        const conflictPoint = moonDistN2===6?"感情のリズムが正反対。「なぜそんな反応をするの？」と感じやすい。感情面での理解が最大の課題。":
+          moonDistN2===3||moonDistN2===9?"感情面で刺激し合う。良い時は最高だが、悪い時は激しくぶつかる。":
+          (WUXING_克[dayElA]===dayElB2||WUXING_克[dayElB2]===dayElA)?"行動パターンがぶつかり合う。どちらかが強い立場になりやすく、対等さを意識することが大切。":
+          "大きな衝突ポイントは少ない。小さなすれ違いを放置しないことが大切。";
+        return `
+      <div class="section-title">💕 恋愛（片思いの場合）</div>
+      <details open style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#fdf6e8;">
+        <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">相手はあなたをどう見ているか ▼</summary>
+        <div style="padding:4px 16px 16px;">
+          <div class="card hi" style="margin-top:8px;">
+            <p style="font-size:16px; line-height:1.9;">${theirView}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">脈ありサイン：</strong>${shukuType==="栄"||shukuType==="親"?"一緒にいる時間が自然と増える。あなたの話をよく聞いてくれる。":shukuType==="安"?"あなたに頼ってくる。困った時に連絡してくる。":shukuType==="命"?"目が合うことが多い。特別扱いされている感覚がある。":"連絡の返信が早い。あなたのことを気にかけてくれる言動がある。"}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">アプローチのヒント：</strong>${dayElA==="火"||dayElA==="木"?"積極的に動いてOK。ただし相手のペースも大切に。":dayElA==="水"||dayElA==="金"?"焦らず、じっくり信頼を積み上げる方が効果的。":"自然体で接することが最大の魅力になる。"}${shukuType==="壊"||shukuType==="危"?" 距離感を大切に。近づきすぎると逆効果になることも。":""}</p>
+          </div>
+        </div>
+      </details>
+
+      <div class="section-title">💑 恋愛（交際中・両思いの場合）</div>
+      <details open style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#fdf6e8;">
+        <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">この関係の強みと注意点 ▼</summary>
+        <div style="padding:4px 16px 16px;">
+          <div class="card hi" style="margin-top:8px;">
+            <p style="font-size:16px; line-height:1.9;"><strong style="color:var(--gold);">この関係の強み：</strong><br>${strongPoints.length>0?strongPoints.join("・")+"が特に相性が良い。":""}${isStrong?"総合的に相性が良く、自然体でいられる関係。":"違いを活かせれば補い合える関係。"}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">長続きするか：</strong> ${longevity}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">喧嘩になりやすいポイント：</strong> ${conflictPoint}</p>
+            ${weakPoints.length>0?`<p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">注意が必要な点：</strong> ${weakPoints.join("・")}の相性に課題がある。意識的に補い合うことが大切。</p>`:""}
+          </div>
+        </div>
+      </details>
+
+      <div class="section-title">🤝 仕事・友人の場合</div>
+      <details style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#f5f2ec;">
+        <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">信頼できるか・一緒にいて消耗するか ▼</summary>
+        <div style="padding:4px 16px 16px;">
+          <div class="card" style="margin-top:8px;">
+            <p style="font-size:16px; line-height:1.9;"><strong style="color:var(--gold);">信頼度：</strong>${tenchuSame?"同じ天中殺。人生の課題が似ていて、深く理解し合える信頼関係を築きやすい。":totalScore>=75?"相性が良く、信頼関係を築きやすい。":"価値観の違いがあるが、それが仕事では強みになることも。"}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">一緒にいると：</strong>${shukuType==="栄"||shukuType==="親"?"一緒にいると互いに活力が出る。プロジェクトを一緒に進めると成果が出やすい。":shukuType==="安"||shukuType==="壊"?"刺激的だが消耗することも。適度な距離感を保つことが大切。":shukuType==="友"?"穏やかで居心地の良い関係。長期的な協力関係に向いている。":"互いの強みを活かせれば良いチームになれる。"}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">ビジネス相性：</strong>${isAgenB2?"あなたが相手を育てる関係。メンター・リーダーとして機能しやすい。":isBgenA2?"相手があなたを育てる関係。相手から学ぶことが多い。":isSameEl?"同じ五行。同じ方向を向いて動きやすい。":"異なる五行。役割分担が明確になると最強のチームになれる。"}</p>
+          </div>
+        </div>
+      </details>`;
+      })()}
+
+      <div class="section-title">AIで深く読む</div>
+      <div class="card" style="margin-bottom:16px; text-align:center;">
+        <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">2人の命盤データをAIに渡すと、9占術を統合した詳細な相性鑑定文を生成できます。</p>
+        <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
+      </div>
+      `;
+      // 相性モードの場合はここで終了
+      document.getElementById("tab10").innerHTML = html;
+      return;
+    }
+
+    // ── 通常モード：命盤の核を表示 ──
     const lifeStar = (starDistrib[lifeIdx] || []).filter(s => ["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s));
     const lifeStarName = lifeStar[0] || "無主星";
     const sunSign = SIGNS[signOf(d.sunLon)];
@@ -7468,17 +8304,16 @@ function renderCrossRef(){
 
   // ダシャー情報
   const dashaCR = calcDasha(sidMoon, d.y);
-  let currentDashaCR = "";
-  for (const ds of dashaCR.dashas) {
-    if (age >= ds.startAge && age < ds.endAge) { currentDashaCR = `${ds.lord}期(${Math.floor(ds.startAge)}〜${Math.floor(ds.endAge)}歳)`; break; }
-  }
-
   // 日主
   const dayMaster = d.day.stem;
   const dayMasterEl = STEM_EL[STEMS.indexOf(dayMaster)];
 
   // 大運情報
   const age = new Date().getFullYear() - d.y;
+  let currentDashaCR = "";
+  for (const ds of dashaCR.dashas) {
+    if (age >= ds.startAge && age < ds.endAge) { currentDashaCR = `${ds.lord}期(${Math.floor(ds.startAge)}〜${Math.floor(ds.endAge)}歳)`; break; }
+  }
   const daiunList = calcDayun(d);
   let currentDaiun = "";
   if (daiunList && daiunList.length > 0) {
@@ -7576,7 +8411,7 @@ function renderCrossRef(){
     { label:"相性", icon:"🤝",
       items:[
         {art:"西洋", val:`シナストリー`, level:"◎"},
-        {art:"四柱", val:`干支の相生相剋`, level:"○"},
+        {art:"四柱", val:`干支の相生・相剋（ぶつかる）`, level:"○"},
         {art:"紫微", val:`—`, level:"○"},
         {art:"算命", val:`—`, level:"△"},
         {art:"数秘", val:`LP比較`, level:"○"},
