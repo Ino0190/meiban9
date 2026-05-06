@@ -554,7 +554,8 @@
         <div class="glyphs" id="h-glyphs"></div>
       </div>
       <div class="tabs">
-        <button class="active" onclick="setTab(0)">西洋占星術</button>
+        <button onclick="setTab(10)">総合鑑定</button>
+        <button onclick="setTab(0)">西洋占星術</button>
         <button onclick="setTab(1)">四柱推命</button>
         <button onclick="setTab(2)">紫微斗数</button>
         <button onclick="setTab(3)">算命学</button>
@@ -563,7 +564,6 @@
         <button onclick="setTab(6)">マヤ暦</button>
         <button onclick="setTab(7)">宿曜</button>
         <button onclick="setTab(8)">印度占星術</button>
-        <button onclick="setTab(10)">総合鑑定</button>
       </div>
       <div class="panel" id="tab0"></div>
       <div class="panel hide" id="tab1"></div>
@@ -1405,6 +1405,10 @@ function introCard(key){
 function renderAll(){
   document.getElementById("empty").style.display = "none";
   document.getElementById("result").style.display = "block";
+
+  // スマホ（768px以下）は総合鑑定タブ、PCは西洋占星術タブをデフォルトで開く
+  const defaultTab = window.innerWidth <= 768 ? 10 : 0;
+  setTab(defaultTab);
 
   const d = currentData;
   const sunSign = SIGNS[signOf(d.sunLon)];
@@ -7416,7 +7420,7 @@ function castIChing(){
 
 /* ── タブ切替 ── */
 function setTab(i){
-  const tabNums = [0,1,2,3,4,5,6,7,8,10]; // tab9 has no button (総合鑑定)
+  const tabNums = [10,0,1,2,3,4,5,6,7,8]; // 総合鑑定が先頭
   document.querySelectorAll(".tabs button").forEach((b,j)=>{
     b.classList.toggle("active", tabNums[j]===i);
   });
