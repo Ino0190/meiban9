@@ -1797,6 +1797,152 @@ ${(() => {
 `;
 }
 
+function buildCompatExportText(){
+  if (!currentData || !dataB) return buildExportText();
+  const d = currentData;
+  const db = dataB;
+
+  // Aさんの基本情報
+  const sunA = SIGNS[signOf(d.sunLon)].n;
+  const moonA = SIGNS[signOf(d.moonLon)].n;
+  const dayStemA = d.day.stem;
+  const dayElA = STEM_EL[STEMS.indexOf(dayStemA)];
+  const smA = calcJintai(d);
+  const nA = calcNumerology(d.y, d.m, d.d);
+  const kA = calcKyusei(d.y, d.m);
+  const mA = calcMaya(d.y, d.m, d.d);
+  const shukuIdxA = calcShukuyo(d.moonLon);
+  const shukuA = SHUKUYO_27[shukuIdxA];
+  const ayaA = ayanamsha(d.jd);
+  const moonRashiA = JYOTISH_RASHIS[Math.floor(norm360(d.moonLon - ayaA)/30)];
+  const lifeIdxA = d.lifeIdx;
+  const lifeStarsA = (d.ziweiDistrib||{})[lifeIdxA] || [];
+
+  // Bさんの基本情報
+  const sunB = SIGNS[signOf(db.sunLon)].n;
+  const moonB = SIGNS[signOf(db.moonLon)].n;
+  const dayStemB = db.day.stem;
+  const dayElB = STEM_EL[STEMS.indexOf(dayStemB)];
+  const smB = calcJintai(db);
+  const nB = calcNumerology(db.y, db.m, db.d);
+  const kB = calcKyusei(db.y, db.m);
+  const mB = calcMaya(db.y, db.m, db.d);
+  const shukuIdxB = calcShukuyo(db.moonLon);
+  const shukuB = SHUKUYO_27[shukuIdxB];
+  const ayaB = ayanamsha(db.jd);
+  const moonRashiB = JYOTISH_RASHIS[Math.floor(norm360(db.moonLon - ayaB)/30)];
+  const lifeIdxB = ziweiLife(db.month.branch, db.hour.branch);
+  const lifeStarsB = (db.ziweiDistrib||{})[lifeIdxB] || [];
+
+  // 相性判定
+  const shukuyoRel = shukuyoCompat(shukuIdxA, shukuIdxB);
+  const shukuyoRelRev = shukuyoCompat(shukuIdxB, shukuIdxA);
+  const WUXING_CYCLE = {木:"火",火:"土",土:"金",金:"水",水:"木"};
+  const wxRel = dayElA === dayElB ? "比和（同じ五行）" :
+    WUXING_CYCLE[dayElA] === dayElB ? "相生（Aが育てる）" :
+    WUXING_CYCLE[dayElB] === dayElA ? "相生（Bが育てる）" : "ぶつかる関係";
+  const numKey = Math.min(nA.lifePath, nB.lifePath) + "-" + Math.max(nA.lifePath, nB.lifePath);
+
+  return `以下は2人の九命盤データと相性判定結果です。このデータをもとに2人の相性を総合鑑定してください。
+
+━━━━━━━━━━━━━━━━━━━━
+【Aさん】基本情報
+━━━━━━━━━━━━━━━━━━━━
+生年月日: ${d.y}年${d.m}月${d.d}日
+出生時刻: ${d.tm==="known" ? d.h+":"+String(d.mi).padStart(2,"0") : "不明"}
+性別: ${{M:"男性",F:"女性",X:"回答なし"}[d.sex]}
+
+◆ 西洋占星術: 太陽${sunA} / 月${moonA}${d.ascLon!==null ? " / ASC"+SIGNS[signOf(d.ascLon)].n : ""}
+◆ 四柱推命: 日主${dayStemA}（${dayElA}）
+◆ 紫微斗数: 命宮主星 ${lifeStarsA.join("・")||"無主星"}
+◆ 算命学: 中心星${smA.stars.center} / ${smA.tenchuType.name}
+◆ 数秘術: ライフパス${nA.lifePath} / バースデー${nA.birthday}
+◆ 九星気学: ${KYUSEI_NAMES[kA.honmei].name}
+◆ マヤ暦: KIN${mA.kin} ${MAYA_SEALS[mA.seal].n}・音${mA.tone}
+◆ 宿曜: ${shukuA.n}（${shukuA.k}）
+◆ インド占星術: 月ラーシ${moonRashiA.jp}
+
+━━━━━━━━━━━━━━━━━━━━
+【Bさん】基本情報
+━━━━━━━━━━━━━━━━━━━━
+生年月日: ${db.y}年${db.m}月${db.d}日
+出生時刻: ${db.tm==="known" ? db.h+":"+String(db.mi).padStart(2,"0") : "不明"}
+性別: ${{M:"男性",F:"女性",X:"回答なし"}[db.sex]}
+
+◆ 西洋占星術: 太陽${sunB} / 月${moonB}${db.ascLon!==null ? " / ASC"+SIGNS[signOf(db.ascLon)].n : ""}
+◆ 四柱推命: 日主${dayStemB}（${dayElB}）
+◆ 紫微斗数: 命宮主星 ${lifeStarsB.join("・")||"無主星"}
+◆ 算命学: 中心星${smB.stars.center} / ${smB.tenchuType.name}
+◆ 数秘術: ライフパス${nB.lifePath} / バースデー${nB.birthday}
+◆ 九星気学: ${KYUSEI_NAMES[kB.honmei].name}
+◆ マヤ暦: KIN${mB.kin} ${MAYA_SEALS[mB.seal].n}・音${mB.tone}
+◆ 宿曜: ${shukuB.n}（${shukuB.k}）
+◆ インド占星術: 月ラーシ${moonRashiB.jp}
+
+━━━━━━━━━━━━━━━━━━━━
+【相性判定結果】9占術の比較
+━━━━━━━━━━━━━━━━━━━━
+◆ 西洋占星術
+  太陽: ${sunA} × ${sunB}
+  月: ${moonA} × ${moonB}
+  金星: ${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].n}（${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].e}）× ${SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].n}（${SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].e}）
+
+◆ 四柱推命
+  日主の関係: ${dayStemA}（${dayElA}）× ${dayStemB}（${dayElB}）= ${wxRel}
+
+◆ 紫微斗数
+  命宮主星: ${lifeStarsA.join("・")||"無主星"} × ${lifeStarsB.join("・")||"無主星"}
+
+◆ 算命学
+  中心星: ${smA.stars.center} × ${smB.stars.center}
+  天中殺: ${smA.tenchuType.name} × ${smB.tenchuType.name}（${smA.tenchuType.name===smB.tenchuType.name?"同じ":"異なる"}）
+
+◆ 数秘術
+  ライフパス: ${nA.lifePath} × ${nB.lifePath}
+
+◆ 九星気学
+  本命星: ${KYUSEI_NAMES[kA.honmei].name}（${KYUSEI_NAMES[kA.honmei].element}）× ${KYUSEI_NAMES[kB.honmei].name}（${KYUSEI_NAMES[kB.honmei].element}）
+
+◆ マヤ暦
+  紋章: ${MAYA_SEALS[mA.seal].n} × ${MAYA_SEALS[mB.seal].n}
+  音: ${mA.tone} × ${mB.tone}
+
+◆ 宿曜占星術（最重要）
+  ${shukuA.n} × ${shukuB.n}
+  A→B: ${shukuyoRel.name}（${shukuyoRel.type}）
+  B→A: ${shukuyoRelRev.name}（${shukuyoRelRev.type}）
+  判定: ${shukuyoRel.desc}
+
+◆ インド占星術
+  月ラーシ: ${moonRashiA.jp} × ${moonRashiB.jp}
+
+━━━━━━━━━━━━━━━━━━━━
+鑑定依頼
+━━━━━━━━━━━━━━━━━━━━
+上記の2人の九占術データと相性判定結果を統合して、以下の形式で相性鑑定をお願いします。
+各セクションは「読み物」として成立する文章で書いてください。
+占術間で矛盾する結果がある場合は、それぞれの占術の立場から議論し、統合的な解釈を示してください。
+
+1. 2人の関係の本質 — どういう組み合わせか
+   9占術の相性判定を統合して「要するにこの2人はこういう関係」を描写。
+   特に宿曜の関係（${shukuyoRel.name}）を重視しつつ、他の占術との整合性を議論。
+
+2. 恋愛の相性 — 惹かれ合うか、長続きするか
+   金星の元素、宿曜の関係、数秘の組み合わせ等から恋愛面を分析。
+   「惹かれ合う理由」と「衝突するポイント」の両面を具体的に。
+
+3. 仕事・友人としての相性 — 一緒に何かできるか
+   四柱推命の五行関係、算命学の中心星、九星の相生相剋から分析。
+
+4. この関係で気をつけること — 具体的な注意点
+   占術間で「危険信号」が出ている部分を率直に指摘。
+   「こうすればうまくいく」の具体的アドバイスも。
+
+5. 総合メッセージ — この2人への手紙
+   全体を通じて、この2人に最も伝えたいことを温かく、しかし正直に。
+`;
+}
+
 /* ── 惑星ハイライト連動 ── */
 function highlightPlanet(name, on){
   // SVG側 — 惑星
@@ -8739,7 +8885,7 @@ function goToTarot(){
 
 function exportForAI(){
   if (!currentData) return;
-  const text = buildExportText();
+  const text = (currentMode === "compat" && dataB) ? buildCompatExportText() : buildExportText();
 
   navigator.clipboard.writeText(text).then(() => {
     const msg = document.getElementById("export-msg");
