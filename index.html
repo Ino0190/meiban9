@@ -290,8 +290,8 @@
       padding:20px 16px;
     }
     .brand-title{ font-size:20px; margin-bottom:14px; }
-    .tabs{ flex-wrap:nowrap; overflow-x:auto; }
-    .tabs button{ padding:10px 12px; font-size:12px; }
+    .tabs{ flex-wrap:wrap; overflow-x:visible; position:sticky; top:0; z-index:10; }
+    .tabs button{ padding:8px 10px; font-size:12px; flex:0 0 auto; border-bottom:2px solid transparent; }
     .panel{ padding:16px 14px; }
     .section-title{ font-size:18px; margin:28px 0 12px; }
     .card p{ font-size:16px; }
@@ -309,7 +309,8 @@
     .palace{ min-height:60px; padding:8px; }
     .palace .pname{ font-size:14px; }
     .palace .star{ font-size:13px; }
-    .palace .palace-reading{ font-size:13px; }
+    .palace .palace-reading{ display:none; } /* スマホでは説明文を非表示 */
+    .palace .gz{ font-size:13px; }
 
     /* 算命学 人体星図 */
     .jintai{ grid-template-columns:1fr 1fr 1fr; max-width:100%; }
@@ -372,6 +373,9 @@
     .panel { padding: 12px 10px !important; }
     .card { padding: 12px !important; }
     .section-title { font-size: 16px !important; }
+    /* 紫微斗数：星のキーワードも非表示 */
+    .star-kw { display: none; }
+    .palace { min-height: 50px !important; padding: 6px !important; }
   }
 </style>
 </head>
