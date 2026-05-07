@@ -83,13 +83,22 @@
     header{ margin:-16px -12px 24px; padding:20px 16px 16px; }
     header h1{ font-size:20px; }
     .spread-layout{
-      grid-template-columns: repeat(2, 1fr);
+      display:grid;
+      grid-template-columns: 1fr 1fr;
       grid-template-rows: auto;
-      padding:16px 10px;
+      gap:12px 8px;
+      padding:16px 8px;
       max-width:100%;
       width:100%;
     }
-    .drawn-card{ width:100%; grid-template-columns:50px 1fr; gap:8px; }
+    .drawn-card{
+      width:100%;
+      grid-template-columns:46px 1fr;
+      gap:6px;
+    }
+    .drawn-card .face{ width:46px; }
+    .drawn-card .card-name{ font-size:13px; }
+    .drawn-card .pos-label{ font-size:11px; }
     .drawn-card.pos-1,
     .drawn-card.pos-2,
     .drawn-card.pos-3,
