@@ -99,20 +99,19 @@
     .drawn-card .face{ width:46px; }
     .drawn-card .card-name{ font-size:13px; }
     .drawn-card .pos-label{ font-size:11px; }
-    .drawn-card.pos-1,
-    .drawn-card.pos-2,
-    .drawn-card.pos-3,
-    .drawn-card.pos-4,
-    .drawn-card.pos-5,
-    .drawn-card.pos-6,
-    .drawn-card.pos-7,
-    .drawn-card.pos-8,
-    .drawn-card.pos-9,
-    .drawn-card.pos-10{
-      grid-column:auto; grid-row:auto; transform:none;
+    .spread-layout .drawn-card.pos-1,
+    .spread-layout .drawn-card.pos-2,
+    .spread-layout .drawn-card.pos-3,
+    .spread-layout .drawn-card.pos-4,
+    .spread-layout .drawn-card.pos-5,
+    .spread-layout .drawn-card.pos-6,
+    .spread-layout .drawn-card.pos-7,
+    .spread-layout .drawn-card.pos-8,
+    .spread-layout .drawn-card.pos-9,
+    .spread-layout .drawn-card.pos-10{
+      grid-column:auto !important; grid-row:auto !important; transform:none !important;
     }
-    .drawn-card.pos-2 { transform:none; }
-    .drawn-card.reversed .face img{ transform:rotate(180deg); }
+    .drawn-card.reversed .face img{ transform:rotate(180deg) !important; }
     .mini-row{ grid-template-columns:repeat(5, 1fr); }
     .tab-bar{ flex-wrap:wrap; }
     .tab-bar button{ flex:1 1 auto; font-size:13px; padding:8px 6px; }
