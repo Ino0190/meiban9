@@ -11,6 +11,7 @@
     --card-bg:#f5f2ec; --card-back:#e8e0d4;
   }
   *{box-sizing:border-box}
+  html, body{ overflow-x:hidden; }
   body{
     margin:0; background:var(--dark); color:var(--text);
     font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
@@ -85,8 +86,10 @@
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: auto;
       padding:16px 10px;
+      max-width:100%;
+      width:100%;
     }
-    .drawn-card{ width:100%; }
+    .drawn-card{ width:100%; grid-template-columns:50px 1fr; gap:8px; }
     .drawn-card.pos-1,
     .drawn-card.pos-2,
     .drawn-card.pos-3,
@@ -330,7 +333,7 @@
     <div class="small">DIVINATION</div>
     <h1>タ ロ ッ ト</h1>
     <div class="sub">あなたの悩みを聞く前に、カードは決まります。</div>
-    <div style="margin-top:12px"><a class="back-link" href="../index.html">← 三命盤に戻る</a></div>
+    <div style="margin-top:12px"><a class="back-link" href="../index.html">← 羅占盤に戻る</a></div>
     <div style="margin-top:14px;">
       <a href="result.html" style="display:inline-block; padding:12px 24px; border:1px solid var(--gold); color:var(--gold); text-decoration:none; border-radius:4px; font-size:16px; letter-spacing:2px;">📜 前回の結果を見る →</a>
     </div>
