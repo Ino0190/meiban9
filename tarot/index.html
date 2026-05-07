@@ -84,34 +84,29 @@
     header h1{ font-size:20px; }
     .spread-layout{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto;
-      gap:12px 8px;
-      padding:16px 8px;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(4, auto);
+      gap:4px 3px;
+      padding:10px 4px;
       max-width:100%;
       width:100%;
+      overflow-x:hidden;
     }
     .drawn-card{
       width:100%;
-      grid-template-columns:46px 1fr;
-      gap:6px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:2px;
     }
-    .drawn-card .face{ width:46px; }
-    .drawn-card .card-name{ font-size:13px; }
-    .drawn-card .pos-label{ font-size:11px; }
-    .spread-layout .drawn-card.pos-1,
-    .spread-layout .drawn-card.pos-2,
-    .spread-layout .drawn-card.pos-3,
-    .spread-layout .drawn-card.pos-4,
-    .spread-layout .drawn-card.pos-5,
-    .spread-layout .drawn-card.pos-6,
-    .spread-layout .drawn-card.pos-7,
-    .spread-layout .drawn-card.pos-8,
-    .spread-layout .drawn-card.pos-9,
-    .spread-layout .drawn-card.pos-10{
-      grid-column:auto !important; grid-row:auto !important; transform:none !important;
+    .drawn-card .face{ width:100%; max-width:56px; }
+    .drawn-card .info{ display:none; }
+    .drawn-card .reversed-mark{ font-size:7px; top:1px; right:1px; padding:0 2px; }
+    .spread-layout .drawn-card.pos-2{
+      transform:rotate(90deg) !important;
+      transform-origin:center;
     }
-    .drawn-card.reversed .face img{ transform:rotate(180deg) !important; }
+    .drawn-card.reversed .face img{ transform:rotate(180deg); }
     .mini-row{ grid-template-columns:repeat(5, 1fr); }
     .tab-bar{ flex-wrap:wrap; }
     .tab-bar button{ flex:1 1 auto; font-size:13px; padding:8px 6px; }
