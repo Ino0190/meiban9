@@ -401,8 +401,8 @@
   <div class="section" id="cardsStage">
     <div class="section-title">③ 引かれたカード</div>
     <div class="spread-layout" id="spreadLayout"></div>
-    <div class="tip" style="text-align:center; font-size:16px; color:var(--muted); margin-top:12px; line-height:1.8;">
-      10枚のカードが並びました。<br>
+    <div class="tip" style="text-align:center; font-size:16px; color:var(--muted); margin-top:12px; line-height:1.8;" id="cardsMessage">
+      カードが並びました。<br>
       このカードたちに向かって、あなたの問いを書いてください。
     </div>
   </div>
@@ -545,6 +545,10 @@ function drawAndReveal() {
     document.getElementById("cardsStage").style.display = "block";
     document.getElementById("questionStage").style.display = "block";
     renderCards();
+    // スプレッドの枚数に応じたメッセージ
+    const cardCount = currentReading.cards.length;
+    const countText = cardCount === 1 ? "1枚のカード" : cardCount + "枚のカードが並びました";
+    document.getElementById("cardsMessage").innerHTML = countText + "。<br>このカードたちに向かって、あなたの問いを書いてください。";
     document.getElementById("cardsStage").scrollIntoView({behavior:"smooth", block:"start"});
     // 悩み入力欄にフォーカス（少し遅らせてカードを見る時間を作る）
     setTimeout(() => document.getElementById("question").focus(), 1200);
