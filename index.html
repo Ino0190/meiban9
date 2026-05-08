@@ -483,9 +483,10 @@
 
   <main id="main">
     <div class="empty" id="empty" style="height:auto; padding:40px 32px;">
-      <div class="sym" style="font-size:0; line-height:0; margin-bottom:10px;"><img src="icons/MeibanIcon01.png" alt="羅占盤" style="width:168px; height:auto; opacity:.7;"></div>
+      <div class="sym" style="font-size:0; line-height:0; margin-bottom:-12px;"><img src="icons/MeibanIcon01.png" alt="羅占盤" style="width:168px; height:168px; opacity:.7; border-radius:50%; object-fit:cover;"></div>
       <div style="font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:8px; font-family:'Noto Serif JP',serif; font-weight:700;">羅 占 盤</div>
-      <div style="font-size:15px; color:var(--muted); margin-bottom:28px;">複数の占術を横断的に分析します。</div>
+      <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">ひとつの占術では見えない、あなたの全体像。<br>9つの占術が重なり合う場所に、人生の設計図が浮かび上がる。</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">東洋・西洋の占術を横断し、複数が一致して指し示すテーマを統合解釈。<br>AIと対話しながら、あなただけの傾向・才能・転換期を深く読み解きます。</div>
 
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
@@ -1793,7 +1794,7 @@ ${(() => {
 6. 総合メッセージ — この人への手紙
    全体を通じて、この人に最も伝えたいことを、温かく、しかし正直に。
 
-※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星を正式安星済み（副星・四化は未実装）。算命学・マヤ暦・宿曜・インド占星術は簡略版です。
+※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星＋四化（生年干・大限干・流年干）を実装済み。算命学は人体星図（十大主星＋十二大従星）＋天中殺を実装。マヤ暦・宿曜・インド占星術（ダシャー＋ナクシャトラ）も計算済みです。
 `;
 }
 
@@ -7692,6 +7693,153 @@ function renderConsult(){
           desc: `${shukuComp.name}。${shukuComp.desc}` },
       ];
 
+      // ── 2人のレーダーチャートを重ねて表示 ──
+      html += `
+      <div class="section-title">性格レーダー比較</div>
+      <div class="card" style="margin-bottom:20px;">
+        <p style="font-size:14px; color:#6a6050; margin-bottom:12px; line-height:1.7;">2人の性格傾向を重ねて表示。<span style="color:var(--gold);">■ あなた</span> / <span style="color:#3c648c;">■ お相手</span></p>
+      ${(() => {
+        // 8軸定義
+        const cAxes = [
+          {id:"action", label:"行動力"},
+          {id:"think", label:"思考力"},
+          {id:"social", label:"社交性"},
+          {id:"creative", label:"創造性"},
+          {id:"stable", label:"安定"},
+          {id:"intuition", label:"直感"},
+          {id:"leadership", label:"統率力"},
+          {id:"nurture", label:"共感力"},
+        ];
+
+        // 投票計算関数（フル版: 通常モードと同等のロジック）
+        function calcPersonVotes(pd, smData, nuData) {
+          const v = {}; cAxes.forEach(a => v[a.id] = 0);
+          const voted = {}; cAxes.forEach(a => voted[a.id] = []);
+          const av = (axis, voter) => { if (!voted[axis].includes(voter)) { voted[axis].push(voter); v[axis]+=1; } };
+
+          // 西洋占星術: 太陽
+          const sEl = SIGNS[signOf(pd.sunLon)].e;
+          if (sEl==="火"){av("leadership","西洋");av("action","西洋");} else if(sEl==="土"){av("stable","西洋");} else if(sEl==="風"){av("social","西洋");av("think","西洋");} else if(sEl==="水"){av("intuition","西洋");av("nurture","西洋");}
+          // 月
+          const mEl = SIGNS[signOf(pd.moonLon)].e;
+          if (mEl==="火"){av("action","西洋☽");} else if(mEl==="土"){av("think","西洋☽");} else if(mEl==="風"){av("social","西洋☽");} else if(mEl==="水"){av("intuition","西洋☽");}
+          // ASC
+          if (pd.ascLon!==null) { const aEl=SIGNS[signOf(pd.ascLon)].e; if(aEl==="水"){av("intuition","西洋ASC");av("nurture","西洋ASC");} else if(aEl==="火"){av("action","西洋ASC");} else if(aEl==="風"){av("social","西洋ASC");} else if(aEl==="土"){av("stable","西洋ASC");av("nurture","西洋ASC");} }
+          // 火星
+          const mars=pd.planets.find(p=>p.n==="火星"); if(mars){const me=SIGNS[signOf(mars.lon)].e; if(me==="火"){av("action","西洋♂");av("leadership","西洋♂");} else if(me==="風"){av("social","西洋♂");} else if(me==="土"){av("stable","西洋♂");} else if(me==="水"){av("intuition","西洋♂");}}
+          // 金星
+          const venus=pd.planets.find(p=>p.n==="金星"); if(venus){const ve=SIGNS[signOf(venus.lon)].e; if(ve==="風"){av("creative","西洋♀");av("social","西洋♀");} else if(ve==="火"){av("creative","西洋♀");} else if(ve==="水"){av("creative","西洋♀");av("intuition","西洋♀");} else if(ve==="土"){av("stable","西洋♀");}}
+          // 海王星合
+          const neptune=pd.planets.find(p=>p.n==="海王星");
+          if(neptune){const pp=pd.planets.filter(p=>["太陽","月","水星","金星","火星"].includes(p.n)); if(pp.some(p=>{const df=Math.abs(p.lon-neptune.lon);return(df>180?360-df:df)<=8;})) av("intuition","西洋♆合");}
+
+          // 四柱推命: 日主
+          const dEl = STEM_EL[STEMS.indexOf(pd.day.stem)];
+          if(dEl==="木"){av("creative","四柱");} else if(dEl==="火"){av("action","四柱");av("leadership","四柱");} else if(dEl==="土"){av("stable","四柱");av("nurture","四柱");} else if(dEl==="金"){av("think","四柱");av("leadership","四柱");} else if(dEl==="水"){av("think","四柱");av("intuition","四柱");}
+          // 十神
+          const tg = pd.pillars ? pd.pillars.map(p=>p.ten).filter(Boolean) : [];
+          if(tg.includes("偏官")||tg.includes("正官")) av("leadership","四柱官");
+          if(tg.includes("食神")||tg.includes("傷官")) av("creative","四柱食傷");
+          if(tg.includes("偏財")||tg.includes("正財")) av("action","四柱財");
+          // 五行水最大
+          if(pd.wx){const wxE=Object.entries(pd.wx);const mx=wxE.reduce((a,b)=>b[1]>a[1]?b:a,["",0]);if(mx[0]==="水"){av("intuition","四柱水");av("nurture","四柱水");} else if(mx[0]==="火"){av("action","四柱火");} else if(mx[0]==="木"){av("creative","四柱木");} else if(mx[0]==="金"){av("think","四柱金");}}
+
+          // 紫微斗数: 命宮主星
+          const lifeI=pd.lifeIdx; const ls=(pd.ziweiDistrib[lifeI]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
+          const zwM={"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
+          if(zwM[ls]) av(zwM[ls],"紫微");
+          if(ls==="武曲") av("action","紫微武");
+          // 官禄宮に紫微/武曲がある場合→仕事でリーダーシップを発揮する配置
+          const offIdx=(pd.lifeIdx-8+12)%12; const offStars=(pd.ziweiDistrib[offIdx]||[]);
+          if(offStars.includes("紫微")||offStars.includes("武曲")) av("leadership","紫微官禄");
+
+          // 算命学: 中央＋東＋南
+          if(smData){
+            const smM={"貫索星":"stable","石門星":"social","鳳閣星":"creative","調舒星":"intuition","禄存星":"action","司禄星":"stable","車騎星":"action","牽牛星":"leadership","龍高星":"think","玉堂星":"think"};
+            if(smM[smData.stars.center]) av(smM[smData.stars.center],"算命中");
+            // 石門星は人を束ねる力もある
+            if(smData.stars.center==="石門星") av("leadership","算命石門");
+            const smE={"車騎星":"action","牽牛星":"leadership","鳳閣星":"creative","調舒星":"creative","禄存星":"social","司禄星":"nurture","貫索星":"stable","石門星":"social","龍高星":"think","玉堂星":"think"};
+            if(smE[smData.stars.east]) av(smE[smData.stars.east],"算命東");
+            const smS={"車騎星":"leadership","牽牛星":"leadership","禄存星":"nurture","司禄星":"nurture","鳳閣星":"social","調舒星":"intuition","貫索星":"action","石門星":"social","龍高星":"creative","玉堂星":"nurture"};
+            if(smS[smData.stars.south]) av(smS[smData.stars.south],"算命南");
+          }
+
+          // 数秘術: LP＋BD
+          if(nuData){
+            const nuM={1:"leadership",2:"nurture",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"leadership",9:"intuition",11:"intuition",22:"leadership",33:"nurture"};
+            if(nuM[nuData.lifePath]) av(nuM[nuData.lifePath],"数秘LP");
+            if(nuData.lifePath===11) av("leadership","数秘LP11");
+            if(nuData.lifePath===33) av("intuition","数秘LP33");
+            const bdM={1:"leadership",2:"social",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"action",9:"intuition"};
+            if(bdM[nuData.birthday]) av(bdM[nuData.birthday],"数秘BD");
+          }
+
+          // 九星気学
+          const kyD=calcKyusei(pd.y, pd.m);
+          const kyM={1:"intuition",2:"nurture",3:"action",4:"social",5:"leadership",6:"leadership",7:"social",8:"stable",9:"creative"};
+          if(kyM[kyD.honmei]) av(kyM[kyD.honmei],"九星");
+
+          // マヤ暦
+          const maD=calcMaya(pd.y, pd.m, pd.d); const slD=MAYA_SEALS[maD.seal];
+          const mayM={"赤い竜":"nurture","白い風":"creative","青い夜":"think","黄色い種":"think","赤い蛇":"intuition","白い世界の橋渡し":"social","青い手":"nurture","黄色い星":"creative","赤い月":"intuition","白い犬":"nurture","青い猿":"creative","黄色い人":"think","赤い空歩く人":"social","白い魔法使い":"intuition","青い鷲":"think","黄色い戦士":"action","赤い地球":"intuition","白い鏡":"think","青い嵐":"action","黄色い太陽":"leadership"};
+          if(slD&&mayM[slD.n]) av(mayM[slD.n],"マヤ紋");
+          if(slD&&slD.n==="黄色い人") av("leadership","マヤ黄人");
+          const wsD=MAYA_SEALS[maD.ws]; if(wsD&&mayM[wsD.n]) av(mayM[wsD.n],"マヤWS");
+
+          // 宿曜
+          const shI=calcShukuyo(pd.moonLon);
+          const shVM=["action","leadership","think","social","creative","stable","intuition","nurture","action","leadership","social","creative","think","stable","intuition","nurture","action","leadership","think","social","creative","stable","intuition","nurture","action","think","social"];
+          av(shVM[shI]||"stable","宿曜");
+
+          // インド占星術
+          const jyA2=ayanamsha(pd.jd); const sM2=norm360(pd.moonLon-jyA2); const nI2=Math.floor(sM2/(360/27));
+          const nVM=["action","action","think","creative","think","intuition","nurture","nurture","intuition","leadership","social","stable","creative","creative","social","leadership","nurture","leadership","intuition","action","stable","think","action","intuition","think","nurture","nurture"];
+          av(nVM[nI2]||"stable","印度");
+
+          return v;
+        }
+
+        const votesA = calcPersonVotes(d, smA, nuA);
+        const votesB = calcPersonVotes(db, smB2, nuB2);
+        const maxV = Math.max(...cAxes.map(a=>Math.max(votesA[a.id],votesB[a.id])), 1);
+
+        // SVG描画
+        const cx=200, cy=200, r=110, n=8;
+        const angleStep = (2*Math.PI)/n;
+        const gp = (i,ratio) => { const ang=-Math.PI/2+i*angleStep; return [cx+r*ratio*Math.cos(ang), cy+r*ratio*Math.sin(ang)]; };
+
+        let svg = '';
+        // 背景
+        [0.25,0.5,0.75,1.0].forEach(ratio => { const pts=[]; for(let i=0;i<n;i++) pts.push(gp(i,ratio).join(',')); svg+='<polygon points="'+pts.join(' ')+'" fill="none" stroke="#e0d8cc" stroke-width="0.5"/>'; });
+        for(let i=0;i<n;i++){const[x,y]=gp(i,1); svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#e0d8cc" stroke-width="0.5"/>';}
+        // Aのポリゴン（ゴールド）
+        const ptsA = cAxes.map((a,i)=>gp(i, votesA[a.id]/maxV).join(',')).join(' ');
+        svg += '<polygon points="'+ptsA+'" fill="rgba(139,105,20,0.12)" stroke="var(--gold)" stroke-width="2"/>';
+        // Bのポリゴン（ブルー）
+        const ptsB = cAxes.map((a,i)=>gp(i, votesB[a.id]/maxV).join(',')).join(' ');
+        svg += '<polygon points="'+ptsB+'" fill="rgba(60,100,140,0.12)" stroke="#3c648c" stroke-width="2" stroke-dasharray="6,3"/>';
+        // ドット
+        cAxes.forEach((a,i)=>{const[x,y]=gp(i,votesA[a.id]/maxV); svg+='<circle cx="'+x+'" cy="'+y+'" r="4" fill="var(--gold)"/>';});
+        cAxes.forEach((a,i)=>{const[x,y]=gp(i,votesB[a.id]/maxV); svg+='<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="#3c648c"/>';});
+        // ラベル
+        cAxes.forEach((a,i)=>{const[x,y]=gp(i,1.25); const anchor=x<cx-10?"end":x>cx+10?"start":"middle"; svg+='<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-size="11" fill="#4a4030">'+a.label+'</text>';});
+
+        // 比較テーブル
+        let tbl = '<div style="margin-top:12px; font-size:14px;">';
+        cAxes.forEach(a => {
+          const diff = votesA[a.id] - votesB[a.id];
+          const who = diff > 0 ? 'あなたが強い' : diff < 0 ? 'お相手が強い' : '同じ';
+          const color = diff > 0 ? 'var(--gold)' : diff < 0 ? '#3c648c' : 'var(--muted)';
+          tbl += '<div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid #f0ede6;"><span style="width:70px; color:var(--muted);">'+a.label+'</span><span style="color:var(--gold); width:20px; text-align:center;">'+votesA[a.id]+'</span><span style="color:var(--muted);">vs</span><span style="color:#3c648c; width:20px; text-align:center;">'+votesB[a.id]+'</span><span style="font-size:12px; color:'+color+';">'+who+'</span></div>';
+        });
+        tbl += '</div>';
+
+        return '<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;"><div style="text-align:center;"><svg viewBox="0 0 400 400" style="width:100%; max-width:360px;">'+svg+'</svg></div><div>'+tbl+'</div></div>';
+      })()}
+      </div>
+      `;
+
       html += `
       <div class="section-title">相性総合スコア</div>
       <div class="card hi" style="text-align:center; margin-bottom:20px; padding:24px;">
@@ -7880,6 +8028,49 @@ function renderConsult(){
     const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
 
     html += `
+    <div class="card hi" style="margin-bottom:24px; padding:20px 24px; border:2px solid var(--gold);">
+      <div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:10px;">あなたを一言で言うと</div>
+      <p style="font-size:18px; line-height:1.9; color:var(--text); margin:0 0 12px;">
+        ${(() => {
+          // 性格の核を自動生成
+          const sunEl = sunSign.e;
+          const dayEl = STEM_EL[STEMS.indexOf(d.day.stem)];
+          const personality = [];
+          // 太陽星座の元素
+          if (sunEl === "火") personality.push("情熱と行動力を持ち");
+          else if (sunEl === "土") personality.push("安定感と現実感覚を持ち");
+          else if (sunEl === "風") personality.push("知性とコミュニケーション力を持ち");
+          else if (sunEl === "水") personality.push("共感力と直感を持ち");
+          // 日主の五行
+          if (dayEl === "土") personality.push("信頼される安定した土台の上で");
+          else if (dayEl === "木") personality.push("成長し続ける意志の力で");
+          else if (dayEl === "火") personality.push("周囲を照らす明るさで");
+          else if (dayEl === "金") personality.push("鋭い判断力と決断力で");
+          else if (dayEl === "水") personality.push("柔軟に形を変えながら");
+          // 命宮主星
+          const lifeStar = (d.ziweiDistrib||{})[d.lifeIdx];
+          const starAction = {"紫微":"人を率いる","天府":"実務を支える","武曲":"目標を形にする","廉貞":"情熱を注ぐ","天機":"知恵で道を切り拓く","天同":"人を和ませる","貪狼":"多方面に才能を発揮する","巨門":"言葉で人を動かす","天相":"人と人を繋ぐ","天梁":"知恵で人を導く","七殺":"独自の道を切り拓く","破軍":"ゼロから創り出す","太陽":"社会に光を放つ","太陰":"静かに深く影響を与える"};
+          const mainStar = lifeStar && lifeStar[0] ? lifeStar[0] : "";
+          personality.push((starAction[mainStar] || "独自の力を発揮する") + "人。");
+          return personality.join("");
+        })()}
+      </p>
+      <p style="font-size:16px; line-height:1.8; color:#6a6050; margin:0 0 8px;">
+        ${(() => {
+          // 今の時期
+          const shichuDayun = calcDayun(d);
+          const currentAge = getCurrentAge(d.y, d.m, d.d);
+          const currentDu = shichuDayun.find(du => currentAge >= du.startAge && currentAge < du.endAge);
+          const ten = currentDu ? tenGod(d.day.stem, currentDu.stem) : "";
+          const tenTheme = {"比肩":"自分の力で立つ","劫財":"競争の中で磨かれる","食神":"楽しみと創造の","傷官":"才能が溢れ出す","偏財":"チャンスが広がる","正財":"安定を築く","偏官":"試練を超えて成長する","正官":"地位と信頼を得る","偏印":"新しい学びの","正印":"知恵が深まる"};
+          const theme = tenTheme[ten] || "変化の";
+          const pyNum = nu.personalYear;
+          const pyShort = {1:"始まり",2:"人間関係を育てる",3:"表現する",4:"基盤を固める",5:"変化を受け入れる",6:"責任を果たす",7:"内省する",8:"収穫する",9:"手放す"};
+          return "今は「" + theme + "時期」。" + (pyShort[pyNum] ? pyShort[pyNum] + "年。" : "") + "焦らず、今できることを積み重ねて。";
+        })()}
+      </p>
+    </div>
+
     <div class="section-title">命盤の核</div>
     <div class="card hi" style="margin-bottom:16px;">
       <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;">
@@ -7925,9 +8116,393 @@ function renderConsult(){
       </p>
     </div>
 
+    <div class="section-title">9占術が一致するテーマ — 統合傾向レーダー</div>
+    <div class="card" style="margin-bottom:20px;">
+      <p style="font-size:14px; color:#6a6050; margin-bottom:16px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向は確実です。</p>
+      ${(() => {
+        // 8つの傾向軸を定義
+        const axes = [
+          {id:"action", label:"行動力・即応性", short:"行動力", desc:"すぐ動ける力"},
+          {id:"think", label:"思考の深さ・分析力", short:"思考・分析", desc:"じっくり考える力"},
+          {id:"social", label:"社交性・人脈力", short:"社交・人脈", desc:"人と繋がる力"},
+          {id:"creative", label:"創造性・表現力", short:"創造・表現", desc:"新しいものを生む力"},
+          {id:"stable", label:"安定志向・堅実さ", short:"安定・堅実", desc:"地に足をつける力"},
+          {id:"intuition", label:"直感・スピリチュアル", short:"直感・霊性", desc:"見えないものを感じる力"},
+          {id:"leadership", label:"リーダーシップ・統率", short:"統率力", desc:"人を率いる力"},
+          {id:"nurture", label:"共感・育成力", short:"共感・育成", desc:"人を支え育てる力"},
+        ];
+
+        // 各占術からの投票を計算（各占術は複数軸に投票可、ただし同じ軸に同じ占術は1票まで）
+        const votes = {};
+        axes.forEach(a => votes[a.id] = []);
+        const addVote = (axis, voter) => { if (!votes[axis].includes(voter)) votes[axis].push(voter); };
+
+        // ── 西洋占星術（太陽・月・ASC・火星・金星から多面的に投票）──
+        const sunEl = sunSign.e;
+        // 太陽: 外に見せる力
+        if (sunEl === "火") { addVote("leadership","西洋"); addVote("action","西洋"); }
+        else if (sunEl === "土") { addVote("stable","西洋"); }
+        else if (sunEl === "風") { addVote("social","西洋"); addVote("think","西洋"); }
+        else if (sunEl === "水") { addVote("intuition","西洋"); addVote("nurture","西洋"); }
+        // 月: 内面の力
+        const moonEl = moonSign.e;
+        if (moonEl === "火") { addVote("action","西洋☽"); }
+        else if (moonEl === "土") { addVote("think","西洋☽"); } // 土の月=分析的・実務的
+        else if (moonEl === "風") { addVote("social","西洋☽"); }
+        else if (moonEl === "水") { addVote("intuition","西洋☽"); }
+        // 火星: 行動パターン
+        const marsSign = SIGNS[signOf(d.planets.find(p=>p.n==="火星").lon)];
+        if (marsSign.e === "火") { addVote("action","西洋♂"); addVote("leadership","西洋♂"); }
+        else if (marsSign.e === "風") { addVote("social","西洋♂"); }
+        else if (marsSign.e === "土") { addVote("stable","西洋♂"); }
+        else if (marsSign.e === "水") { addVote("intuition","西洋♂"); }
+        // 金星: 価値観・創造性
+        const venusSign = SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)];
+        if (venusSign.e === "風") { addVote("creative","西洋♀"); addVote("social","西洋♀"); }
+        else if (venusSign.e === "火") { addVote("creative","西洋♀"); }
+        else if (venusSign.e === "水") { addVote("creative","西洋♀"); addVote("intuition","西洋♀"); }
+        else if (venusSign.e === "土") { addVote("stable","西洋♀"); }
+        // ASC: 直感的な星座なら投票
+        if (d.ascLon !== null) {
+          const ascEl = SIGNS[signOf(d.ascLon)].e;
+          if (ascEl === "水") { addVote("intuition","西洋ASC"); addVote("nurture","西洋ASC"); }
+          else if (ascEl === "火") addVote("action","西洋ASC");
+          else if (ascEl === "風") addVote("social","西洋ASC");
+          else if (ascEl === "土") { addVote("stable","西洋ASC"); addVote("nurture","西洋ASC"); }
+        }
+        // 海王星アスペクト: 海王星が個人天体と合なら直感に投票
+        const neptune = d.planets.find(p=>p.n==="海王星");
+        if (neptune) {
+          const personalPlanets = d.planets.filter(p=>["太陽","月","水星","金星","火星"].includes(p.n));
+          const hasNeptuneConj = personalPlanets.some(p => {
+            const diff = Math.abs(p.lon - neptune.lon);
+            const angle = diff > 180 ? 360 - diff : diff;
+            return angle <= 8;
+          });
+          if (hasNeptuneConj) addVote("intuition","西洋♆合");
+        }
+
+        // ── 四柱推命（日主＋十神構成から投票）──
+        if (dayMasterEl === "木") { addVote("creative","四柱"); }
+        else if (dayMasterEl === "火") { addVote("action","四柱"); addVote("leadership","四柱"); }
+        else if (dayMasterEl === "土") { addVote("stable","四柱"); addVote("nurture","四柱"); }
+        else if (dayMasterEl === "金") { addVote("think","四柱"); addVote("leadership","四柱"); }
+        else if (dayMasterEl === "水") { addVote("think","四柱"); addVote("intuition","四柱"); }
+        // 十神から追加投票（偏官=リーダーシップ、食神/傷官=創造性、財星=行動力）
+        const tenGods = d.pillars ? d.pillars.map(p=>p.ten).filter(Boolean) : [];
+        if (tenGods.includes("偏官") || tenGods.includes("正官")) addVote("leadership","四柱官");
+        if (tenGods.includes("食神") || tenGods.includes("傷官")) addVote("creative","四柱食傷");
+        if (tenGods.includes("偏財") || tenGods.includes("正財")) addVote("action","四柱財");
+        // 五行バランス: 最大の五行から追加投票
+        if (d.wx) {
+          const wxEntries = Object.entries(d.wx);
+          const maxWx = wxEntries.reduce((a,b) => b[1] > a[1] ? b : a, ["",0]);
+          if (maxWx[0] === "水") { addVote("intuition","四柱水"); addVote("nurture","四柱水"); }
+          else if (maxWx[0] === "火") addVote("action","四柱火");
+          else if (maxWx[0] === "木") addVote("creative","四柱木");
+          else if (maxWx[0] === "金") addVote("think","四柱金");
+        }
+
+        // ── 紫微斗数（命宮主星で投票）──
+        const zwVote = {"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
+        if (zwVote[lifeStarName]) addVote(zwVote[lifeStarName],"紫微");
+        // 武曲は行動力も
+        if (lifeStarName === "武曲") addVote("action","紫微武");
+        // 官禄宮に紫微/武曲がある場合→仕事でリーダーシップを発揮する配置
+        const officialIdx = (d.lifeIdx - 8 + 12) % 12;
+        const officialStars = (d.ziweiDistrib[officialIdx] || []);
+        if (officialStars.includes("紫微") || officialStars.includes("武曲")) addVote("leadership","紫微官禄");
+
+        // ── 算命学（中央星＋東西南北から投票）──
+        const smVote = {"貫索星":"stable","石門星":"social","鳳閣星":"creative","調舒星":"intuition","禄存星":"action","司禄星":"stable","車騎星":"action","牽牛星":"leadership","龍高星":"think","玉堂星":"think"};
+        if (smVote[sm.stars.center]) addVote(smVote[sm.stars.center],"算命中");
+        // 石門星は人を束ねる力もある
+        if (sm.stars.center === "石門星") addVote("leadership","算命石門");
+        // 東（社会での顔）
+        const smEastVote = {"車騎星":"action","牽牛星":"leadership","鳳閣星":"creative","調舒星":"creative","禄存星":"social","司禄星":"nurture","貫索星":"stable","石門星":"social","龍高星":"think","玉堂星":"think"};
+        if (smEastVote[sm.stars.east]) addVote(smEastVote[sm.stars.east],"算命東");
+        // 南（目下・部下への態度）
+        const smSouthVote = {"車騎星":"leadership","牽牛星":"leadership","禄存星":"nurture","司禄星":"nurture","鳳閣星":"social","調舒星":"intuition","貫索星":"action","石門星":"social","龍高星":"creative","玉堂星":"nurture"};
+        if (smSouthVote[sm.stars.south]) addVote(smSouthVote[sm.stars.south],"算命南");
+
+        // ── 数秘術（LP＋BD）──
+        const nuVote = {1:"leadership",2:"nurture",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"leadership",9:"intuition",11:"intuition",22:"leadership",33:"nurture"};
+        if (nuVote[nu.lifePath]) addVote(nuVote[nu.lifePath],"数秘LP");
+        if (nu.lifePath === 11) addVote("leadership","数秘LP11");
+        if (nu.lifePath === 33) addVote("intuition","数秘LP33");
+        // バースデーナンバーからも1票
+        const bdVote = {1:"leadership",2:"social",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"action",9:"intuition"};
+        if (bdVote[nu.birthday]) addVote(bdVote[nu.birthday],"数秘BD");
+
+        // ── 九星気学 ──
+        const ky = calcKyusei(d.y, d.m);
+        const kyVote = {1:"intuition",2:"nurture",3:"action",4:"social",5:"leadership",6:"leadership",7:"social",8:"stable",9:"creative"};
+        if (kyVote[ky.honmei]) addVote(kyVote[ky.honmei],"九星");
+
+        // ── マヤ暦（紋章＋ウェイブスペル）──
+        const ma = calcMaya(d.y, d.m, d.d);
+        const seal = MAYA_SEALS[ma.seal];
+        const mayaVote = {"赤い竜":"nurture","白い風":"creative","青い夜":"think","黄色い種":"think","赤い蛇":"intuition","白い世界の橋渡し":"social","青い手":"nurture","黄色い星":"creative","赤い月":"intuition","白い犬":"nurture","青い猿":"creative","黄色い人":"think","赤い空歩く人":"social","白い魔法使い":"intuition","青い鷲":"think","黄色い戦士":"action","赤い地球":"intuition","白い鏡":"think","青い嵐":"action","黄色い太陽":"leadership"};
+        if (mayaVote[seal?.n]) addVote(mayaVote[seal?.n],"マヤ紋");
+        // 黄色い人は影響力＝リーダーシップも
+        if (seal?.n === "黄色い人") addVote("leadership","マヤ黄人");
+        // 赤い地球は安定にも投票（シンクロニシティ＋地に足）
+        if (seal?.n === "赤い地球") addVote("stable","マヤ地球");
+        // ウェイブスペルからも
+        const ws = MAYA_SEALS[ma.ws];
+        if (ws && mayaVote[ws.n]) addVote(mayaVote[ws.n],"マヤWS");
+
+        // ── 宿曜 ──
+        const shukuIdx = calcShukuyo(d.moonLon);
+        const shuku = SHUKUYO_27[shukuIdx];
+        // 宿の性質をより細かく分類（27宿を8軸に対応）
+        const shukuVoteMap = [
+          "action","leadership","think","social","creative","stable","intuition","nurture",
+          "action","leadership","social","creative","think","stable","intuition","nurture",
+          "action","leadership","think","social","creative","stable","intuition","nurture",
+          "action","think","social"
+        ];
+        addVote(shukuVoteMap[shukuIdx] || "stable","宿曜");
+
+        // ── インド占星術（ナクシャトラ）──
+        const jyAya = ayanamsha(d.jd);
+        const sidMoon = norm360(d.moonLon - jyAya);
+        const nakIdx = Math.floor(sidMoon / (360/27));
+        // ナクシャトラの性質に基づく分類
+        const nakVoteMap = [
+          "action","action","think","creative","think","intuition","nurture","nurture","intuition",
+          "leadership","social","stable","creative","creative","social","leadership","nurture","leadership",
+          "intuition","action","stable","think","action","intuition","think","nurture","nurture"
+        ];
+        addVote(nakVoteMap[nakIdx] || "stable","印度");
+
+        // スコア計算（最大票数で正規化）
+        const maxVotes = Math.max(...axes.map(a => votes[a.id].length), 1);
+        const scores = axes.map(a => ({...a, count: votes[a.id].length, voters: votes[a.id], pct: Math.round(votes[a.id].length / maxVotes * 100)}));
+
+        // SVGレーダーチャート描画
+        const cx = 200, cy = 200, r = 110;
+        const n = 8;
+        const angleStep = (2 * Math.PI) / n;
+        const getPoint = (i, ratio) => {
+          const angle = -Math.PI/2 + i * angleStep;
+          return [cx + r * ratio * Math.cos(angle), cy + r * ratio * Math.sin(angle)];
+        };
+
+        // 背景の同心円
+        let svgBg = '';
+        [0.25, 0.5, 0.75, 1.0].forEach(ratio => {
+          const pts = [];
+          for (let i=0; i<n; i++) pts.push(getPoint(i, ratio).join(','));
+          svgBg += '<polygon points="'+pts.join(' ')+'" fill="none" stroke="#e0d8cc" stroke-width="0.5"/>';
+        });
+        // 軸線
+        for (let i=0; i<n; i++) {
+          const [x,y] = getPoint(i, 1);
+          svgBg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#e0d8cc" stroke-width="0.5"/>';
+        }
+        // データポリゴン
+        const dataPts = scores.map((s,i) => getPoint(i, s.pct/100).join(',')).join(' ');
+        const dataPolygon = '<polygon points="'+dataPts+'" fill="rgba(139,105,20,0.15)" stroke="var(--gold)" stroke-width="2"/>';
+        // データ点
+        let dataDots = '';
+        scores.forEach((s,i) => {
+          const [x,y] = getPoint(i, s.pct/100);
+          dataDots += '<circle cx="'+x+'" cy="'+y+'" r="4" fill="var(--gold)"/>';
+        });
+        // ラベル
+        let labels = '';
+        scores.forEach((s,i) => {
+          const [x,y] = getPoint(i, 1.28);
+          const anchor = x < cx-10 ? "end" : x > cx+10 ? "start" : "middle";
+          // 短縮ラベル（SVG内に収める）
+          const shortLabel = s.label.length > 6 ? s.label.slice(0,6) : s.label;
+          labels += '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-size="11" fill="#4a4030">'+shortLabel+'</text>';
+          labels += '<text x="'+x+'" y="'+(y+13)+'" text-anchor="'+anchor+'" font-size="10" fill="var(--gold)" font-weight="700">'+s.count+'票</text>';
+        });
+
+        let radarHtml = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:center;">';
+        radarHtml += '<div style="text-align:center;"><svg viewBox="0 0 400 400" style="width:100%; max-width:380px;">'+svgBg+dataPolygon+dataDots+labels+'</svg></div>';
+        // 右側: 投票詳細
+        radarHtml += '<div>';
+        scores.sort((a,b) => b.count - a.count).forEach(s => {
+          const barW = Math.max(s.pct, 8);
+          radarHtml += '<div style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;"><span style="font-size:14px; font-weight:700; color:var(--text); width:140px;">'+s.label+'</span><span style="font-size:13px; color:var(--gold); font-weight:700;">'+s.count+'票</span></div>';
+          radarHtml += '<div style="display:flex; align-items:center; gap:6px;"><div style="flex:1; background:#f0ede6; border-radius:3px; height:8px; overflow:hidden;"><div style="width:'+barW+'%; height:100%; background:var(--gold); border-radius:3px;"></div></div></div>';
+          radarHtml += '<div style="font-size:12px; color:var(--muted); margin-top:2px;">'+s.voters.join(' / ')+'</div></div>';
+        });
+        radarHtml += '</div></div>';
+
+        // 上位3つのサマリー
+        const top3 = scores.slice(0, 3);
+        radarHtml += '<div style="margin-top:16px; padding:12px 14px; background:#f8f6f0; border-radius:6px; border:1px solid var(--border);">';
+        radarHtml += '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:8px;">✦ 複数占術が一致する強み TOP3</div>';
+        top3.forEach((s,i) => {
+          radarHtml += '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:4px;"><strong>'+(i+1)+'. '+s.label+'</strong>（'+s.count+'占術が一致）— '+s.desc+'</div>';
+        });
+        radarHtml += '</div>';
+
+        return radarHtml;
+      })()}
+    </div>
+
+    <div class="section-title">人生領域レーダー — どの分野が強いか</div>
+    <div class="card" style="margin-bottom:20px;">
+      <p style="font-size:14px; color:#6a6050; margin-bottom:16px; line-height:1.7;">人生の8つの領域について、各占術が「この人はここが強い」と示す度合いを可視化。紫微斗数の12宮・四柱の十神・西洋占星術の天体配置から判定しています。</p>
+      ${(() => {
+        // 人生領域8軸
+        const lifeAxes = [
+          {id:"wealth", label:"稼ぐ力・財運", short:"財運", desc:"お金を稼ぎ増やす力"},
+          {id:"love", label:"恋愛・パートナー", short:"恋愛", desc:"愛情とパートナーシップ"},
+          {id:"health", label:"健康・体力", short:"健康", desc:"身体のエネルギーと持久力"},
+          {id:"career", label:"仕事・キャリア", short:"仕事", desc:"社会での活躍と出世"},
+          {id:"influence", label:"社会的影響力", short:"影響力", desc:"世の中に与えるインパクト"},
+          {id:"study", label:"学び・知性", short:"学び", desc:"知識を吸収し活かす力"},
+          {id:"home", label:"家庭・安定基盤", short:"家庭", desc:"家族と生活の安定"},
+          {id:"spirit", label:"精神・内面", short:"精神", desc:"心の豊かさと充実感"},
+        ];
+
+        const lifeVotes = {};
+        lifeAxes.forEach(a => lifeVotes[a.id] = []);
+        const addLifeVote = (axis, voter) => { if (!lifeVotes[axis].includes(voter)) lifeVotes[axis].push(voter); };
+
+        // ── 紫微斗数: 各宮の主星の強さで投票 ──
+        const palaceToLife = {"財帛宮":"wealth","夫妻宮":"love","疾厄宮":"health","官禄宮":"career","遷移宮":"influence","福德宮":"spirit","田宅宮":"home","父母宮":"study","命宮":"career","子女宮":"love","兄弟宮":"home","僕役宮":"career"};
+        const strongStars = ["紫微","天府","太陽","太陰","武曲","天同","天機","廉貞","貪狼","巨門","天相","天梁","七殺","破軍"];
+        for (let i=0; i<12; i++){
+          const branchIdx = (d.lifeIdx - i + 12) % 12;
+          const stars = (d.ziweiDistrib[branchIdx] || []).filter(s => strongStars.includes(s));
+          const palaceName = PALACE_NAMES[i];
+          const lifeAxis = palaceToLife[palaceName];
+          if (lifeAxis && stars.length > 0) {
+            addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮",""));
+            // 星が2つ以上ある宮は特に強い
+            if (stars.length >= 2) addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮","")+"強");
+          }
+        }
+
+        // ── 四柱推命: 十神から投票 ──
+        const tenGods2 = d.pillars ? d.pillars.map(p=>p.ten).filter(Boolean) : [];
+        if (tenGods2.includes("正財") || tenGods2.includes("偏財")) addLifeVote("wealth","四柱財");
+        if (tenGods2.includes("正官") || tenGods2.includes("偏官")) { addLifeVote("career","四柱官"); addLifeVote("influence","四柱官影"); }
+        if (tenGods2.includes("正印") || tenGods2.includes("偏印")) { addLifeVote("study","四柱印"); addLifeVote("spirit","四柱印精"); }
+        if (tenGods2.includes("食神") || tenGods2.includes("傷官")) { addLifeVote("wealth","四柱食財"); addLifeVote("spirit","四柱食精"); }
+        if (tenGods2.includes("比肩") || tenGods2.includes("劫財")) addLifeVote("health","四柱比");
+        // 日主の五行から
+        if (dayMasterEl === "土") { addLifeVote("home","四柱土"); addLifeVote("health","四柱土健"); }
+        else if (dayMasterEl === "金") { addLifeVote("wealth","四柱金"); addLifeVote("career","四柱金仕"); }
+        else if (dayMasterEl === "水") { addLifeVote("study","四柱水"); addLifeVote("spirit","四柱水精"); }
+        else if (dayMasterEl === "木") { addLifeVote("health","四柱木"); addLifeVote("study","四柱木学"); }
+        else if (dayMasterEl === "火") { addLifeVote("influence","四柱火"); addLifeVote("love","四柱火愛"); }
+
+        // ── 西洋占星術: 天体から投票 ──
+        // 金星→恋愛＋財運
+        addLifeVote("love","西洋♀");
+        if (venusSign.e === "土" || venusSign.e === "風") addLifeVote("wealth","西洋♀財");
+        // 木星→財運＋影響力
+        const jupiter = d.planets.find(p=>p.n==="木星");
+        if (jupiter) { addLifeVote("wealth","西洋♃"); addLifeVote("influence","西洋♃影"); }
+        // 土星→仕事＋家庭
+        const saturn = d.planets.find(p=>p.n==="土星");
+        if (saturn) { addLifeVote("career","西洋♄"); addLifeVote("home","西洋♄家"); }
+        // 火星→健康＋仕事
+        addLifeVote("health","西洋♂");
+        if (marsSign.e === "火") addLifeVote("career","西洋♂仕");
+        // 水星→学び
+        addLifeVote("study","西洋☿");
+        // 月→精神＋家庭
+        addLifeVote("spirit","西洋☽");
+        addLifeVote("home","西洋☽家");
+        // 太陽→影響力
+        addLifeVote("influence","西洋☉");
+
+        // ── 算命学: 十二大従星エネルギーから健康に投票 ──
+        if (sm.juuniDay && sm.juuniDay.energy >= 8) addLifeVote("health","算命活力");
+        // 中央星から
+        if (["車騎星","牽牛星"].includes(sm.stars.center)) addLifeVote("career","算命仕");
+        if (["禄存星","司禄星"].includes(sm.stars.center)) addLifeVote("wealth","算命財");
+        if (["鳳閣星","調舒星"].includes(sm.stars.center)) addLifeVote("spirit","算命精");
+
+        // ── 数秘術 ──
+        const lpLife = {1:"career",2:"love",3:"influence",4:"home",5:"influence",6:"love",7:"study",8:"wealth",9:"spirit",11:"spirit",22:"career",33:"love"};
+        if (lpLife[nu.lifePath]) addLifeVote(lpLife[nu.lifePath],"数秘LP");
+
+        // ── 九星気学 ──
+        const kyLife = {1:"study",2:"home",3:"career",4:"love",5:"influence",6:"career",7:"wealth",8:"home",9:"influence"};
+        const ky2 = calcKyusei(d.y, d.m);
+        if (kyLife[ky2.honmei]) addLifeVote(kyLife[ky2.honmei],"九星");
+
+        // スコア計算
+        const maxLifeVotes = Math.max(...lifeAxes.map(a => lifeVotes[a.id].length), 1);
+        const lifeScores = lifeAxes.map(a => ({...a, count: lifeVotes[a.id].length, voters: lifeVotes[a.id], pct: Math.round(lifeVotes[a.id].length / maxLifeVotes * 100)}));
+
+        // SVGレーダーチャート描画
+        const cx2 = 200, cy2 = 200, r2 = 110;
+        const n2 = 8;
+        const angleStep2 = (2 * Math.PI) / n2;
+        const getPoint2 = (i, ratio) => {
+          const angle = -Math.PI/2 + i * angleStep2;
+          return [cx2 + r2 * ratio * Math.cos(angle), cy2 + r2 * ratio * Math.sin(angle)];
+        };
+
+        let svgBg2 = '';
+        [0.25, 0.5, 0.75, 1.0].forEach(ratio => {
+          const pts = [];
+          for (let i=0; i<n2; i++) pts.push(getPoint2(i, ratio).join(','));
+          svgBg2 += '<polygon points="'+pts.join(' ')+'" fill="none" stroke="#e0d8cc" stroke-width="0.5"/>';
+        });
+        for (let i=0; i<n2; i++) {
+          const [x,y] = getPoint2(i, 1);
+          svgBg2 += '<line x1="'+cx2+'" y1="'+cy2+'" x2="'+x+'" y2="'+y+'" stroke="#e0d8cc" stroke-width="0.5"/>';
+        }
+        const dataPts2 = lifeScores.map((s,i) => getPoint2(i, s.pct/100).join(',')).join(' ');
+        const dataPolygon2 = '<polygon points="'+dataPts2+'" fill="rgba(60,100,140,0.15)" stroke="#3c648c" stroke-width="2"/>';
+        let dataDots2 = '';
+        lifeScores.forEach((s,i) => {
+          const [x,y] = getPoint2(i, s.pct/100);
+          dataDots2 += '<circle cx="'+x+'" cy="'+y+'" r="4" fill="#3c648c"/>';
+        });
+        let labels2 = '';
+        lifeScores.forEach((s,i) => {
+          const [x,y] = getPoint2(i, 1.28);
+          const anchor = x < cx2-10 ? "end" : x > cx2+10 ? "start" : "middle";
+          labels2 += '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-size="11" fill="#4a4030">'+s.short+'</text>';
+          labels2 += '<text x="'+x+'" y="'+(y+13)+'" text-anchor="'+anchor+'" font-size="10" fill="#3c648c" font-weight="700">'+s.count+'票</text>';
+        });
+
+        let lifeHtml = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:center;">';
+        lifeHtml += '<div style="text-align:center;"><svg viewBox="0 0 400 400" style="width:100%; max-width:380px;">'+svgBg2+dataPolygon2+dataDots2+labels2+'</svg></div>';
+        lifeHtml += '<div>';
+        lifeScores.sort((a,b) => b.count - a.count).forEach(s => {
+          const barW = Math.max(s.pct, 8);
+          lifeHtml += '<div style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;"><span style="font-size:14px; font-weight:700; color:var(--text); width:140px;">'+s.label+'</span><span style="font-size:13px; color:#3c648c; font-weight:700;">'+s.count+'票</span></div>';
+          lifeHtml += '<div style="display:flex; align-items:center; gap:6px;"><div style="flex:1; background:#e8eef4; border-radius:3px; height:8px; overflow:hidden;"><div style="width:'+barW+'%; height:100%; background:#3c648c; border-radius:3px;"></div></div></div>';
+          lifeHtml += '<div style="font-size:12px; color:var(--muted); margin-top:2px;">'+s.voters.join(' / ')+'</div></div>';
+        });
+        lifeHtml += '</div></div>';
+
+        // 上位3つのサマリー
+        const lifeTop3 = lifeScores.slice(0, 3);
+        lifeHtml += '<div style="margin-top:16px; padding:12px 14px; background:#eef2f8; border-radius:6px; border:1px solid #c8d4e0;">';
+        lifeHtml += '<div style="font-size:14px; color:#3c648c; font-weight:700; margin-bottom:8px;">✦ 人生で特に恵まれている領域 TOP3</div>';
+        lifeTop3.forEach((s,i) => {
+          lifeHtml += '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:4px;"><strong>'+(i+1)+'. '+s.label+'</strong>（'+s.count+'票）— '+s.desc+'</div>';
+        });
+        lifeHtml += '</div>';
+
+        return lifeHtml;
+      })()}
+    </div>
+
     <div class="section-title">人生タイムライン — 5占術が語る時間の流れ</div>
     <div class="card" style="margin-bottom:20px; overflow-x:auto;">
       <p style="font-size:14px; color:#6a6050; margin-bottom:16px; line-height:1.7;">5つの占術が持つ「大運」を時間軸で並べました。複数の占術が同時に「変化」を示す時期は、人生の転換点になりやすい時期です。</p>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:12px; display:flex; gap:16px; flex-wrap:wrap;">
+        <span><span style="display:inline-block; width:14px; height:14px; background:#f0d0c0; border:1px solid #e0b0a0; border-radius:2px; vertical-align:middle; margin-right:4px;"></span>変化の時期</span>
+        <span><span style="display:inline-block; width:14px; height:14px; background:#f0ede6; border:1px solid var(--border); border-radius:2px; vertical-align:middle; margin-right:4px;"></span>現在地</span>
+        <span><span style="display:inline-block; width:14px; height:3px; background:rgba(192,64,48,.7); vertical-align:middle; margin-right:4px;"></span>今の年齢</span>
+        <span><span style="display:inline-block; width:14px; height:14px; background:rgba(192,64,48,.08); border:1px dashed rgba(192,64,48,.3); border-radius:2px; vertical-align:middle; margin-right:4px;"></span>転換期</span>
+      </div>
       ${(() => {
         const currentAge = getCurrentAge(d.y, d.m, d.d);
         const maxAge = 80;
@@ -8117,6 +8692,49 @@ function renderConsult(){
         html += '<div style="padding-left:80px; margin-top:4px; position:relative;">';
         html += '<div style="position:absolute; left:calc(80px + (100% - 80px) * '+currentAge+' / '+maxAge+' - 14px); font-size:11px; color:#c04030; font-weight:700;">▲'+currentAge+'歳</div>';
         html += '</div>';
+
+        // ── 感情曲線（タイムラインと同じ横幅で重ねる）──
+        html += '<div style="display:flex; align-items:center; margin-top:16px; margin-bottom:3px; position:relative; z-index:1;">';
+        html += '<div style="width:80px; flex-shrink:0; font-size:11px; color:#3c648c; font-weight:700; padding-right:8px; text-align:right;">感情曲線</div>';
+        html += '<div style="flex:1; position:relative; height:50px; background:#faf8f4; border:1px solid var(--border); border-radius:3px; overflow:hidden;">';
+        // 感情スコアを計算
+        const emotionScoreTL = new Array(maxAge).fill(0);
+        const tenEmotionTL = {"比肩":1,"劫財":-1,"食神":2,"傷官":1,"偏財":2,"正財":1,"偏官":-2,"正官":1,"偏印":-1,"正印":1};
+        shichuDayun.forEach(du => {
+          const ten = tenGod(d.day.stem, du.stem);
+          const score = tenEmotionTL[ten] || 0;
+          for (let a = Math.max(0,du.startAge); a < Math.min(maxAge,du.endAge); a++) emotionScoreTL[a] += score;
+        });
+        const palaceEmotionTL = {"命宮":1,"夫妻宮":2,"子女宮":1,"財帛宮":1,"疾厄宮":-2,"遷移宮":-1,"福德宮":2,"官禄宮":1};
+        ziweiDayun.forEach(du => {
+          const score = palaceEmotionTL[du.palaceName] || 0;
+          for (let a = Math.max(0,du.startAge); a < Math.min(maxAge,du.endAge); a++) emotionScoreTL[a] += score;
+        });
+        const dashaEmotionTL = {"太陽":1,"月":1,"火星":-1,"水星":1,"木星":2,"金星":2,"土星":-2,"ラーフ":-1,"ケートゥ":-1};
+        dashaData.dashas.forEach(ds => {
+          const score = dashaEmotionTL[ds.lord] || 0;
+          for (let a = Math.max(0,Math.floor(ds.startAge)); a < Math.min(maxAge,Math.floor(ds.endAge)); a++) emotionScoreTL[a] += score;
+        });
+        const maxEmTL = Math.max(...emotionScoreTL.map(Math.abs), 1);
+        const normEmTL = emotionScoreTL.map(s => s / maxEmTL);
+        // SVGパスを生成（高さ50px、中央が0）
+        const emH = 50;
+        let pathDTL = '';
+        for (let a = 0; a < maxAge; a++) {
+          const x = (a / maxAge * 100).toFixed(2);
+          const y = (emH/2 - normEmTL[a] * (emH/2) * 0.85).toFixed(1);
+          pathDTL += (a === 0 ? 'M' : 'L') + x + ',' + y;
+        }
+        html += '<svg style="position:absolute; top:0; left:0; width:100%; height:100%;" preserveAspectRatio="none" viewBox="0 0 100 '+emH+'">';
+        html += '<line x1="0" y1="'+emH/2+'" x2="100" y2="'+emH/2+'" stroke="#e0d8cc" stroke-width="0.3" stroke-dasharray="1,1"/>';
+        html += '<path d="'+pathDTL+'" fill="none" stroke="#3c648c" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
+        // 今の年齢マーカー
+        const nowPctTL = (currentAge / maxAge * 100).toFixed(1);
+        html += '<line x1="'+nowPctTL+'" y1="0" x2="'+nowPctTL+'" y2="'+emH+'" stroke="rgba(192,64,48,.5)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+        html += '</svg>';
+        html += '<div style="position:absolute; top:2px; right:4px; font-size:9px; color:#3c648c;">高揚↑</div>';
+        html += '<div style="position:absolute; bottom:2px; right:4px; font-size:9px; color:#3c648c;">低迷↓</div>';
+        html += '</div></div>';
 
         html += '</div>';
 
