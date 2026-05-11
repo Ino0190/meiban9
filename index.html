@@ -2187,6 +2187,7 @@ function renderCompatTypeCard(d, db, smA, nuA) {
           '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjA.type.desc+'</div>' +
           (hlA && hlA.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlA.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlA.text+'</div>' : '') +
           (tjA.type.personality ? '<div style="font-size:13px; color:#6a6050; line-height:1.7; margin-top:10px; text-align:left; border-top:1px solid rgba(201,147,58,0.2); padding-top:10px;">'+tjA.type.personality+'</div>' : '') +
+          (tjA.type.howToRelate ? '<div style="margin-top:10px; padding:10px 12px; background:rgba(201,147,58,0.06); border-radius:4px; text-align:left;"><div style="font-size:12px; color:var(--gold); font-weight:700; margin-bottom:4px; letter-spacing:1px;">このタイプとの付き合い方</div><div style="font-size:13px; color:var(--text); line-height:1.7;">'+tjA.type.howToRelate+'</div></div>' : '') +
         '</div>' +
         // お相手
         '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
@@ -2196,6 +2197,7 @@ function renderCompatTypeCard(d, db, smA, nuA) {
           '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjB.type.desc+'</div>' +
           (hlB && hlB.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlB.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlB.text+'</div>' : '') +
           (tjB.type.personality ? '<div style="font-size:13px; color:#6a6050; line-height:1.7; margin-top:10px; text-align:left; border-top:1px solid rgba(201,147,58,0.2); padding-top:10px;">'+tjB.type.personality+'</div>' : '') +
+          (tjB.type.howToRelate ? '<div style="margin-top:10px; padding:10px 12px; background:rgba(201,147,58,0.06); border-radius:4px; text-align:left;"><div style="font-size:12px; color:var(--gold); font-weight:700; margin-bottom:4px; letter-spacing:1px;">このタイプとの付き合い方</div><div style="font-size:13px; color:var(--text); line-height:1.7;">'+tjB.type.howToRelate+'</div></div>' : '') +
         '</div>' +
       '</div>' +
       // 4軸比較テーブル
@@ -8460,6 +8462,7 @@ function renderConsult(){
         let rightContent = '<div style="display:flex; flex-direction:column; gap:14px; text-align:left;">';
         rightContent += sect('性格', typeInfo.personality);
         if (typeInfo.careerFit) rightContent += sect('向いている仕事', typeInfo.careerFit);
+        if (typeInfo.howToRelate) rightContent += sect('このタイプとの付き合い方', typeInfo.howToRelate);
         if (typeInfo.strengths || typeInfo.challenges) {
           rightContent += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">';
           if (typeInfo.strengths) rightContent += '<div>' + sect('強み', list(typeInfo.strengths)) + '</div>';
@@ -8470,8 +8473,8 @@ function renderConsult(){
 
         // 全体構成: 個性像（全幅）→ [画像 | 右コンテンツ]
         return highlightHtml +
-          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(260px, 380px) 1fr; gap:20px; align-items:stretch;">' +
-            '<div>' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:100%; border-radius:8px; display:block; object-fit:cover;">' : '') + '</div>' +
+          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(300px, 420px) 1fr; gap:24px; align-items:start;">' +
+            '<div style="flex-shrink:0;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;">' : '') + '</div>' +
             '<div style="padding:16px 20px; background:rgba(255,255,255,0.4); border-radius:8px;">' + rightContent + '</div>' +
           '</div>';
       })();
@@ -8533,6 +8536,51 @@ function renderConsult(){
           '<button onclick="shareTypeResult()" style="padding:14px 36px; background:var(--gold); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:1px;">結果をシェア</button>' +
           '<div id="share-status" style="font-size:13px; color:var(--muted); margin-top:8px;"></div>' +
         '</div>';
+      })() +
+      // タイプ相性
+      (() => {
+        const TYPES_ALL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
+        const myParts = tj.key.split("_");
+        const typeImageMap2 = {
+          "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
+          "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
+          "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
+          "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+        };
+        const categories = [
+          { label:"ベストパートナー", desc:"役割が違うだけ。自然な補完関係", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[2]!==myParts[2]; }},
+          { label:"刺激的な補完", desc:"視野が違う。新しい発見をくれる相手", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[1]!==myParts[1]; }},
+          { label:"ブレーキとアクセル", desc:"気質が違う。暴走を止めてくれる相手", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[3]!==myParts[3]; }},
+          { label:"惹かれる対極", desc:"全て真逆。強烈な引力と摩擦", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===4; }},
+        ];
+        let out = '<div style="max-width:1040px; margin:0 auto 24px; text-align:left;">' +
+          '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:14px; font-weight:700; text-align:center;">'+typeInfo.name+'と相性の良いタイプ</div>';
+        categories.forEach(cat => {
+          const matches = [];
+          Object.keys(TYPES_ALL).forEach(key => {
+            if (key === tj.key) return;
+            const parts = key.split("_");
+            if (cat.check(parts)) matches.push({ key, type: TYPES_ALL[key] });
+          });
+          if (matches.length === 0) return;
+          out += '<div style="margin-bottom:16px;">' +
+            '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+cat.label+'</div>' +
+            '<div style="font-size:13px; color:#8a7050; margin-bottom:8px;">'+cat.desc+'</div>' +
+            '<div style="display:flex; gap:12px; flex-wrap:wrap;">';
+          matches.forEach(m => {
+            const img = typeImageMap2[m.type.name] ? '16typecard/'+typeImageMap2[m.type.name] : '';
+            out += '<div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:6px; flex:1; min-width:220px;">' +
+              (img ? '<img src="'+img+'" alt="'+m.type.name+'" style="width:48px; height:72px; object-fit:cover; border-radius:4px; flex-shrink:0;">' : '') +
+              '<div>' +
+                '<div style="font-size:15px; color:var(--gold); font-weight:700;">'+m.type.name+'</div>' +
+                '<div style="font-size:13px; color:var(--text); line-height:1.5;">'+m.type.desc+'</div>' +
+              '</div>' +
+            '</div>';
+          });
+          out += '</div></div>';
+        });
+        out += '</div>';
+        return out;
       })() +
       // 16タイプ一覧（自分に近い順）
       (() => {
