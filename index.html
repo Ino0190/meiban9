@@ -348,6 +348,8 @@
 
     /* インラインgrid 2カラム→1カラム */
     .compat-2col{ grid-template-columns:1fr !important; }
+    .type-card-2col{ grid-template-columns:1fr !important; }
+    .type-card-2col img{ max-width:340px; margin:0 auto; height:auto !important; object-fit:contain !important; }
 
     /* インラインスタイルのgridを強制1カラム化 */
     [style*="grid-template-columns:repeat(3"],[style*="grid-template-columns: repeat(3"] { grid-template-columns: 1fr !important; }
@@ -609,6 +611,7 @@
 </div>
 
 <script src="ephemeris-data.js"></script>
+<script src="type-judge.js?v=10"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1312,20 +1315,20 @@ function calcPersonData(bd, bt, tm, sex, bp) {
 function quickDateInput(el, targetId) {
   const v = el.value.replace(/\D/g, ""); // 数字のみ
   if (v.length === 8) {
-    const y = v.slice(0,4), m = v.slice(4,6), d = v.slice(6,8);
-    const dateStr = `${y}-${m}-${d}`;
+    const y = parseInt(v.slice(0,4), 10);
+    const m = parseInt(v.slice(4,6), 10);
+    const d = parseInt(v.slice(6,8), 10);
+    // 月・日の範囲チェック
+    if (m < 1 || m > 12 || d < 1 || d > new Date(y, m, 0).getDate()) {
+      el.style.borderColor = "#ef4444";
+      return;
+    }
+    const dateStr = `${v.slice(0,4)}-${v.slice(4,6)}-${v.slice(6,8)}`;
     const target = document.getElementById(targetId);
     target.value = dateStr;
-    // 有効な日付かチェック
-    const dt = new Date(dateStr);
-    if (isNaN(dt.getTime())) {
-      el.style.borderColor = "#ef4444";
-    } else {
-      el.style.borderColor = "#22c55e";
-      // 入力欄を軽くフラッシュして確認
-      target.style.background = "#f0fdf4";
-      setTimeout(() => { target.style.background = ""; }, 600);
-    }
+    el.style.borderColor = "#22c55e";
+    target.style.background = "#f0fdf4";
+    setTimeout(() => { target.style.background = ""; }, 600);
   } else {
     el.style.borderColor = "";
   }
@@ -1457,7 +1460,7 @@ function renderAll(){
   try { renderMaya(); } catch(e) { document.getElementById("tab6").innerHTML = `<div class="note">マヤ暦の描画でエラー: ${e.message}</div>`; }
   try { renderShukuyo(); } catch(e) { document.getElementById("tab7").innerHTML = `<div class="note">宿曜の描画でエラー: ${e.message}</div>`; }
   try { renderJyotish(); } catch(e) { document.getElementById("tab8").innerHTML = `<div class="note">印度占星術の描画でエラー: ${e.message}</div>`; }
-  try { renderConsult(); } catch(e) { document.getElementById("tab10").innerHTML = `<div class="note">悩み相談タブの描画でエラー: ${e.message}</div>`; }
+  try { renderConsult(); } catch(e) { document.getElementById("tab10").innerHTML = `<div class="note">総合鑑定タブの描画でエラー: ${e.message}</div>`; }
   try { renderCrossRef(); } catch(e) { console.warn("クロスリファレンス表エラー:", e); }
   loadReading();
   document.getElementById("btn-export").style.display = "block";
@@ -1848,7 +1851,40 @@ function buildCompatExportText(){
     WUXING_CYCLE[dayElB] === dayElA ? "相生（相手が育てる）" : "ぶつかる関係";
   const numKey = Math.min(nA.lifePath, nB.lifePath) + "-" + Math.max(nA.lifePath, nB.lifePath);
 
+  // 16タイプ判定（相性版）
+  let typeInfoText = "";
+  try {
+    const kA = calcKyusei(d.y, d.m), kB = calcKyusei(db.y, db.m);
+    const maA2 = calcMaya(d.y, d.m, d.d), maB2 = calcMaya(db.y, db.m, db.d);
+    const siA2 = calcShukuyo(d.moonLon), siB2 = calcShukuyo(db.moonLon);
+    let jyA2 = null, jyB2 = null;
+    if (typeof ayanamsha === 'function') {
+      const ayaA2 = ayanamsha(d.jd);
+      jyA2 = { sunRashi: Math.floor(norm360(d.sunLon-ayaA2)/30), moonRashi: Math.floor(norm360(d.moonLon-ayaA2)/30), lagnaRashi: d.ascLon!==null ? Math.floor(norm360(d.ascLon-ayaA2)/30) : null };
+      const ayaB2 = ayanamsha(db.jd);
+      jyB2 = { sunRashi: Math.floor(norm360(db.sunLon-ayaB2)/30), moonRashi: Math.floor(norm360(db.moonLon-ayaB2)/30), lagnaRashi: db.ascLon!==null ? Math.floor(norm360(db.ascLon-ayaB2)/30) : null };
+    }
+    const tjA = TypeJudge.judge(d, smA, nA, kA, maA2, siA2, jyA2);
+    const tjB = TypeJudge.judge(db, smB, nB, kB, maB2, siB2, jyB2);
+    const partsA = tjA.key.split("_"), partsB = tjB.key.split("_");
+    const matchCount = partsA.filter((p,i)=>p===partsB[i]).length;
+    const axisLabels = ["価値観", "視野", "役割", "気質"];
+    const diffs = partsA.map((p,i)=>p!==partsB[i] ? `${axisLabels[i]}(${p}/${partsB[i]})` : null).filter(Boolean);
+    typeInfoText = `
+━━━━━━━━━━━━━━━━━━━━
+【16タイプ判定】
+━━━━━━━━━━━━━━━━━━━━
+◆ あなた: ${tjA.type.name} — ${tjA.type.desc}
+  タイプコード: ${tjA.key}
+◆ お相手: ${tjB.type.name} — ${tjB.type.desc}
+  タイプコード: ${tjB.key}
+◆ 4軸の一致: ${matchCount}/4
+◆ 異なる軸: ${diffs.length > 0 ? diffs.join("、") : "なし（同じタイプ）"}
+`;
+  } catch(e) { typeInfoText = ""; }
+
   return `以下は2人の羅占盤データと相性判定結果です。このデータをもとに2人の相性を総合鑑定してください。
+${typeInfoText}
 
 ━━━━━━━━━━━━━━━━━━━━
 【あなた】基本情報
@@ -1931,6 +1967,7 @@ function buildCompatExportText(){
 1. 2人の関係の本質 — どういう組み合わせか
    9占術の相性判定を統合して「要するにこの2人はこういう関係」を描写。
    特に宿曜の関係（${shukuyoRel.name}）を重視しつつ、他の占術との整合性を議論。
+   16タイプ判定の結果（あなた・お相手のタイプ名と異なる軸）も参考にしてください。
 
 2. 恋愛の相性 — 惹かれ合うか、長続きするか
    金星の元素、宿曜の関係、数秘の組み合わせ等から恋愛面を分析。
@@ -2032,6 +2069,132 @@ function highlightAspect(hitEl, on) {
 }
 
 /* ── 西洋占星術描画 ── */
+
+// 相性モード時の2人の16タイプ比較カード（renderConsultから呼ばれる）
+function renderCompatTypeCard(d, db, smA, nuA) {
+  try {
+    // Aさんの判定
+    const smB = calcJintai(db);
+    const nuB = calcNumerology(db.y, db.m, db.d);
+    const kyA = calcKyusei(d.y, d.m);
+    const kyB = calcKyusei(db.y, db.m);
+    const maA = calcMaya(d.y, d.m, d.d);
+    const maB = calcMaya(db.y, db.m, db.d);
+    const siA = calcShukuyo(d.moonLon);
+    const siB = calcShukuyo(db.moonLon);
+    let jyA = null, jyB = null;
+    if (typeof ayanamsha === 'function') {
+      const ayaA = ayanamsha(d.jd);
+      jyA = { sunRashi: Math.floor(norm360(d.sunLon - ayaA) / 30), moonRashi: Math.floor(norm360(d.moonLon - ayaA) / 30), lagnaRashi: d.ascLon !== null ? Math.floor(norm360(d.ascLon - ayaA) / 30) : null };
+      const ayaB = ayanamsha(db.jd);
+      jyB = { sunRashi: Math.floor(norm360(db.sunLon - ayaB) / 30), moonRashi: Math.floor(norm360(db.moonLon - ayaB) / 30), lagnaRashi: db.ascLon !== null ? Math.floor(norm360(db.ascLon - ayaB) / 30) : null };
+    }
+    const tjA = TypeJudge.judge(d, smA, nuA, kyA, maA, siA, jyA);
+    const tjB = TypeJudge.judge(db, smB, nuB, kyB, maB, siB, jyB);
+
+    const typeImageMap = {
+      "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
+      "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+      "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
+      "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+    };
+    const imgA = typeImageMap[tjA.type.name] ? '16typecard/'+typeImageMap[tjA.type.name] : '';
+    const imgB = typeImageMap[tjB.type.name] ? '16typecard/'+typeImageMap[tjB.type.name] : '';
+
+    // 軸の日本語表示
+    const AXIS_DISPLAY = {
+      "革新":"変化を求める","継承":"伝統を守る",
+      "広い":"広く見たい","狭い":"深く見たい",
+      "リーダー":"先頭に立つ","参謀":"サポートが得意",
+      "楽天":"楽観的","慎重":"慎重",
+    };
+    const axisLabels = ["価値観", "視野", "役割", "気質"];
+    const partsA = tjA.key.split("_");
+    const partsB = tjB.key.split("_");
+
+    // 4軸比較テーブル
+    const axisRows = axisLabels.map((label, i) => {
+      const a = partsA[i], b = partsB[i];
+      const match = a === b;
+      const icon = match ? '<span style="color:#22a060; font-weight:700;">✓一致</span>' : '<span style="color:#c09050; font-weight:700;">▲違い</span>';
+      const cellStyle = match ? "color:var(--gold); font-weight:700;" : "color:var(--text);";
+      return '<tr style="border-bottom:1px solid rgba(201,147,58,0.15);">' +
+        '<td style="padding:8px 10px; font-size:14px; color:var(--muted); font-weight:700;">'+label+'</td>' +
+        '<td style="padding:8px 10px; font-size:14px; text-align:center; '+cellStyle+'">'+(AXIS_DISPLAY[a]||a)+'</td>' +
+        '<td style="padding:8px 10px; font-size:13px; text-align:center;">'+icon+'</td>' +
+        '<td style="padding:8px 10px; font-size:14px; text-align:center; '+cellStyle+'">'+(AXIS_DISPLAY[b]||b)+'</td>' +
+      '</tr>';
+    }).join('');
+
+    // 一致/違いの数で基本的な相性を判定
+    const matchCount = partsA.filter((p, i) => p === partsB[i]).length;
+    const diffAxes = partsA.map((p, i) => p !== partsB[i] ? i : -1).filter(i => i >= 0);
+    const diffAxisNames = diffAxes.map(i => axisLabels[i]);
+
+    // 関係性コメントの生成
+    const matchLabels = {
+      4: "同じタイプ — 完全に似た者同士",
+      3: "近親タイプ — 似ているがどこかで補完",
+      2: "半分違うタイプ — 共通点と違いのバランス",
+      1: "ほぼ反対 — 強い刺激と摩擦",
+      0: "対極タイプ — 真逆で惹かれ合い、ぶつかる"
+    };
+    const diffComments = {
+      0: { title: "価値観の違い", text: "進む方向が違います。一方は新しいものを求め、一方は伝統を守りたい。長期的には話し合いが欠かせない組み合わせ。" },
+      1: { title: "視野の違い", text: "広く見る人と深く掘る人。見える世界が違うので、お互いの発見が新鮮な刺激になります。補完関係を築きやすい。" },
+      2: { title: "役割の違い", text: "前に立つ人と支える人。自然な役割分担ができるため、仕事でもパートナーシップでも機能しやすい組み合わせ。" },
+      3: { title: "気質の違い", text: "楽観と慎重。一方が暴走しそうなときにもう一方がブレーキ役になる。セットで動くと強い。" },
+    };
+    const diffCommentsHtml = diffAxes.length === 0 ?
+      '<div style="font-size:15px; color:var(--text); line-height:1.8;">4軸すべて一致。似た価値観・視野・役割・気質を共有する組み合わせ。安定しやすいが、同じ弱点も共有するので刺激不足にならないよう注意。</div>' :
+      diffAxes.map(i => {
+        const c = diffComments[i];
+        return '<div style="margin-bottom:12px; padding-left:12px; border-left:3px solid var(--gold);">' +
+          '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+c.title+'</div>' +
+          '<div style="font-size:14px; color:var(--text); line-height:1.8;">'+c.text+'</div>' +
+        '</div>';
+      }).join('');
+
+    return '<div class="card hi" style="margin-bottom:24px; padding:24px;">' +
+      '<div style="text-align:center; font-size:13px; color:var(--gold); letter-spacing:3px; margin-bottom:6px;">二人の羅占盤タイプ</div>' +
+      '<div style="text-align:center; font-size:16px; color:var(--text); margin-bottom:18px;">'+matchLabels[matchCount]+'</div>' +
+      // 2人のタイプカード並列
+      '<div class="compat-2col" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">' +
+        // あなた
+        '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
+          '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">あなた</div>' +
+          (imgA ? '<img src="'+imgA+'" alt="'+tjA.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
+          '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjA.type.name+'</div>' +
+          '<div style="font-size:13px; color:#6a6050; line-height:1.6;">'+tjA.type.desc+'</div>' +
+        '</div>' +
+        // お相手
+        '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
+          '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">お相手</div>' +
+          (imgB ? '<img src="'+imgB+'" alt="'+tjB.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
+          '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjB.type.name+'</div>' +
+          '<div style="font-size:13px; color:#6a6050; line-height:1.6;">'+tjB.type.desc+'</div>' +
+        '</div>' +
+      '</div>' +
+      // 4軸比較テーブル
+      '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700;">4軸の比較</div>' +
+      '<table style="width:100%; border-collapse:collapse; margin-bottom:18px; background:rgba(255,255,255,0.4); border-radius:6px; overflow:hidden;">' +
+        '<thead><tr style="background:rgba(201,147,58,0.1);">' +
+          '<th style="padding:8px 10px; font-size:13px; color:var(--muted); text-align:left; width:80px;">軸</th>' +
+          '<th style="padding:8px 10px; font-size:13px; color:var(--muted); text-align:center;">あなた</th>' +
+          '<th style="padding:8px 10px; font-size:13px; color:var(--muted); text-align:center; width:80px;">判定</th>' +
+          '<th style="padding:8px 10px; font-size:13px; color:var(--muted); text-align:center;">お相手</th>' +
+        '</tr></thead>' +
+        '<tbody>' + axisRows + '</tbody>' +
+      '</table>' +
+      // 関係性コメント
+      '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:10px; font-weight:700;">この組み合わせの特徴</div>' +
+      '<div>' + diffCommentsHtml + '</div>' +
+    '</div>';
+  } catch(e) {
+    console.warn("renderCompatTypeCard error:", e);
+    return "";
+  }
+}
 
 // 相性モード時の各タブ先頭に表示する比較表ヘルパー
 function compatHeader(tabKey) {
@@ -4917,6 +5080,130 @@ function renderNumerology(){
 
 /* ============ 九星気学 ============ */
 
+// 性格レーダー8軸の投票計算（タイプ詳細カード・相性モード・renderCrossRefで共用）
+function calcPersonalityRadar(pd, smData, nuData) {
+  const AXES = ["action","think","social","creative","stable","intuition","leadership","nurture"];
+  const v = {}; AXES.forEach(a => v[a] = 0);
+  const voted = {}; AXES.forEach(a => voted[a] = new Set());
+  const av = (axis, voter) => { if (!voted[axis].has(voter)) { voted[axis].add(voter); v[axis]++; } };
+  try {
+    // 西洋: 太陽・月・ASC・火星・金星・海王星
+    const sEl = SIGNS[signOf(pd.sunLon)].e;
+    if (sEl==="火"){av("leadership","西洋");av("action","西洋");} else if(sEl==="土"){av("stable","西洋");} else if(sEl==="風"){av("social","西洋");av("think","西洋");} else if(sEl==="水"){av("intuition","西洋");av("nurture","西洋");}
+    const mEl = SIGNS[signOf(pd.moonLon)].e;
+    if (mEl==="火"){av("action","西洋☽");} else if(mEl==="土"){av("think","西洋☽");} else if(mEl==="風"){av("social","西洋☽");} else if(mEl==="水"){av("intuition","西洋☽");}
+    if (pd.ascLon!==null) { const aEl=SIGNS[signOf(pd.ascLon)].e; if(aEl==="水"){av("intuition","西洋ASC");av("nurture","西洋ASC");} else if(aEl==="火"){av("action","西洋ASC");} else if(aEl==="風"){av("social","西洋ASC");} else if(aEl==="土"){av("stable","西洋ASC");av("nurture","西洋ASC");} }
+    const mars=pd.planets.find(p=>p.n==="火星"); if(mars){const me=SIGNS[signOf(mars.lon)].e; if(me==="火"){av("action","西洋♂");av("leadership","西洋♂");} else if(me==="風"){av("social","西洋♂");} else if(me==="土"){av("stable","西洋♂");} else if(me==="水"){av("intuition","西洋♂");}}
+    const venus=pd.planets.find(p=>p.n==="金星"); if(venus){const ve=SIGNS[signOf(venus.lon)].e; if(ve==="風"){av("creative","西洋♀");av("social","西洋♀");} else if(ve==="火"){av("creative","西洋♀");} else if(ve==="水"){av("creative","西洋♀");av("intuition","西洋♀");} else if(ve==="土"){av("stable","西洋♀");}}
+    const neptune=pd.planets.find(p=>p.n==="海王星");
+    if(neptune){const pp=pd.planets.filter(p=>["太陽","月","水星","金星","火星"].includes(p.n)); if(pp.some(p=>{const df=Math.abs(p.lon-neptune.lon);return(df>180?360-df:df)<=8;})) av("intuition","西洋♆合");}
+    // 四柱: 日主・十神・五行
+    const dEl = STEM_EL[STEMS.indexOf(pd.day.stem)];
+    if(dEl==="木"){av("creative","四柱");} else if(dEl==="火"){av("action","四柱");av("leadership","四柱");} else if(dEl==="土"){av("stable","四柱");av("nurture","四柱");} else if(dEl==="金"){av("think","四柱");av("leadership","四柱");} else if(dEl==="水"){av("think","四柱");av("intuition","四柱");}
+    const tg = pd.pillars ? pd.pillars.map(p=>p.ten).filter(Boolean) : [];
+    if(tg.includes("偏官")||tg.includes("正官")) av("leadership","四柱官");
+    if(tg.includes("食神")||tg.includes("傷官")) av("creative","四柱食傷");
+    if(tg.includes("偏財")||tg.includes("正財")) av("action","四柱財");
+    if(pd.wx){const wxE=Object.entries(pd.wx);const mx=wxE.reduce((a,b)=>b[1]>a[1]?b:a,["",0]);if(mx[0]==="水"){av("intuition","四柱水");av("nurture","四柱水");} else if(mx[0]==="火"){av("action","四柱火");} else if(mx[0]==="木"){av("creative","四柱木");} else if(mx[0]==="金"){av("think","四柱金");}}
+    // 紫微: 命宮主星
+    const lifeI=pd.lifeIdx; const ls=(pd.ziweiDistrib[lifeI]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
+    const zwM={"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
+    if(zwM[ls]) av(zwM[ls],"紫微");
+    if(ls==="武曲") av("action","紫微武");
+    const offIdx=(pd.lifeIdx-8+12)%12; const offStars=(pd.ziweiDistrib[offIdx]||[]);
+    if(offStars.includes("紫微")||offStars.includes("武曲")) av("leadership","紫微官禄");
+    // 算命: 中央・東・南
+    if(smData){
+      const smM={"貫索星":"stable","石門星":"social","鳳閣星":"creative","調舒星":"intuition","禄存星":"action","司禄星":"stable","車騎星":"action","牽牛星":"leadership","龍高星":"think","玉堂星":"think"};
+      if(smM[smData.stars.center]) av(smM[smData.stars.center],"算命中");
+      if(smData.stars.center==="石門星") av("leadership","算命石門");
+      const smE={"車騎星":"action","牽牛星":"leadership","鳳閣星":"creative","調舒星":"creative","禄存星":"social","司禄星":"nurture","貫索星":"stable","石門星":"social","龍高星":"think","玉堂星":"think"};
+      if(smE[smData.stars.east]) av(smE[smData.stars.east],"算命東");
+      const smS={"車騎星":"leadership","牽牛星":"leadership","禄存星":"nurture","司禄星":"nurture","鳳閣星":"social","調舒星":"intuition","貫索星":"action","石門星":"social","龍高星":"creative","玉堂星":"nurture"};
+      if(smS[smData.stars.south]) av(smS[smData.stars.south],"算命南");
+    }
+    // 数秘: LP・BD
+    if(nuData){
+      const nuM={1:"leadership",2:"nurture",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"leadership",9:"intuition",11:"intuition",22:"leadership",33:"nurture"};
+      if(nuM[nuData.lifePath]) av(nuM[nuData.lifePath],"数秘LP");
+      if(nuData.lifePath===11) av("leadership","数秘LP11");
+      if(nuData.lifePath===33) av("intuition","数秘LP33");
+      const bdM={1:"leadership",2:"social",3:"creative",4:"stable",5:"action",6:"nurture",7:"think",8:"action",9:"intuition"};
+      if(bdM[nuData.birthday]) av(bdM[nuData.birthday],"数秘BD");
+    }
+    // 九星
+    const kyD=calcKyusei(pd.y, pd.m);
+    const kyM={1:"intuition",2:"nurture",3:"action",4:"social",5:"leadership",6:"leadership",7:"social",8:"stable",9:"creative"};
+    if(kyM[kyD.honmei]) av(kyM[kyD.honmei],"九星");
+    // マヤ
+    const maD=calcMaya(pd.y, pd.m, pd.d); const slD=MAYA_SEALS[maD.seal];
+    const mayM={"赤い竜":"nurture","白い風":"creative","青い夜":"think","黄色い種":"think","赤い蛇":"intuition","白い世界の橋渡し":"social","青い手":"nurture","黄色い星":"creative","赤い月":"intuition","白い犬":"nurture","青い猿":"creative","黄色い人":"think","赤い空歩く人":"social","白い魔法使い":"intuition","青い鷲":"think","黄色い戦士":"action","赤い地球":"intuition","白い鏡":"think","青い嵐":"action","黄色い太陽":"leadership"};
+    if(slD&&mayM[slD.n]) av(mayM[slD.n],"マヤ紋");
+    if(slD&&slD.n==="黄色い人") av("leadership","マヤ黄人");
+    if(slD&&slD.n==="赤い地球") av("stable","マヤ地球");
+    const wsD=MAYA_SEALS[maD.ws]; if(wsD&&mayM[wsD.n]) av(mayM[wsD.n],"マヤWS");
+    // 宿曜
+    const shI=calcShukuyo(pd.moonLon);
+    const shVM=["action","leadership","think","social","creative","stable","intuition","nurture","action","leadership","social","creative","think","stable","intuition","nurture","action","leadership","think","social","creative","stable","intuition","nurture","action","think","social"];
+    av(shVM[shI]||"stable","宿曜");
+    // インド
+    if (typeof ayanamsha === 'function') {
+      const jyA2=ayanamsha(pd.jd); const sM2=norm360(pd.moonLon-jyA2); const nI2=Math.floor(sM2/(360/27));
+      const nVM=["action","action","think","creative","think","intuition","nurture","nurture","intuition","leadership","social","stable","creative","creative","social","leadership","nurture","leadership","intuition","action","stable","think","action","intuition","think","nurture","nurture"];
+      av(nVM[nI2]||"stable","印度");
+    }
+  } catch(e) { console.warn("calcPersonalityRadar error:", e); }
+  return v;
+}
+
+// レーダー上位2軸の組み合わせからタイプ内の個性タグ＋解釈文を生成
+function personalityHighlight(votes, typeName) {
+  const ENTRIES = Object.entries(votes).sort((a,b) => b[1] - a[1]);
+  if (ENTRIES.length < 2 || ENTRIES[0][1] === 0) return null;
+  const top = ENTRIES.slice(0, 2).map(([k,v]) => ({ id:k, v }));
+  const LABELS = {action:"行動力", think:"思考力", social:"社交性", creative:"創造性", stable:"落ち着き・忍耐", intuition:"感受性・直感", leadership:"統率力", nurture:"共感・育成"};
+  // 組み合わせのキー（アルファベット順で正規化）
+  const key = [top[0].id, top[1].id].sort().join("+");
+  // 組み合わせ別の解釈文（28通り = C(8,2)）
+  const COMBOS = {
+    "action+creative":     { tag:"発明家タイプ",     text:"手を動かしながら新しいものを形にするタイプ。頭で考えるより先に試作する。" },
+    "action+intuition":    { tag:"直感で動くタイプ", text:"理屈より勘で動く。動き出す速さと感度の鋭さが武器。" },
+    "action+leadership":   { tag:"突破型リーダー",   text:"先頭に立ち、行動で人を引っ張るタイプ。止まるより動く方が力が出る。" },
+    "action+nurture":      { tag:"面倒見の良い実務家", text:"黙々と動きながら周囲を支える。実務と人への気配りを両立する。" },
+    "action+social":       { tag:"フットワークの人", text:"人の輪と現場の両方を行き来する。動き続けることで繋がりが生まれる。" },
+    "action+stable":       { tag:"地道な実行力",     text:"派手さはないが、継続して動き続ける粘りが最大の武器。" },
+    "action+think":        { tag:"考えて動く実務家", text:"行動と熟慮のバランス型。戦略を立て、着実に実行に移せる。" },
+    "creative+intuition":  { tag:"独自世界の芸術家", text:"感性で掴み、創作で表現する。理屈より美と共鳴で動く。" },
+    "creative+leadership": { tag:"ビジョナリー型リーダー", text:"新しい世界観を示しながら人を巻き込む。アートと組織をつなぐ力。" },
+    "creative+nurture":    { tag:"優しい作り手",     text:"人の心に寄り添う創作をする。癒しの表現者。" },
+    "creative+social":     { tag:"表現で繋がる人",   text:"人の前で創り、交わりの中から作品が生まれる。場を楽しませる創作者。" },
+    "creative+stable":     { tag:"職人的な作り手",   text:"長年かけて独自の世界を磨く。派手さより完成度を追う。" },
+    "creative+think":      { tag:"構想型クリエイター", text:"緻密な設計図を描き、論理と美意識を両立させる。" },
+    "intuition+leadership":{ tag:"勘の良いリーダー", text:"理屈抜きで本質を掴み、決断に迷わない。カリスマ性を持つ。" },
+    "intuition+nurture":   { tag:"共感の達人",       text:"相手の気持ちを瞬時に読み、必要な言葉や手を差し出せる。" },
+    "intuition+social":    { tag:"場の空気を読む人", text:"集団の機微を感じ取り、軽やかに振る舞う。居心地の良さを作る才能。" },
+    "intuition+stable":    { tag:"静かな洞察者",     text:"表に出ず、長年かけて深い理解を積み上げる。発する言葉に重みがある。" },
+    "intuition+think":     { tag:"深く見抜く人",     text:"論理と直感の両輪。表面の奥にある本質を掴む分析眼。" },
+    "leadership+nurture":  { tag:"信頼されるリーダー", text:"力で引っ張るのではなく、支えと導きで人を動かす。組織の要になりやすい。" },
+    "leadership+social":   { tag:"華やかな人望家",   text:"人に愛され、自然と中心に立つ。社交の場でのリーダーシップが光る。" },
+    "leadership+stable":   { tag:"ブレない指揮官",   text:"動じず、長期の視点で組織を率いる。伝統を守りつつ進化させる。" },
+    "leadership+think":    { tag:"戦略家",           text:"冷静な分析で方針を決め、組織を動かす。感情より論理で判断する。" },
+    "nurture+social":      { tag:"場を温める人",     text:"人と人をつなぎ、場を和ませる。みんなの居場所を作る才能。" },
+    "nurture+stable":      { tag:"縁の下の力持ち",   text:"目立たず、黙々と支え続ける。いなくなった時に存在の大きさが分かるタイプ。" },
+    "nurture+think":       { tag:"知性ある世話役",   text:"論理的に人を支える。カウンセラー気質で、冷静な助言ができる。" },
+    "social+stable":       { tag:"信頼の人脈家",     text:"軽い社交ではなく、長く続く信頼関係を築く。堅実な外交官タイプ。" },
+    "social+think":        { tag:"対話で深める人",   text:"議論や会話から新しい視点を得る。知的な交流を楽しむ知性派。" },
+    "stable+think":        { tag:"深く考え抜く人",   text:"時間をかけて深く熟考する研究者タイプ。浅い結論で満足しない。" },
+  };
+  const combo = COMBOS[key] || { tag:"", text:"" };
+  return {
+    top1: { id: top[0].id, label: LABELS[top[0].id], v: top[0].v },
+    top2: { id: top[1].id, label: LABELS[top[1].id], v: top[1].v },
+    tag: combo.tag,
+    text: combo.text,
+  };
+}
+
 function calcKyusei(y, m){
   // 本命星（年の九星）: 立春(2/4頃)前は前年扱い
   // 男女共通: (11 - (年 - 2) % 9) % 9 → 0なら9
@@ -6898,6 +7185,11 @@ function renderConsult(){
     </div>`}
   `;
 
+  // 相性モード: 2人の16タイプ比較を先頭に表示
+  if (currentMode === "compat" && dataB) {
+    html += renderCompatTypeCard(d, dataB, sm, nu);
+  }
+
   // ════════════════════════════════════════
   // 恋愛カテゴリ
   // ════════════════════════════════════════
@@ -8028,49 +8320,233 @@ function renderConsult(){
     const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
 
     html += `
-    <div class="card hi" style="margin-bottom:24px; padding:20px 24px; border:2px solid var(--gold);">
-      <div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:10px;">あなたを一言で言うと</div>
-      <p style="font-size:18px; line-height:1.9; color:var(--text); margin:0 0 12px;">
-        ${(() => {
-          // 性格の核を自動生成
-          const sunEl = sunSign.e;
-          const dayEl = STEM_EL[STEMS.indexOf(d.day.stem)];
-          const personality = [];
-          // 太陽星座の元素
-          if (sunEl === "火") personality.push("情熱と行動力を持ち");
-          else if (sunEl === "土") personality.push("安定感と現実感覚を持ち");
-          else if (sunEl === "風") personality.push("知性とコミュニケーション力を持ち");
-          else if (sunEl === "水") personality.push("共感力と直感を持ち");
-          // 日主の五行
-          if (dayEl === "土") personality.push("信頼される安定した土台の上で");
-          else if (dayEl === "木") personality.push("成長し続ける意志の力で");
-          else if (dayEl === "火") personality.push("周囲を照らす明るさで");
-          else if (dayEl === "金") personality.push("鋭い判断力と決断力で");
-          else if (dayEl === "水") personality.push("柔軟に形を変えながら");
-          // 命宮主星
-          const lifeStar = (d.ziweiDistrib||{})[d.lifeIdx];
-          const starAction = {"紫微":"人を率いる","天府":"実務を支える","武曲":"目標を形にする","廉貞":"情熱を注ぐ","天機":"知恵で道を切り拓く","天同":"人を和ませる","貪狼":"多方面に才能を発揮する","巨門":"言葉で人を動かす","天相":"人と人を繋ぐ","天梁":"知恵で人を導く","七殺":"独自の道を切り拓く","破軍":"ゼロから創り出す","太陽":"社会に光を放つ","太陰":"静かに深く影響を与える"};
-          const mainStar = lifeStar && lifeStar[0] ? lifeStar[0] : "";
-          personality.push((starAction[mainStar] || "独自の力を発揮する") + "人。");
-          return personality.join("");
-        })()}
-      </p>
-      <p style="font-size:16px; line-height:1.8; color:#6a6050; margin:0 0 8px;">
-        ${(() => {
-          // 今の時期
-          const shichuDayun = calcDayun(d);
-          const currentAge = getCurrentAge(d.y, d.m, d.d);
-          const currentDu = shichuDayun.find(du => currentAge >= du.startAge && currentAge < du.endAge);
-          const ten = currentDu ? tenGod(d.day.stem, currentDu.stem) : "";
-          const tenTheme = {"比肩":"自分の力で立つ","劫財":"競争の中で磨かれる","食神":"楽しみと創造の","傷官":"才能が溢れ出す","偏財":"チャンスが広がる","正財":"安定を築く","偏官":"試練を超えて成長する","正官":"地位と信頼を得る","偏印":"新しい学びの","正印":"知恵が深まる"};
-          const theme = tenTheme[ten] || "変化の";
-          const pyNum = nu.personalYear;
-          const pyShort = {1:"始まり",2:"人間関係を育てる",3:"表現する",4:"基盤を固める",5:"変化を受け入れる",6:"責任を果たす",7:"内省する",8:"収穫する",9:"手放す"};
-          return "今は「" + theme + "時期」。" + (pyShort[pyNum] ? pyShort[pyNum] + "年。" : "") + "焦らず、今できることを積み重ねて。";
-        })()}
-      </p>
-    </div>
+    ${(() => {
+      // ── 新16タイプ判定（4軸×2極 + 修飾子2軸）──
+      const sm2 = calcJintai(d);
+      const nu2 = calcNumerology(d.y, d.m, d.d);
+      const ky2 = calcKyusei(d.y, d.m);
+      const ma2 = calcMaya(d.y, d.m, d.d);
+      const si2 = calcShukuyo(d.moonLon);
+      let jy2 = null;
+      if (typeof ayanamsha === 'function') {
+        const ay = ayanamsha(d.jd);
+        jy2 = {sunRashi:Math.floor(norm360(d.sunLon-ay)/30), moonRashi:Math.floor(norm360(d.moonLon-ay)/30), lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};
+      }
+      const tj = TypeJudge.judge(d, sm2, nu2, ky2, ma2, si2, jy2);
+      const typeInfo = tj.type;
 
+      // 軸バー生成
+      const axisBar = (a) => {
+        const tot = a.plus + a.minus;
+        if (tot === 0) return '<span style="color:var(--muted)">—</span>';
+        // 軸の短い内部名を自然な日本語に変換（表示専用）
+        const AXIS_DISPLAY = {
+          "革新":"変化を求める","継承":"伝統を守る",
+          "広い":"広く見たい","狭い":"深く見たい",
+          "リーダー":"先頭に立つ","参謀":"サポートが得意",
+          "楽天":"楽観的","慎重":"慎重",
+        };
+        const displayPn = AXIS_DISPLAY[a.pn] || a.pn;
+        const displayMn = AXIS_DISPLAY[a.mn] || a.mn;
+        // pos: 0%=完全に左(pn側), 100%=完全に右(mn側)
+        const pos = Math.round((a.minus / tot) * 100);
+        const isLeft = a.plus >= a.minus;
+        const dotColor = isLeft ? 'var(--gold)' : '#6a6050';
+        return '<div style="display:flex;align-items:center;gap:6px;margin:6px 0;">' +
+          '<span style="font-size:14px;width:100px;text-align:right;font-weight:'+(isLeft?'700':'400')+';color:'+(isLeft?'var(--gold)':'var(--muted)')+';">' + displayPn + '</span>' +
+          '<div style="flex:1;height:12px;background:#f0ede6;border-radius:6px;position:relative;border:1px solid #e0d8cc;">' +
+          '<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#d0c8bc;"></div>' +
+          (isLeft ?
+            '<div style="position:absolute;left:'+pos+'%;top:2px;height:8px;width:'+(50-pos)+'%;background:var(--gold);border-radius:4px;opacity:0.4;"></div>' :
+            '<div style="position:absolute;left:50%;top:2px;height:8px;width:'+(pos-50)+'%;background:#6a6050;border-radius:4px;opacity:0.4;"></div>'
+          ) +
+          '<div style="position:absolute;left:calc('+pos+'% - 6px);top:0;width:12px;height:12px;background:'+dotColor+';border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>' +
+          '</div>' +
+          '<span style="font-size:14px;width:100px;font-weight:'+(!isLeft?'700':'400')+';color:'+(!isLeft?'#6a6050':'var(--muted)')+';">' + displayMn + '</span>' +
+          '</div>';
+      };
+
+      // 性格の核テキスト
+      const sunEl2 = sunSign.e;
+      const dayEl2 = STEM_EL[STEMS.indexOf(d.day.stem)];
+      const personality2 = [];
+      if (sunEl2==="火") personality2.push("情熱と行動力を持ち");
+      else if (sunEl2==="土") personality2.push("安定感と現実感覚を持ち");
+      else if (sunEl2==="風") personality2.push("知性とコミュニケーション力を持ち");
+      else if (sunEl2==="水") personality2.push("共感力と直感を持ち");
+      if (dayEl2==="土") personality2.push("信頼される安定した土台の上で");
+      else if (dayEl2==="木") personality2.push("成長し続ける意志の力で");
+      else if (dayEl2==="火") personality2.push("周囲を照らす明るさで");
+      else if (dayEl2==="金") personality2.push("鋭い判断力と決断力で");
+      else if (dayEl2==="水") personality2.push("柔軟に形を変えながら");
+      const lifeStar2 = (d.ziweiDistrib||{})[d.lifeIdx];
+      const starAction2 = {"紫微":"人を率いる","天府":"実務を支える","武曲":"目標を形にする","廉貞":"情熱を注ぐ","天機":"知恵で道を切り拓く","天同":"人を和ませる","貪狼":"多方面に才能を発揮する","巨門":"言葉で人を動かす","天相":"人と人を繋ぐ","天梁":"知恵で人を導く","七殺":"独自の道を切り拓く","破軍":"ゼロから創り出す","太陽":"社会に光を放つ","太陰":"静かに深く影響を与える"};
+      const mainStar2 = lifeStar2 && lifeStar2[0] ? lifeStar2[0] : "";
+      personality2.push((starAction2[mainStar2] || "独自の力を発揮する") + "人。");
+      const personalityText = personality2.join("");
+
+      // 今の時期テキスト
+      const shichuDayunT = calcDayun(d);
+      const currentAgeT = getCurrentAge(d.y, d.m, d.d);
+      const currentDuT = shichuDayunT.find(du => currentAgeT >= du.startAge && currentAgeT < du.endAge);
+      const tenT = currentDuT ? tenGod(d.day.stem, currentDuT.stem) : "";
+      const tenThemeT = {"比肩":"自分の力で立つ","劫財":"競争の中で磨かれる","食神":"楽しみと創造の","傷官":"才能が溢れ出す","偏財":"チャンスが広がる","正財":"安定を築く","偏官":"試練を超えて成長する","正官":"地位と信頼を得る","偏印":"新しい学びの","正印":"知恵が深まる"};
+      const themeT = tenThemeT[tenT] || "変化の";
+      const pyShortT = {1:"始まり",2:"人間関係を育てる",3:"表現する",4:"基盤を固める",5:"変化を受け入れる",6:"責任を果たす",7:"内省する",8:"収穫する",9:"手放す"};
+      const timingText = "今は「" + themeT + "時期」。" + (pyShortT[nu.personalYear] ? pyShortT[nu.personalYear] + "年。" : "") + "焦らず、今できることを積み重ねて。";
+
+      // タイプ名→画像ファイル名のマッピング
+      const typeImageMap = {
+        "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
+        "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+        "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
+        "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+      };
+      const typeImageSrc = typeImageMap[typeInfo.name] ? '16typecard/'+typeImageMap[typeInfo.name] : null;
+
+      // タイプ詳細カード（拡張情報があれば生成、内部2カラム）
+      const typeDetailCard = (() => {
+        if (!typeInfo.personality) return '';
+        const sect = (title, body) => '<div style="margin-top:14px; break-inside:avoid;"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700;">'+title+'</div><div style="font-size:15px; color:var(--text); line-height:1.8;">'+body+'</div></div>';
+        const list = arr => '<ul style="margin:0; padding-left:20px; font-size:15px; color:var(--text); line-height:1.8;">' + arr.map(x => '<li>'+x+'</li>').join('') + '</ul>';
+        let out = '<div style="text-align:left; padding:20px 24px; background:rgba(255,255,255,0.5); border-radius:8px; column-count:2; column-gap:28px; column-rule:1px solid rgba(139,105,20,0.15); box-sizing:border-box;">';
+        // あなたの個性（レーダー上位2軸から生成）— 先頭に配置
+        try {
+          const radarVotes = calcPersonalityRadar(d, sm2, nu2);
+          const highlight = personalityHighlight(radarVotes, typeInfo.name);
+          if (highlight && highlight.tag) {
+            out += '<div style="margin-bottom:14px; break-inside:avoid; padding:10px 12px; background:rgba(201,147,58,0.08); border-left:3px solid var(--gold); border-radius:4px;">' +
+              '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; font-weight:700;">あなたの'+typeInfo.name+'像</div>' +
+              '<div style="font-size:15px; color:var(--text); line-height:1.8; font-weight:700; margin-bottom:4px;">'+highlight.tag+'</div>' +
+              '<div style="font-size:14px; color:var(--text); line-height:1.7; margin-bottom:6px;">'+highlight.text+'</div>' +
+              '<div style="font-size:13px; color:#8a7050;">特に強い資質: <span style="color:var(--gold); font-weight:700;">'+highlight.top1.label+'('+highlight.top1.v+')</span> / <span style="color:var(--gold); font-weight:700;">'+highlight.top2.label+'('+highlight.top2.v+')</span></div>' +
+            '</div>';
+          }
+        } catch(e) { console.warn("個性生成エラー:", e); }
+        out += sect('性格', typeInfo.personality);
+        if (typeInfo.strengths) out += sect('強み', list(typeInfo.strengths));
+        if (typeInfo.challenges) out += sect('気をつけたいこと', list(typeInfo.challenges));
+        if (typeInfo.careerFit) out += sect('向いている仕事', typeInfo.careerFit);
+        out += '</div>';
+        return out;
+      })();
+
+      return '<div style="text-align:center; margin-bottom:28px; padding:28px 20px; background:linear-gradient(135deg, #fdf6e8 0%, #f5f0e4 100%); border-radius:12px; border:1px solid var(--gold);">' +
+        '<div style="font-size:13px; color:var(--gold); letter-spacing:3px; margin-bottom:8px;">あなたの羅占盤タイプ</div>' +
+        '<div style="font-size:32px; color:var(--gold); font-weight:900; font-family:\'Noto Serif JP\',serif; letter-spacing:6px; margin-bottom:12px;">'+typeInfo.name+'</div>' +
+        // 語源・タグラインは2カラムの上（全幅中央）
+        (typeInfo.etymology ? '<div style="font-size:14px; color:#8a7050; line-height:1.7; max-width:760px; margin:0 auto 10px; font-style:italic;">'+typeInfo.etymology+'</div>' : '') +
+        '<div style="font-size:17px; color:var(--text); line-height:1.8; max-width:720px; margin:0 auto 20px;">'+typeInfo.desc+'</div>' +
+        // 信頼度バッジ（出生時刻不明等で精度が下がっている場合に表示）
+        (() => {
+          if (tj.confidence === "高" && tj.warnings.length === 0) return '';
+          const bg = tj.confidence === "低" ? "rgba(200,80,80,0.08)" : "rgba(201,147,58,0.08)";
+          const border = tj.confidence === "低" ? "rgba(200,80,80,0.35)" : "rgba(201,147,58,0.35)";
+          const label = tj.confidence === "低" ? "判定信頼度: 低" : tj.confidence === "中" ? "判定信頼度: 中" : "判定にゆらぎあり";
+          const warnHtml = tj.warnings.length > 0 ? '<div style="font-size:13px; color:#8a7050; line-height:1.7; margin-top:6px;">' + tj.warnings.map(w => w.replace(/^⚠\s*/,'')).join('<br>') + '</div>' : '';
+          const hint = !d.ascLon ? '<div style="font-size:13px; color:#6a6050; line-height:1.7; margin-top:6px;">出生時刻を入力すると、軸4（楽天／慎重）や紫微斗数の命宮などが精確に計算され、タイプ判定の精度が上がります。</div>' : '';
+          return '<div style="max-width:720px; margin:0 auto 18px; padding:10px 14px; background:'+bg+'; border:1px solid '+border+'; border-radius:6px; text-align:left;">' +
+            '<div style="font-size:14px; color:var(--gold); font-weight:700;">ⓘ ' + label + '</div>' +
+            warnHtml + hint +
+          '</div>';
+        })() +
+        // 画像と詳細カードを2カラムで同じ高さに
+        (typeInfo.personality ?
+          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(280px, 420px) 1fr; gap:24px; max-width:1040px; margin:0 auto 20px; align-items:stretch; text-align:left;">' +
+            '<div style="display:flex; align-items:center; justify-content:center;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="max-width:100%; max-height:100%; width:auto; height:auto; border-radius:8px; display:block; object-fit:contain;">' : '') + '</div>' +
+            typeDetailCard +
+          '</div>'
+          :
+          // 拡張情報なし: 画像のみ中央表示
+          (typeImageSrc ? '<div style="max-width:340px; margin:0 auto 20px;"><img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;"></div>' : '')
+        ) +
+        // 4軸バー
+        '<div style="max-width:600px; margin:0 auto 16px; text-align:left;">' +
+        axisBar(tj.a1) + axisBar(tj.a2) + axisBar(tj.a3) + axisBar(tj.a4) +
+        '</div>' +
+        // 生き方の傾向
+        '<div style="font-size:13px; color:var(--muted); margin-bottom:14px;">' +
+        '生き方の傾向: <span style="color:var(--gold);">' + tj.m1.label + '</span> / <span style="color:var(--gold);">' + tj.m2.label + '</span>' +
+        '</div>' +
+        '<div style="font-size:16px; color:var(--text); line-height:1.8; max-width:760px; margin:0 auto; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);">'+personalityText+'</div>' +
+        '<div style="font-size:15px; color:#6a6050; line-height:1.7; max-width:760px; margin:6px auto 0;">'+timingText+'</div>' +
+        (() => {
+          // エネルギー分布（算命十二大従星）
+          const eY = sm.juuniYear?.e || 0;
+          const eM = sm.juuniMonth?.e || 0;
+          const eD = sm.juuniDay?.e || 0;
+          const eType = eY >= eM && eY >= eD ? "前半型" : eD >= eY && eD >= eM ? "後半型" : "均等型";
+          const eDesc = eType === "前半型" ? "人生の前半で大きく動き、後半は蓄えた知恵で影響を与える" : eType === "後半型" ? "じっくり力を蓄え、人生の後半で大きく花開く" : "生涯を通じて安定したエネルギーで歩む";
+          return '<div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(139,105,20,0.2); font-size:13px; color:var(--muted);">' +
+            '<span style="color:var(--gold); font-weight:700;">⚡ '+eType+'</span>（青年'+eY+' → 壮年'+eM+' → 晩年'+eD+'）' +
+            '<div style="font-size:13px; color:#6a6050; margin-top:4px;">'+eDesc+'</div></div>';
+        })() +
+        '<div style="font-size:12px; color:var(--muted); margin-top:10px;">タイプコード: '+tj.key+'</div>' +
+      '</div>' +
+      // 16タイプ一覧（自分に近い順）
+      (() => {
+        const TYPES_FULL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
+        const myKey = tj.key;
+        const myParts = myKey.split("_");
+        const axisNames = ["価値観", "視野", "役割", "気質"];
+        const AXIS_DISPLAY_MINI = {
+          "革新":"変化を求める","継承":"伝統を守る",
+          "広い":"広く見たい","狭い":"深く見たい",
+          "リーダー":"先頭に立つ","参謀":"サポートが得意",
+          "楽天":"楽観的","慎重":"慎重",
+        };
+        // 全16タイプを距離順に分類
+        const groups = [[], [], [], [], []]; // distance 0-4
+        Object.keys(TYPES_FULL).forEach(key => {
+          const parts = key.split("_");
+          let dist = 0;
+          const diffs = [];
+          parts.forEach((p, i) => {
+            if (p !== myParts[i]) { dist++; diffs.push({ axis: axisNames[i], from: myParts[i], to: p }); }
+          });
+          groups[dist].push({ key, type: TYPES_FULL[key], dist, diffs });
+        });
+        const groupTitles = [
+          "あなたのタイプ",
+          "近親タイプ（1軸だけ違う）",
+          "半分違うタイプ（2軸違う）",
+          "ほぼ反対タイプ（3軸違う）",
+          "対極タイプ（全4軸違う）"
+        ];
+        const miniCard = (item) => {
+          const img = typeImageMap[item.type.name] ? '16typecard/'+typeImageMap[item.type.name] : null;
+          const diffBadges = item.dist === 0 ? '' :
+            item.diffs.map(dd => '<span style="display:inline-block; padding:2px 6px; font-size:11px; background:rgba(201,147,58,0.15); color:#8a7050; border-radius:3px; margin-right:3px;">'+dd.axis+': '+(AXIS_DISPLAY_MINI[dd.from]||dd.from)+'→'+(AXIS_DISPLAY_MINI[dd.to]||dd.to)+'</span>').join('');
+          const isMe = item.dist === 0;
+          const borderStyle = isMe ? '2px solid var(--gold)' : '1px solid var(--border)';
+          return '<div style="padding:12px; background:'+(isMe?'rgba(201,147,58,0.10)':'#fff')+'; border:'+borderStyle+'; border-radius:8px; display:flex; gap:12px; align-items:flex-start;">' +
+            (img ? '<img src="'+img+'" alt="'+item.type.name+'" style="width:70px; height:105px; object-fit:cover; border-radius:4px; flex-shrink:0;">' : '') +
+            '<div style="flex:1; min-width:0;">' +
+              '<div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+item.type.name+(isMe?' ★':'')+'</div>' +
+              '<div style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:6px;">'+item.type.desc+'</div>' +
+              (diffBadges ? '<div style="margin-top:6px;">'+diffBadges+'</div>' : '') +
+            '</div>' +
+          '</div>';
+        };
+        let body = '';
+        for (let d2 = 1; d2 <= 4; d2++) {
+          if (groups[d2].length === 0) continue;
+          body += '<div style="margin-top:18px;">' +
+            '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:10px; letter-spacing:1px;">'+groupTitles[d2]+'（'+groups[d2].length+'タイプ）</div>' +
+            '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px;">' +
+            groups[d2].map(miniCard).join('') +
+            '</div>' +
+          '</div>';
+        }
+        return '<details style="margin:20px auto 0; max-width:1040px; text-align:left;">' +
+          '<summary style="cursor:pointer; padding:12px 18px; background:rgba(201,147,58,0.08); border:1px solid var(--gold); border-radius:8px; font-size:15px; color:var(--gold); font-weight:700; text-align:center; list-style:none;">▼ 他のタイプも見る（自分に近い順・全16タイプ）</summary>' +
+          '<div style="padding:8px 4px;">' + body + '</div>' +
+        '</details>';
+      })();
+    })()}
+    `;
+
+    html += `
     <div class="section-title">命盤の核</div>
     <div class="card hi" style="margin-bottom:16px;">
       <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;">
@@ -8118,18 +8594,19 @@ function renderConsult(){
 
     <div class="section-title">9占術が一致するテーマ — 統合傾向レーダー</div>
     <div class="card" style="margin-bottom:20px;">
-      <p style="font-size:14px; color:#6a6050; margin-bottom:16px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向は確実です。</p>
+      <p style="font-size:14px; color:#6a6050; margin-bottom:8px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向は確実です。</p>
+      <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">このレーダーは「どれだけ持っているか（能力の量）」を示します。上の16タイプ診断は「それをどう使うか（指向の方向）」を示します。たとえば統率力が高くても、マーヴェリックのように群れを率いず一人で発揮するタイプもいます。</p>
       ${(() => {
         // 8つの傾向軸を定義
         const axes = [
-          {id:"action", label:"行動力・即応性", short:"行動力", desc:"すぐ動ける力"},
-          {id:"think", label:"思考の深さ・分析力", short:"思考・分析", desc:"じっくり考える力"},
-          {id:"social", label:"社交性・人脈力", short:"社交・人脈", desc:"人と繋がる力"},
-          {id:"creative", label:"創造性・表現力", short:"創造・表現", desc:"新しいものを生む力"},
-          {id:"stable", label:"安定志向・堅実さ", short:"安定・堅実", desc:"地に足をつける力"},
-          {id:"intuition", label:"直感・スピリチュアル", short:"直感・霊性", desc:"見えないものを感じる力"},
-          {id:"leadership", label:"リーダーシップ・統率", short:"統率力", desc:"人を率いる力"},
-          {id:"nurture", label:"共感・育成力", short:"共感・育成", desc:"人を支え育てる力"},
+          {id:"action", label:"行動力", short:"行動力", desc:"すぐ動ける力"},
+          {id:"think", label:"思考力", short:"思考力", desc:"じっくり考える力"},
+          {id:"social", label:"社交性", short:"社交性", desc:"人と繋がる力"},
+          {id:"creative", label:"創造性", short:"創造性", desc:"新しいものを生む力"},
+          {id:"stable", label:"落ち着き・忍耐", short:"忍耐", desc:"動じない力、長期で積み上げる力"},
+          {id:"intuition", label:"感受性・直感", short:"感受性", desc:"感じ取る力、見えないものを掴む力"},
+          {id:"leadership", label:"統率力", short:"統率力", desc:"人を率いる力"},
+          {id:"nurture", label:"共感・育成", short:"共感力", desc:"人を支え育てる力"},
         ];
 
         // 各占術からの投票を計算（各占術は複数軸に投票可、ただし同じ軸に同じ占術は1票まで）
@@ -8367,7 +8844,8 @@ function renderConsult(){
         const addLifeVote = (axis, voter) => { if (!lifeVotes[axis].includes(voter)) lifeVotes[axis].push(voter); };
 
         // ── 紫微斗数: 各宮の主星の強さで投票 ──
-        const palaceToLife = {"財帛宮":"wealth","夫妻宮":"love","疾厄宮":"health","官禄宮":"career","遷移宮":"influence","福德宮":"spirit","田宅宮":"home","父母宮":"study","命宮":"career","子女宮":"love","兄弟宮":"home","僕役宮":"career"};
+        // 各宮1票のみ（「強」追加投票は廃止）。命宮・兄弟宮は除外
+        const palaceToLife = {"財帛宮":"wealth","夫妻宮":"love","疾厄宮":"health","官禄宮":"career","遷移宮":"influence","福德宮":"spirit","田宅宮":"home","父母宮":"study","子女宮":"love","僕役宮":"influence"};
         const strongStars = ["紫微","天府","太陽","太陰","武曲","天同","天機","廉貞","貪狼","巨門","天相","天梁","七殺","破軍"];
         for (let i=0; i<12; i++){
           const branchIdx = (d.lifeIdx - i + 12) % 12;
@@ -8376,61 +8854,75 @@ function renderConsult(){
           const lifeAxis = palaceToLife[palaceName];
           if (lifeAxis && stars.length > 0) {
             addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮",""));
-            // 星が2つ以上ある宮は特に強い
-            if (stars.length >= 2) addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮","")+"強");
           }
         }
 
-        // ── 四柱推命: 十神から投票 ──
+        // ── 四柱推命: 十神から投票（各十神1軸のみ）──
         const tenGods2 = d.pillars ? d.pillars.map(p=>p.ten).filter(Boolean) : [];
         if (tenGods2.includes("正財") || tenGods2.includes("偏財")) addLifeVote("wealth","四柱財");
-        if (tenGods2.includes("正官") || tenGods2.includes("偏官")) { addLifeVote("career","四柱官"); addLifeVote("influence","四柱官影"); }
-        if (tenGods2.includes("正印") || tenGods2.includes("偏印")) { addLifeVote("study","四柱印"); addLifeVote("spirit","四柱印精"); }
-        if (tenGods2.includes("食神") || tenGods2.includes("傷官")) { addLifeVote("wealth","四柱食財"); addLifeVote("spirit","四柱食精"); }
+        if (tenGods2.includes("正官") || tenGods2.includes("偏官")) addLifeVote("career","四柱官");
+        if (tenGods2.includes("正印") || tenGods2.includes("偏印")) addLifeVote("study","四柱印");
+        if (tenGods2.includes("食神") || tenGods2.includes("傷官")) addLifeVote("spirit","四柱食傷");
         if (tenGods2.includes("比肩") || tenGods2.includes("劫財")) addLifeVote("health","四柱比");
-        // 日主の五行から
-        if (dayMasterEl === "土") { addLifeVote("home","四柱土"); addLifeVote("health","四柱土健"); }
-        else if (dayMasterEl === "金") { addLifeVote("wealth","四柱金"); addLifeVote("career","四柱金仕"); }
-        else if (dayMasterEl === "水") { addLifeVote("study","四柱水"); addLifeVote("spirit","四柱水精"); }
-        else if (dayMasterEl === "木") { addLifeVote("health","四柱木"); addLifeVote("study","四柱木学"); }
-        else if (dayMasterEl === "火") { addLifeVote("influence","四柱火"); addLifeVote("love","四柱火愛"); }
 
-        // ── 西洋占星術: 天体から投票 ──
-        // 金星→恋愛＋財運
+        // ── 西洋占星術: 天体の星座元素で条件付き投票 ──
+        // 金星→恋愛（常に）
         addLifeVote("love","西洋♀");
-        if (venusSign.e === "土" || venusSign.e === "風") addLifeVote("wealth","西洋♀財");
-        // 木星→財運＋影響力
+        // 木星: 星座の元素で投票先を変える
         const jupiter = d.planets.find(p=>p.n==="木星");
-        if (jupiter) { addLifeVote("wealth","西洋♃"); addLifeVote("influence","西洋♃影"); }
-        // 土星→仕事＋家庭
+        if (jupiter) {
+          const jupEl = SIGNS[signOf(jupiter.lon)].e;
+          if (jupEl==="土") addLifeVote("wealth","西洋♃");
+          else if (jupEl==="火") addLifeVote("career","西洋♃");
+          else if (jupEl==="風") addLifeVote("influence","西洋♃");
+          else addLifeVote("spirit","西洋♃");
+        }
+        // 土星: 星座の元素で投票先を変える
         const saturn = d.planets.find(p=>p.n==="土星");
-        if (saturn) { addLifeVote("career","西洋♄"); addLifeVote("home","西洋♄家"); }
-        // 火星→健康＋仕事
-        addLifeVote("health","西洋♂");
-        if (marsSign.e === "火") addLifeVote("career","西洋♂仕");
-        // 水星→学び
-        addLifeVote("study","西洋☿");
-        // 月→精神＋家庭
-        addLifeVote("spirit","西洋☽");
-        addLifeVote("home","西洋☽家");
-        // 太陽→影響力
-        addLifeVote("influence","西洋☉");
+        if (saturn) {
+          const satEl = SIGNS[signOf(saturn.lon)].e;
+          if (satEl==="土"||satEl==="水") addLifeVote("career","西洋♄");
+          else if (satEl==="火") addLifeVote("health","西洋♄");
+          else addLifeVote("study","西洋♄");
+        }
+        // 火星: 火の星座なら健康、それ以外なら仕事
+        if (marsSign.e === "火") addLifeVote("health","西洋♂");
+        else addLifeVote("career","西洋♂");
+        // 水星: 風/水なら学び、それ以外なら仕事
+        const mercSign = SIGNS[signOf(d.planets.find(p=>p.n==="水星").lon)];
+        if (mercSign.e==="風"||mercSign.e==="水") addLifeVote("study","西洋☿");
+        else addLifeVote("career","西洋☿");
+        // 月: 水の星座なら精神、それ以外なら家庭
+        if (moonSign.e==="水") addLifeVote("spirit","西洋☽");
+        else addLifeVote("home","西洋☽");
+        // 太陽: 火の星座なら影響力、それ以外なら仕事
+        if (sunSign.e==="火") addLifeVote("influence","西洋☉");
+        else if (sunSign.e==="風") addLifeVote("influence","西洋☉");
+        else addLifeVote("career","西洋☉");
+        // 海王星合個人天体→精神
+        const neptLife = d.planets.find(p=>p.n==="海王星");
+        if (neptLife) {
+          const ppLife = d.planets.filter(p=>["太陽","月","水星","金星","火星"].includes(p.n));
+          if (ppLife.some(p=>{const df=Math.abs(p.lon-neptLife.lon);return(df>180?360-df:df)<=8;})) addLifeVote("spirit","西洋♆精");
+        }
 
-        // ── 算命学: 十二大従星エネルギーから健康に投票 ──
-        if (sm.juuniDay && sm.juuniDay.energy >= 8) addLifeVote("health","算命活力");
-        // 中央星から
+        // ── 算命学 ──
+        const totalEnergy = (sm.juuniYear?.e||0) + (sm.juuniMonth?.e||0) + (sm.juuniDay?.e||0);
+        if (totalEnergy >= 20) addLifeVote("health","算命活力");
         if (["車騎星","牽牛星"].includes(sm.stars.center)) addLifeVote("career","算命仕");
         if (["禄存星","司禄星"].includes(sm.stars.center)) addLifeVote("wealth","算命財");
         if (["鳳閣星","調舒星"].includes(sm.stars.center)) addLifeVote("spirit","算命精");
+        if (["石門星"].includes(sm.stars.center)) addLifeVote("influence","算命影");
+        if (["龍高星","玉堂星"].includes(sm.stars.center)) addLifeVote("study","算命学");
 
         // ── 数秘術 ──
-        const lpLife = {1:"career",2:"love",3:"influence",4:"home",5:"influence",6:"love",7:"study",8:"wealth",9:"spirit",11:"spirit",22:"career",33:"love"};
+        const lpLife = {1:"career",2:"love",3:"influence",4:"career",5:"influence",6:"love",7:"study",8:"wealth",9:"spirit",11:"spirit",22:"career",33:"love"};
         if (lpLife[nu.lifePath]) addLifeVote(lpLife[nu.lifePath],"数秘LP");
 
         // ── 九星気学 ──
-        const kyLife = {1:"study",2:"home",3:"career",4:"love",5:"influence",6:"career",7:"wealth",8:"home",9:"influence"};
+        const kyLife = {1:"study",2:"career",3:"career",4:"love",5:"influence",6:"career",7:"wealth",8:"career",9:"influence"};
         const ky2 = calcKyusei(d.y, d.m);
-        if (kyLife[ky2.honmei]) addLifeVote(kyLife[ky2.honmei],"九星");
+        if (kyLife[ky2.honmei] && lifeVotes[kyLife[ky2.honmei]]) addLifeVote(kyLife[ky2.honmei],"九星");
 
         // スコア計算
         const maxLifeVotes = Math.max(...lifeAxes.map(a => lifeVotes[a.id].length), 1);
