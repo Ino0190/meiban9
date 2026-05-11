@@ -1794,7 +1794,14 @@ ${(() => {
    抽象的な「気をつけましょう」ではなく、「具体的にこれをやれ」「これはやめろ」のレベルで。
    健康面の注意点も含めてください。
 
-6. 総合メッセージ — この人への手紙
+6. この人の物語 — 占術データから読み取れる人生のストーリー
+   幼少期→青年期→壮年期→現在→未来の流れを、占術データに基づいて「読み物」として描写してください。
+   大運・ダシャー・パーソナルイヤーの転換期を物語の節目に使い、
+   16タイプの個性を主人公の性格として描いてください。
+   「こういう子供だったはず」「こういう青年期を過ごしたはず」「これからこうなっていく」を
+   占術の根拠を示しながら、物語として語ってください。
+
+7. 総合メッセージ — この人への手紙
    全体を通じて、この人に最も伝えたいことを、温かく、しかし正直に。
 
 ※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星＋四化（生年干・大限干・流年干）を実装済み。算命学は人体星図（十大主星＋十二大従星）＋天中殺を実装。マヤ暦・宿曜・インド占星術（ダシャー＋ナクシャトラ）も計算済みです。
@@ -1980,7 +1987,13 @@ ${typeInfoText}
    占術間で「危険信号」が出ている部分を率直に指摘。
    「こうすればうまくいく」の具体的アドバイスも。
 
-5. 総合メッセージ — この2人への手紙
+5. 2人の物語 — この2人が出会い、関係を深めていくストーリー
+   それぞれの人生の物語（幼少期→青年期→現在）を簡潔に描いた上で、
+   2人が出会った必然性、惹かれ合う理由、ぶつかるポイント、
+   乗り越えた先の関係を物語として描写してください。
+   宿曜の関係性（${shukuyoRel.name}）と16タイプの軸差を物語の骨格に使ってください。
+
+6. 総合メッセージ — この2人への手紙
    全体を通じて、この2人に最も伝えたいことを温かく、しかし正直に。
 `;
 }
@@ -2092,6 +2105,12 @@ function renderCompatTypeCard(d, db, smA, nuA) {
     const tjA = TypeJudge.judge(d, smA, nuA, kyA, maA, siA, jyA);
     const tjB = TypeJudge.judge(db, smB, nuB, kyB, maB, siB, jyB);
 
+    // 個性タグ取得
+    const radarA = calcPersonalityRadar(d, smA, nuA);
+    const hlA = personalityHighlight(radarA, tjA.type.name, tjA.a3.winner);
+    const radarB = calcPersonalityRadar(db, smB, nuB);
+    const hlB = personalityHighlight(radarB, tjB.type.name, tjB.a3.winner);
+
     const typeImageMap = {
       "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
       "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
@@ -2165,14 +2184,18 @@ function renderCompatTypeCard(d, db, smA, nuA) {
           '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">あなた</div>' +
           (imgA ? '<img src="'+imgA+'" alt="'+tjA.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
           '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjA.type.name+'</div>' +
-          '<div style="font-size:13px; color:#6a6050; line-height:1.6;">'+tjA.type.desc+'</div>' +
+          '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjA.type.desc+'</div>' +
+          (hlA && hlA.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlA.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlA.text+'</div>' : '') +
+          (tjA.type.personality ? '<div style="font-size:13px; color:#6a6050; line-height:1.7; margin-top:10px; text-align:left; border-top:1px solid rgba(201,147,58,0.2); padding-top:10px;">'+tjA.type.personality+'</div>' : '') +
         '</div>' +
         // お相手
         '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
           '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">お相手</div>' +
           (imgB ? '<img src="'+imgB+'" alt="'+tjB.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
           '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjB.type.name+'</div>' +
-          '<div style="font-size:13px; color:#6a6050; line-height:1.6;">'+tjB.type.desc+'</div>' +
+          '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjB.type.desc+'</div>' +
+          (hlB && hlB.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlB.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlB.text+'</div>' : '') +
+          (tjB.type.personality ? '<div style="font-size:13px; color:#6a6050; line-height:1.7; margin-top:10px; text-align:left; border-top:1px solid rgba(201,147,58,0.2); padding-top:10px;">'+tjB.type.personality+'</div>' : '') +
         '</div>' +
       '</div>' +
       // 4軸比較テーブル
@@ -5157,37 +5180,45 @@ function calcPersonalityRadar(pd, smData, nuData) {
 }
 
 // レーダー上位2軸の組み合わせからタイプ内の個性タグ＋解釈文を生成
-function personalityHighlight(votes, typeName) {
+function personalityHighlight(votes, typeName, axis3Winner) {
   const ENTRIES = Object.entries(votes).sort((a,b) => b[1] - a[1]);
   if (ENTRIES.length < 2 || ENTRIES[0][1] === 0) return null;
   const top = ENTRIES.slice(0, 2).map(([k,v]) => ({ id:k, v }));
   const LABELS = {action:"行動力", think:"思考力", social:"社交性", creative:"創造性", stable:"落ち着き・忍耐", intuition:"感受性・直感", leadership:"統率力", nurture:"共感・育成"};
   // 組み合わせのキー（アルファベット順で正規化）
   const key = [top[0].id, top[1].id].sort().join("+");
-  // 組み合わせ別の解釈文（28通り = C(8,2)）
+  const isSanbo = axis3Winner === "参謀"; // 参謀タイプかどうか
+  // 組み合わせ別の解釈文（統率力を含む組み合わせはリーダー/参謀で分岐）
   const COMBOS = {
     "action+creative":     { tag:"発明家タイプ",     text:"手を動かしながら新しいものを形にするタイプ。頭で考えるより先に試作する。" },
     "action+intuition":    { tag:"直感で動くタイプ", text:"理屈より勘で動く。動き出す速さと感度の鋭さが武器。" },
-    "action+leadership":   { tag:"突破型リーダー",   text:"先頭に立ち、行動で人を引っ張るタイプ。止まるより動く方が力が出る。" },
+    "action+leadership":   { tag: isSanbo ? "裏で動かす実力者" : "突破型リーダー",
+                             text: isSanbo ? "表には出ないが、実行力で組織を動かす。気づけば自分が要になっている。" : "先頭に立ち、行動で人を引っ張るタイプ。止まるより動く方が力が出る。" },
     "action+nurture":      { tag:"面倒見の良い実務家", text:"黙々と動きながら周囲を支える。実務と人への気配りを両立する。" },
     "action+social":       { tag:"フットワークの人", text:"人の輪と現場の両方を行き来する。動き続けることで繋がりが生まれる。" },
     "action+stable":       { tag:"地道な実行力",     text:"派手さはないが、継続して動き続ける粘りが最大の武器。" },
     "action+think":        { tag:"考えて動く実務家", text:"行動と熟慮のバランス型。戦略を立て、着実に実行に移せる。" },
     "creative+intuition":  { tag:"独自世界の芸術家", text:"感性で掴み、創作で表現する。理屈より美と共鳴で動く。" },
-    "creative+leadership": { tag:"ビジョナリー型リーダー", text:"新しい世界観を示しながら人を巻き込む。アートと組織をつなぐ力。" },
+    "creative+leadership": { tag: isSanbo ? "構想を描く黒幕" : "ビジョナリー型リーダー",
+                             text: isSanbo ? "新しい世界観を裏で設計し、誰かに実行させる。アイデアの源泉。" : "新しい世界観を示しながら人を巻き込む。アートと組織をつなぐ力。" },
     "creative+nurture":    { tag:"優しい作り手",     text:"人の心に寄り添う創作をする。癒しの表現者。" },
     "creative+social":     { tag:"表現で繋がる人",   text:"人の前で創り、交わりの中から作品が生まれる。場を楽しませる創作者。" },
     "creative+stable":     { tag:"職人的な作り手",   text:"長年かけて独自の世界を磨く。派手さより完成度を追う。" },
     "creative+think":      { tag:"構想型クリエイター", text:"緻密な設計図を描き、論理と美意識を両立させる。" },
-    "intuition+leadership":{ tag:"勘の良いリーダー", text:"理屈抜きで本質を掴み、決断に迷わない。カリスマ性を持つ。" },
+    "intuition+leadership":{ tag: isSanbo ? "本質を見抜く参謀" : "勘の良いリーダー",
+                             text: isSanbo ? "理屈抜きで本質を掴み、的確な助言で組織を正しい方向に導く。" : "理屈抜きで本質を掴み、決断に迷わない。カリスマ性を持つ。" },
     "intuition+nurture":   { tag:"共感の達人",       text:"相手の気持ちを瞬時に読み、必要な言葉や手を差し出せる。" },
     "intuition+social":    { tag:"場の空気を読む人", text:"集団の機微を感じ取り、軽やかに振る舞う。居心地の良さを作る才能。" },
     "intuition+stable":    { tag:"静かな洞察者",     text:"表に出ず、長年かけて深い理解を積み上げる。発する言葉に重みがある。" },
     "intuition+think":     { tag:"深く見抜く人",     text:"論理と直感の両輪。表面の奥にある本質を掴む分析眼。" },
-    "leadership+nurture":  { tag:"信頼されるリーダー", text:"力で引っ張るのではなく、支えと導きで人を動かす。組織の要になりやすい。" },
-    "leadership+social":   { tag:"華やかな人望家",   text:"人に愛され、自然と中心に立つ。社交の場でのリーダーシップが光る。" },
-    "leadership+stable":   { tag:"ブレない指揮官",   text:"動じず、長期の視点で組織を率いる。伝統を守りつつ進化させる。" },
-    "leadership+think":    { tag:"戦略家",           text:"冷静な分析で方針を決め、組織を動かす。感情より論理で判断する。" },
+    "leadership+nurture":  { tag: isSanbo ? "静かに導く参謀" : "信頼されるリーダー",
+                             text: isSanbo ? "力で引っ張らず、支えと導きで人を正しい方向に動かす。影の要。" : "力で引っ張るのではなく、支えと導きで人を動かす。組織の要になりやすい。" },
+    "leadership+social":   { tag: isSanbo ? "人脈で動かす人" : "華やかな人望家",
+                             text: isSanbo ? "広い人脈を裏で活かし、必要な人を必要な場所に配置する。" : "人に愛され、自然と中心に立つ。社交の場でのリーダーシップが光る。" },
+    "leadership+stable":   { tag: isSanbo ? "ブレない番頭" : "ブレない指揮官",
+                             text: isSanbo ? "動じず、長期の視点で組織を支える。トップの右腕として機能する。" : "動じず、長期の視点で組織を率いる。伝統を守りつつ進化させる。" },
+    "leadership+think":    { tag: isSanbo ? "影の軍師" : "戦略家",
+                             text: isSanbo ? "冷静な分析で最適解を導き、表に立つ人に判断材料を渡す。" : "冷静な分析で方針を決め、組織を動かす。感情より論理で判断する。" },
     "nurture+social":      { tag:"場を温める人",     text:"人と人をつなぎ、場を和ませる。みんなの居場所を作る才能。" },
     "nurture+stable":      { tag:"縁の下の力持ち",   text:"目立たず、黙々と支え続ける。いなくなった時に存在の大きさが分かるタイプ。" },
     "nurture+think":       { tag:"知性ある世話役",   text:"論理的に人を支える。カウンセラー気質で、冷静な助言ができる。" },
@@ -8414,7 +8445,7 @@ function renderConsult(){
         let highlightHtml = '';
         try {
           const radarVotes = calcPersonalityRadar(d, sm2, nu2);
-          const highlight = personalityHighlight(radarVotes, typeInfo.name);
+          const highlight = personalityHighlight(radarVotes, typeInfo.name, tj.a3.winner);
           if (highlight && highlight.tag) {
             highlightHtml = '<div style="padding:14px 18px; background:rgba(201,147,58,0.08); border-left:3px solid var(--gold); border-radius:4px; margin-bottom:18px;">' +
               '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; font-weight:700;">あなたの'+typeInfo.name+'像</div>' +
@@ -10335,7 +10366,7 @@ function shareTypeResult() {
   const tj = TypeJudge.judge(d, sm2, nu2, ky2, ma2, si2, jy2);
   const typeInfo = tj.type;
   const radarVotes = calcPersonalityRadar(d, sm2, nu2);
-  const highlight = personalityHighlight(radarVotes, typeInfo.name);
+  const highlight = personalityHighlight(radarVotes, typeInfo.name, tj.a3.winner);
   const tagLine = highlight && highlight.tag ? `\n✨ ${highlight.tag}\n${highlight.text}` : '';
   const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」${tagLine}`;
   const shareUrl = 'https://ino0190.github.io/meiban9/';
@@ -10509,7 +10540,7 @@ function downloadTypeImage() {
 
   // 個性タグ取得
   const radarVotes = calcPersonalityRadar(d, sm2, nu2);
-  const highlight = personalityHighlight(radarVotes, typeInfo.name);
+  const highlight = personalityHighlight(radarVotes, typeInfo.name, tj.a3.winner);
 
   const S = 1080;
   const canvas = document.createElement("canvas");
