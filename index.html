@@ -8404,31 +8404,45 @@ function renderConsult(){
       };
       const typeImageSrc = typeImageMap[typeInfo.name] ? '16typecard/'+typeImageMap[typeInfo.name] : null;
 
-      // タイプ詳細カード（拡張情報があれば生成、内部2カラム）
+      // タイプ詳細カード（拡張情報があれば生成）
       const typeDetailCard = (() => {
         if (!typeInfo.personality) return '';
-        const sect = (title, body) => '<div style="margin-top:14px; break-inside:avoid;"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700;">'+title+'</div><div style="font-size:15px; color:var(--text); line-height:1.8;">'+body+'</div></div>';
+        const sect = (title, body) => '<div style="break-inside:avoid;"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700;">'+title+'</div><div style="font-size:15px; color:var(--text); line-height:1.8;">'+body+'</div></div>';
         const list = arr => '<ul style="margin:0; padding-left:20px; font-size:15px; color:var(--text); line-height:1.8;">' + arr.map(x => '<li>'+x+'</li>').join('') + '</ul>';
-        let out = '<div style="text-align:left; padding:20px 24px; background:rgba(255,255,255,0.5); border-radius:8px; column-count:2; column-gap:28px; column-rule:1px solid rgba(139,105,20,0.15); box-sizing:border-box;">';
-        // あなたの個性（レーダー上位2軸から生成）— 先頭に配置
+
+        // あなたの個性（レーダー上位2軸から生成）— 全幅で上に配置
+        let highlightHtml = '';
         try {
           const radarVotes = calcPersonalityRadar(d, sm2, nu2);
           const highlight = personalityHighlight(radarVotes, typeInfo.name);
           if (highlight && highlight.tag) {
-            out += '<div style="margin-bottom:14px; break-inside:avoid; padding:10px 12px; background:rgba(201,147,58,0.08); border-left:3px solid var(--gold); border-radius:4px;">' +
+            highlightHtml = '<div style="padding:14px 18px; background:rgba(201,147,58,0.08); border-left:3px solid var(--gold); border-radius:4px; margin-bottom:18px;">' +
               '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; font-weight:700;">あなたの'+typeInfo.name+'像</div>' +
-              '<div style="font-size:15px; color:var(--text); line-height:1.8; font-weight:700; margin-bottom:4px;">'+highlight.tag+'</div>' +
-              '<div style="font-size:14px; color:var(--text); line-height:1.7; margin-bottom:6px;">'+highlight.text+'</div>' +
-              '<div style="font-size:13px; color:#8a7050;">特に強い資質: <span style="color:var(--gold); font-weight:700;">'+highlight.top1.label+'('+highlight.top1.v+')</span> / <span style="color:var(--gold); font-weight:700;">'+highlight.top2.label+'('+highlight.top2.v+')</span></div>' +
+              '<div style="font-size:18px; color:var(--text); line-height:1.8; font-weight:700; margin-bottom:6px;">'+highlight.tag+'</div>' +
+              '<div style="font-size:15px; color:var(--text); line-height:1.7;">'+highlight.text+'</div>' +
+              '<div style="font-size:14px; color:#8a7050; margin-top:8px;">特に強い資質: <span style="color:var(--gold); font-weight:700;">'+highlight.top1.label+'('+highlight.top1.v+')</span> / <span style="color:var(--gold); font-weight:700;">'+highlight.top2.label+'('+highlight.top2.v+')</span></div>' +
             '</div>';
           }
-        } catch(e) { console.warn("個性生成エラー:", e); }
-        out += sect('性格', typeInfo.personality);
-        if (typeInfo.strengths) out += sect('強み', list(typeInfo.strengths));
-        if (typeInfo.challenges) out += sect('気をつけたいこと', list(typeInfo.challenges));
-        if (typeInfo.careerFit) out += sect('向いている仕事', typeInfo.careerFit);
-        out += '</div>';
-        return out;
+        } catch(e) {}
+
+        // 右側コンテンツ（性格→向いている仕事→[強み|気をつけたいこと]）
+        let rightContent = '<div style="display:flex; flex-direction:column; gap:14px; text-align:left;">';
+        rightContent += sect('性格', typeInfo.personality);
+        if (typeInfo.careerFit) rightContent += sect('向いている仕事', typeInfo.careerFit);
+        if (typeInfo.strengths || typeInfo.challenges) {
+          rightContent += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">';
+          if (typeInfo.strengths) rightContent += '<div>' + sect('強み', list(typeInfo.strengths)) + '</div>';
+          if (typeInfo.challenges) rightContent += '<div>' + sect('気をつけたいこと', list(typeInfo.challenges)) + '</div>';
+          rightContent += '</div>';
+        }
+        rightContent += '</div>';
+
+        // 全体構成: 個性像（全幅）→ [画像 | 右コンテンツ]
+        return highlightHtml +
+          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(260px, 380px) 1fr; gap:20px; align-items:start;">' +
+            '<div style="position:sticky; top:20px;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;">' : '') + '</div>' +
+            '<div style="padding:16px 20px; background:rgba(255,255,255,0.4); border-radius:8px;">' + rightContent + '</div>' +
+          '</div>';
       })();
 
       return '<div style="text-align:center; margin-bottom:28px; padding:28px 20px; background:linear-gradient(135deg, #fdf6e8 0%, #f5f0e4 100%); border-radius:12px; border:1px solid var(--gold);">' +
@@ -8452,10 +8466,7 @@ function renderConsult(){
         })() +
         // 画像と詳細カードを2カラムで同じ高さに
         (typeInfo.personality ?
-          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(280px, 420px) 1fr; gap:24px; max-width:1040px; margin:0 auto 20px; align-items:stretch; text-align:left;">' +
-            '<div style="display:flex; align-items:center; justify-content:center;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="max-width:100%; max-height:100%; width:auto; height:auto; border-radius:8px; display:block; object-fit:contain;">' : '') + '</div>' +
-            typeDetailCard +
-          '</div>'
+          '<div style="max-width:1040px; margin:0 auto 20px; text-align:left;">' + typeDetailCard + '</div>'
           :
           // 拡張情報なし: 画像のみ中央表示
           (typeImageSrc ? '<div style="max-width:340px; margin:0 auto 20px;"><img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;"></div>' : '')
@@ -8483,6 +8494,15 @@ function renderConsult(){
         })() +
         '<div style="font-size:12px; color:var(--muted); margin-top:10px;">タイプコード: '+tj.key+'</div>' +
       '</div>' +
+      // シェアボタン
+      (() => {
+        const shareText = `🔮 羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」\n生き方の傾向: ${tj.m1.label} / ${tj.m2.label}\n\n▶ あなたも占ってみる`;
+        const shareTitle = `羅占盤 — ${typeInfo.name}`;
+        return '<div style="text-align:center; margin:16px auto 20px; max-width:600px;">' +
+          '<button onclick="shareTypeResult()" style="padding:14px 36px; background:var(--gold); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:1px;">結果をシェア</button>' +
+          '<div id="share-status" style="font-size:13px; color:var(--muted); margin-top:8px;"></div>' +
+        '</div>';
+      })() +
       // 16タイプ一覧（自分に近い順）
       (() => {
         const TYPES_FULL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
@@ -10296,6 +10316,337 @@ function exportForAI(){
     document.body.appendChild(close);
     ta.select();
   });
+}
+
+// ── SNSシェア機能（画像＋テキスト＋URL一括）──
+function shareTypeResult() {
+  if (!currentData) return;
+  const d = currentData;
+  const sm2 = calcJintai(d);
+  const nu2 = calcNumerology(d.y, d.m, d.d);
+  const ky2 = calcKyusei(d.y, d.m);
+  const ma2 = calcMaya(d.y, d.m, d.d);
+  const si2 = calcShukuyo(d.moonLon);
+  let jy2 = null;
+  if (typeof ayanamsha === 'function') {
+    const ay = ayanamsha(d.jd);
+    jy2 = {sunRashi:Math.floor(norm360(d.sunLon-ay)/30), moonRashi:Math.floor(norm360(d.moonLon-ay)/30), lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};
+  }
+  const tj = TypeJudge.judge(d, sm2, nu2, ky2, ma2, si2, jy2);
+  const typeInfo = tj.type;
+  const radarVotes = calcPersonalityRadar(d, sm2, nu2);
+  const highlight = personalityHighlight(radarVotes, typeInfo.name);
+  const tagLine = highlight && highlight.tag ? `\n✨ ${highlight.tag}\n${highlight.text}` : '';
+  const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」${tagLine}`;
+  const shareUrl = 'https://ino0190.github.io/meiban9/';
+
+  // Canvas画像を生成してからシェア
+  generateShareImage(typeInfo, tj, highlight, (blob) => {
+    const file = new File([blob], `rasenban_${typeInfo.name}.png`, { type: 'image/png' });
+
+    // スマホ: Web Share API（画像＋テキスト＋URL）
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        title: `羅占盤 — ${typeInfo.name}`,
+        text: shareText,
+        url: shareUrl,
+        files: [file],
+      }).catch(() => {});
+    } else if (navigator.share) {
+      // filesは非対応だがshareは対応（テキスト＋URLのみ）→画像はダウンロード
+      triggerDownload2(blob, typeInfo.name);
+      navigator.share({ title: `羅占盤 — ${typeInfo.name}`, text: shareText, url: shareUrl }).catch(() => {});
+    } else {
+      // PC: 画像ダウンロード＋テキストコピー
+      triggerDownload2(blob, typeInfo.name);
+      navigator.clipboard.writeText(shareText + '\n\n▶ ' + shareUrl).then(() => {
+        const st = document.getElementById("share-status");
+        if (st) { st.textContent = "✓ 画像を保存＋テキストをコピーしました"; setTimeout(() => { st.textContent = ""; }, 3000); }
+      }).catch(() => {});
+    }
+  });
+}
+
+function triggerDownload2(blob, typeName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.download = `rasenban_${typeName}.png`;
+  link.href = url;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function generateShareImage(typeInfo, tj, highlight, callback) {
+  const S = 1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = S;
+  canvas.height = S;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#1a1208";
+  ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = "#c9933a";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(16, 16, S-32, S-32);
+
+  const typeImageMap = {
+    "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
+    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+    "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
+    "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+  };
+  const imgFile = typeImageMap[typeInfo.name];
+
+  const drawOverlay = () => {
+    const overlay = ctx.createLinearGradient(480, 0, S, 0);
+    overlay.addColorStop(0, "rgba(26,18,8,0)");
+    overlay.addColorStop(0.3, "rgba(26,18,8,0.85)");
+    overlay.addColorStop(1, "rgba(26,18,8,0.95)");
+    ctx.fillStyle = overlay;
+    ctx.fillRect(0, 0, S, S);
+
+    const bottomOv = ctx.createLinearGradient(0, S-140, 0, S);
+    bottomOv.addColorStop(0, "rgba(26,18,8,0)");
+    bottomOv.addColorStop(1, "rgba(26,18,8,0.9)");
+    ctx.fillStyle = bottomOv;
+    ctx.fillRect(0, S-140, S, 140);
+
+    const rx = 550;
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("🔮 羅占盤", rx, 70);
+
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "bold 56px sans-serif";
+    ctx.fillText(typeInfo.name, rx, 140);
+
+    ctx.fillStyle = "#d8ccb8";
+    ctx.font = "18px sans-serif";
+    const desc = typeInfo.desc;
+    if (desc.length > 16) {
+      ctx.fillText(desc.slice(0, 16), rx, 185);
+      ctx.fillText(desc.slice(16), rx, 212);
+    } else {
+      ctx.fillText(desc, rx, 185);
+    }
+
+    ctx.strokeStyle = "rgba(201,147,58,0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(rx, 240); ctx.lineTo(S-50, 240); ctx.stroke();
+
+    if (highlight && highlight.tag) {
+      ctx.fillStyle = "#c9933a";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`あなたの${typeInfo.name}像`, rx, 280);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 32px sans-serif";
+      ctx.fillText(highlight.tag, rx, 325);
+      ctx.fillStyle = "#d8ccb8";
+      ctx.font = "16px sans-serif";
+      const maxW = S - rx - 50;
+      let line = "", lineY = 365;
+      for (const ch of highlight.text) {
+        if (ctx.measureText(line + ch).width > maxW) {
+          ctx.fillText(line, rx, lineY);
+          line = ch; lineY += 26;
+        } else { line += ch; }
+      }
+      if (line) ctx.fillText(line, rx, lineY);
+      ctx.fillStyle = "#c9933a";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(`${highlight.top1.label}(${highlight.top1.v}) / ${highlight.top2.label}(${highlight.top2.v})`, rx, lineY + 50);
+    }
+
+    ctx.fillStyle = "#8a7050";
+    ctx.font = "16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`生き方の傾向: ${tj.m1.label} / ${tj.m2.label}`, S/2, S-65);
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("rasenban — 9つの占術で読む、あなたの命盤", S/2, S-38);
+  };
+
+  const finalize = () => {
+    canvas.toBlob((blob) => { callback(blob); }, 'image/png');
+  };
+
+  if (imgFile) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const imgRatio = img.width / img.height;
+      const drawH = S;
+      const drawW = drawH * imgRatio;
+      ctx.drawImage(img, 0, 0, drawW, drawH);
+      drawOverlay();
+      finalize();
+    };
+    img.onerror = () => { drawOverlay(); finalize(); };
+    img.src = "16typecard/" + imgFile;
+  } else {
+    drawOverlay();
+    finalize();
+  }
+}
+
+function downloadTypeImage() {
+  if (!currentData) return;
+  const d = currentData;
+  const sm2 = calcJintai(d);
+  const nu2 = calcNumerology(d.y, d.m, d.d);
+  const ky2 = calcKyusei(d.y, d.m);
+  const ma2 = calcMaya(d.y, d.m, d.d);
+  const si2 = calcShukuyo(d.moonLon);
+  let jy2 = null;
+  if (typeof ayanamsha === 'function') {
+    const ay = ayanamsha(d.jd);
+    jy2 = {sunRashi:Math.floor(norm360(d.sunLon-ay)/30), moonRashi:Math.floor(norm360(d.moonLon-ay)/30), lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};
+  }
+  const tj = TypeJudge.judge(d, sm2, nu2, ky2, ma2, si2, jy2);
+  const typeInfo = tj.type;
+
+  // 個性タグ取得
+  const radarVotes = calcPersonalityRadar(d, sm2, nu2);
+  const highlight = personalityHighlight(radarVotes, typeInfo.name);
+
+  const S = 1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = S;
+  canvas.height = S;
+  const ctx = canvas.getContext("2d");
+
+  // ダーク背景
+  ctx.fillStyle = "#1a1208";
+  ctx.fillRect(0, 0, S, S);
+
+  // 金枠
+  ctx.strokeStyle = "#c9933a";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(16, 16, S-32, S-32);
+
+  const typeImageMap = {
+    "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
+    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+    "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
+    "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+  };
+  const imgFile = typeImageMap[typeInfo.name];
+
+  const drawOverlay = () => {
+    // 右側に半透明グラデーション
+    const overlay = ctx.createLinearGradient(480, 0, S, 0);
+    overlay.addColorStop(0, "rgba(26,18,8,0)");
+    overlay.addColorStop(0.3, "rgba(26,18,8,0.85)");
+    overlay.addColorStop(1, "rgba(26,18,8,0.95)");
+    ctx.fillStyle = overlay;
+    ctx.fillRect(0, 0, S, S);
+
+    // 下部グラデーション
+    const bottomOv = ctx.createLinearGradient(0, S-140, 0, S);
+    bottomOv.addColorStop(0, "rgba(26,18,8,0)");
+    bottomOv.addColorStop(1, "rgba(26,18,8,0.9)");
+    ctx.fillStyle = bottomOv;
+    ctx.fillRect(0, S-140, S, 140);
+
+    const rx = 550;
+
+    // 羅占盤
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("🔮 羅占盤", rx, 70);
+
+    // タイプ名
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "bold 56px sans-serif";
+    ctx.fillText(typeInfo.name, rx, 140);
+
+    // タグライン
+    ctx.fillStyle = "#d8ccb8";
+    ctx.font = "18px sans-serif";
+    const desc = typeInfo.desc;
+    if (desc.length > 16) {
+      ctx.fillText(desc.slice(0, 16), rx, 185);
+      ctx.fillText(desc.slice(16), rx, 212);
+    } else {
+      ctx.fillText(desc, rx, 185);
+    }
+
+    // 区切り線
+    ctx.strokeStyle = "rgba(201,147,58,0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(rx, 240); ctx.lineTo(S-50, 240); ctx.stroke();
+
+    // あなたの○○像
+    if (highlight && highlight.tag) {
+      ctx.fillStyle = "#c9933a";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText(`あなたの${typeInfo.name}像`, rx, 280);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 32px sans-serif";
+      ctx.fillText(highlight.tag, rx, 325);
+
+      // 解釈文（折り返し）
+      ctx.fillStyle = "#d8ccb8";
+      ctx.font = "16px sans-serif";
+      const maxW = S - rx - 50;
+      let line = "", lineY = 365;
+      for (const ch of highlight.text) {
+        if (ctx.measureText(line + ch).width > maxW) {
+          ctx.fillText(line, rx, lineY);
+          line = ch; lineY += 26;
+        } else { line += ch; }
+      }
+      if (line) ctx.fillText(line, rx, lineY);
+
+      // 強い資質
+      ctx.fillStyle = "#c9933a";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(`${highlight.top1.label}(${highlight.top1.v}) / ${highlight.top2.label}(${highlight.top2.v})`, rx, lineY + 50);
+    }
+
+    // 生き方の傾向
+    ctx.fillStyle = "#8a7050";
+    ctx.font = "16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`生き方の傾向: ${tj.m1.label} / ${tj.m2.label}`, S/2, S-65);
+
+    // フッター
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("rasenban — 9つの占術で読む、あなたの命盤", S/2, S-38);
+  };
+
+  if (imgFile) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      // キャラ画像を左に高さいっぱいで描画
+      const imgRatio = img.width / img.height;
+      const drawH = S;
+      const drawW = drawH * imgRatio;
+      ctx.drawImage(img, 0, 0, drawW, drawH);
+      drawOverlay();
+      triggerDownload(canvas, typeInfo.name);
+    };
+    img.onerror = () => { drawOverlay(); triggerDownload(canvas, typeInfo.name); };
+    img.src = "16typecard/" + imgFile;
+  } else {
+    drawOverlay();
+    triggerDownload(canvas, typeInfo.name);
+  }
+}
+
+function triggerDownload(canvas, typeName) {
+  const link = document.createElement("a");
+  link.download = `rasenban_${typeName}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  const st = document.getElementById("share-status");
+  if (st) { st.textContent = "✓ 画像を保存しました"; setTimeout(() => { st.textContent = ""; }, 3000); }
 }
 </script>
 </body>
