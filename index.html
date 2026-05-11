@@ -2094,7 +2094,7 @@ function renderCompatTypeCard(d, db, smA, nuA) {
 
     const typeImageMap = {
       "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-      "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+      "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
       "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
       "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
     };
@@ -8398,7 +8398,7 @@ function renderConsult(){
       // タイプ名→画像ファイル名のマッピング
       const typeImageMap = {
         "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-        "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+        "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
         "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
         "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
       };
@@ -8439,8 +8439,8 @@ function renderConsult(){
 
         // 全体構成: 個性像（全幅）→ [画像 | 右コンテンツ]
         return highlightHtml +
-          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(260px, 380px) 1fr; gap:20px; align-items:start;">' +
-            '<div style="position:sticky; top:20px;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;">' : '') + '</div>' +
+          '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(260px, 380px) 1fr; gap:20px; align-items:stretch;">' +
+            '<div>' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:100%; border-radius:8px; display:block; object-fit:cover;">' : '') + '</div>' +
             '<div style="padding:16px 20px; background:rgba(255,255,255,0.4); border-radius:8px;">' + rightContent + '</div>' +
           '</div>';
       })();
@@ -8615,7 +8615,7 @@ function renderConsult(){
     <div class="section-title">9占術が一致するテーマ — 統合傾向レーダー</div>
     <div class="card" style="margin-bottom:20px;">
       <p style="font-size:14px; color:#6a6050; margin-bottom:8px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向は確実です。</p>
-      <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">このレーダーは「どれだけ持っているか（能力の量）」を示します。上の16タイプ診断は「それをどう使うか（指向の方向）」を示します。たとえば統率力が高くても、マーヴェリックのように群れを率いず一人で発揮するタイプもいます。</p>
+      <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">このレーダーは「どれだけ持っているか（能力の量）」を示します。上の16タイプ診断は「それをどう使うか（指向の方向）」を示します。たとえば統率力が高くても、マーベリックのように群れを率いず一人で発揮するタイプもいます。</p>
       ${(() => {
         // 8つの傾向軸を定義
         const axes = [
@@ -10391,7 +10391,7 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
 
   const typeImageMap = {
     "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
     "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
     "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
   };
@@ -10528,7 +10528,7 @@ function downloadTypeImage() {
 
   const typeImageMap = {
     "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーヴェリック":"0Maverick01.png",
+    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
     "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
     "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
   };
@@ -10622,7 +10622,6 @@ function downloadTypeImage() {
 
   if (imgFile) {
     const img = new Image();
-    img.crossOrigin = "anonymous";
     img.onload = () => {
       // キャラ画像を左に高さいっぱいで描画
       const imgRatio = img.width / img.height;
@@ -10641,12 +10640,11 @@ function downloadTypeImage() {
 }
 
 function triggerDownload(canvas, typeName) {
+  // legacy — kept for compatibility but no longer called from UI
   const link = document.createElement("a");
   link.download = `rasenban_${typeName}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
-  const st = document.getElementById("share-status");
-  if (st) { st.textContent = "✓ 画像を保存しました"; setTimeout(() => { st.textContent = ""; }, 3000); }
 }
 </script>
 </body>
