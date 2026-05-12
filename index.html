@@ -1844,6 +1844,71 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
+【10】16タイプ判定（羅占盤タイプ）
+━━━━━━━━━━━━━━━━━━━━
+${(() => {
+  const sm = calcJintai(d);
+  const nu = calcNumerology(d.y, d.m, d.d);
+  const ky = calcKyusei(d.y, d.m);
+  const ma = calcMaya(d.y, d.m, d.d);
+  const si = calcShukuyo(d.moonLon);
+  let jy = null;
+  if (typeof ayanamsha === 'function') {
+    const ay = ayanamsha(d.jd);
+    jy = {sunRashi:Math.floor(norm360(d.sunLon-ay)/30), moonRashi:Math.floor(norm360(d.moonLon-ay)/30), lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};
+  }
+  const tj = TypeJudge.judge(d, sm, nu, ky, ma, si, jy);
+  const typeInfo = tj.type;
+  const AXIS_NAMES = ["価値観","視野","役割","気質"];
+  const AXIS_DISPLAY = {
+    "革新":"変化を求める","継承":"伝統を守る",
+    "広い":"広く見たい","狭い":"深く見たい",
+    "リーダー":"先頭に立つ","参謀":"サポートが得意",
+    "楽天":"楽観的","慎重":"慎重"
+  };
+  const axisResults = [tj.a1, tj.a2, tj.a3, tj.a4].map((a, i) => {
+    const winner = a.plus >= a.minus ? a.pn : a.mn;
+    const loser = a.plus >= a.minus ? a.mn : a.pn;
+    const total = a.plus + a.minus;
+    const pct = total > 0 ? Math.round(Math.max(a.plus, a.minus) / total * 100) : 50;
+    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（${pct}%確度、${a.plus}票 vs ${a.minus}票）\n    → ${AXIS_DISPLAY[winner]}側に判定。${AXIS_DISPLAY[loser]}側の要素も${Math.min(a.plus,a.minus)}票あり、完全な一方向ではない。`;
+  }).join("\n");
+
+  // 近いタイプとの違い
+  const myParts = tj.key.split("_");
+  const TYPES_ALL = TypeJudge.TYPES || {};
+  const neighbors = [];
+  Object.keys(TYPES_ALL).forEach(key => {
+    const parts = key.split("_");
+    let dist = 0;
+    const diffs = [];
+    parts.forEach((p, i) => { if (p !== myParts[i]) { dist++; diffs.push(AXIS_NAMES[i]); } });
+    if (dist === 1) neighbors.push({ name: TYPES_ALL[key].name, diff: diffs[0] });
+  });
+  const neighborText = neighbors.map(n => `  - ${n.name}（${n.diff}軸が逆）`).join("\n");
+
+  return `◆ 判定結果: ${typeInfo.name}
+◆ タイプコード: ${tj.key}
+◆ タグライン: ${typeInfo.desc}
+◆ 信頼度: ${tj.confidence}
+${tj.warnings.length > 0 ? "◆ 警告: " + tj.warnings.join(" / ") : ""}
+
+◆ 4軸の判定理由:
+${axisResults}
+
+◆ 生き方の傾向: ${tj.m1.label} / ${tj.m2.label}
+
+◆ 1軸違いの近いタイプ（判定が揺れる可能性のあるタイプ）:
+${neighborText}
+  → 上記タイプとの違いを意識して、この人が「なぜこのタイプなのか」を鑑定に反映してください。
+
+◆ 16タイプの意味:
+  このタイプ判定は9占術のデータから4軸（価値観/視野/役割/気質）×2極に投票し、
+  各軸の多数決で決定しています。「能力の量」ではなく「指向の方向」を示します。
+  同じ統率力が高い人でも、「先頭に立って率いる」タイプと「裏から導く」タイプに分かれます。`;
+})()}
+
+━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
 ━━━━━━━━━━━━━━━━━━━━
 上記の九占術のデータを統合して、以下の形式で鑑定してください。
