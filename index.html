@@ -8857,14 +8857,14 @@ function renderConsult(){
       ${(() => {
         // 8つの傾向軸を定義
         const axes = [
-          {id:"action", label:"行動力", short:"行動力", desc:"すぐ動ける力"},
-          {id:"think", label:"思考力", short:"思考力", desc:"じっくり考える力"},
-          {id:"social", label:"社交性", short:"社交性", desc:"人と繋がる力"},
-          {id:"creative", label:"創造性", short:"創造性", desc:"新しいものを生む力"},
-          {id:"stable", label:"落ち着き・忍耐", short:"忍耐", desc:"動じない力、長期で積み上げる力"},
-          {id:"intuition", label:"感受性・直感", short:"感受性", desc:"感じ取る力、見えないものを掴む力"},
-          {id:"leadership", label:"統率力", short:"統率力", desc:"人を率いる力"},
-          {id:"nurture", label:"共感・育成", short:"共感力", desc:"人を支え育てる力"},
+          {id:"action", label:"行動力", short:"行動力", desc:"考えるより先に動く。現場で体を使って突破する傾向"},
+          {id:"think", label:"思考力", short:"思考力", desc:"情報を集め、分析し、構造化してから判断する傾向"},
+          {id:"social", label:"社交性", short:"社交性", desc:"人と繋がることでエネルギーを得る。場を広げる傾向"},
+          {id:"creative", label:"創造性", short:"創造性", desc:"既存の枠を超え、新しい組み合わせを生み出す傾向"},
+          {id:"stable", label:"落ち着き・忍耐", short:"忍耐", desc:"動じず、長い時間をかけて積み上げる。安定を作る傾向"},
+          {id:"intuition", label:"感受性・直感", short:"感受性", desc:"言語化される前の空気や違和感を感覚的に捉える傾向"},
+          {id:"leadership", label:"統率力", short:"統率力", desc:"方向を示し、人を動かし、責任を引き受ける傾向"},
+          {id:"nurture", label:"共感・育成", short:"共感力", desc:"人の感情を理解し、成長を支え、安心を与える傾向"},
         ];
 
         // 各占術からの投票を計算（各占術は複数軸に投票可、ただし同じ軸に同じ占術は1票まで）
@@ -9062,9 +9062,10 @@ function renderConsult(){
         radarHtml += '<div>';
         scores.sort((a,b) => b.count - a.count).forEach(s => {
           const barW = Math.max(s.pct, 8);
-          radarHtml += '<div style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;"><span style="font-size:14px; font-weight:700; color:var(--text); width:140px;">'+s.label+'</span><span style="font-size:13px; color:var(--gold); font-weight:700;">'+s.count+'票</span></div>';
+          radarHtml += '<div style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;"><span style="font-size:14px; font-weight:700; color:var(--text); width:140px;">'+s.label+'</span><span style="font-size:13px; color:var(--gold); font-weight:700;">'+s.count+'票</span></div>';
           radarHtml += '<div style="display:flex; align-items:center; gap:6px;"><div style="flex:1; background:#f0ede6; border-radius:3px; height:8px; overflow:hidden;"><div style="width:'+barW+'%; height:100%; background:var(--gold); border-radius:3px;"></div></div></div>';
-          radarHtml += '<div style="font-size:12px; color:var(--muted); margin-top:2px;">'+s.voters.join(' / ')+'</div></div>';
+          radarHtml += '<div style="font-size:13px; color:#8a7050; margin-top:2px; line-height:1.5;">'+s.desc+'</div>';
+          radarHtml += '<div style="font-size:11px; color:var(--muted); margin-top:1px;">'+s.voters.join(' / ')+'</div></div>';
         });
         radarHtml += '</div></div>';
 
