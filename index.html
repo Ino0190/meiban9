@@ -10681,33 +10681,33 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
     ctx.fillStyle = "#c9933a";
     ctx.font = "bold 120px 'Noto Serif JP', serif";
     ctx.textAlign = "center";
-    ctx.fillText(typeInfo.name, cx, 340);
+    ctx.fillText(typeInfo.name, cx, 480);
 
     // タグライン
     ctx.fillStyle = "#d8ccb8";
     ctx.font = "36px 'Noto Serif JP', serif";
     const desc = typeInfo.desc;
-    if (desc.length > 16) {
-      ctx.fillText(desc.slice(0, 16), cx, 420);
-      ctx.fillText(desc.slice(16), cx, 465);
+    if (desc.length > 20) {
+      ctx.fillText(desc.slice(0, 20), cx, 560);
+      ctx.fillText(desc.slice(20), cx, 605);
     } else {
-      ctx.fillText(desc, cx, 420);
+      ctx.fillText(desc, cx, 560);
     }
 
     // 区切り線
     ctx.strokeStyle = "rgba(201,147,58,0.5)";
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(half + 100, 510); ctx.lineTo(W - 100, 510); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(half + 100, 650); ctx.lineTo(W - 100, 650); ctx.stroke();
 
     // 個性タグ
-    let nextY = 580;
+    let nextY = 720;
     if (highlight && highlight.tag) {
       ctx.fillStyle = "#c9933a";
       ctx.font = "26px 'Noto Serif JP', serif";
-      ctx.fillText("あなたの" + typeInfo.name + "像", cx, 565);
+      ctx.fillText("あなたの" + typeInfo.name + "像", cx, 700);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 64px 'Noto Serif JP', serif";
-      ctx.fillText(highlight.tag, cx, 650);
+      ctx.fillText(highlight.tag, cx, 780);
       // 説明文
       ctx.fillStyle = "#d8ccb8";
       ctx.font = "28px 'Noto Serif JP', serif";
@@ -10789,7 +10789,6 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   // 画像読み込み（カード＋ロゴ＋装飾）
   const loadImg = (src) => new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
