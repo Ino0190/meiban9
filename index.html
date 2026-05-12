@@ -492,43 +492,13 @@
 
   <main id="main">
     <div class="empty" id="empty" style="height:auto; padding:40px 32px; position:relative; overflow:hidden;">
-      <!-- ロゴ（最前面・星座SVGより上） -->
+      <!-- ロゴ（最前面） -->
       <div style="text-align:center; margin-bottom:8px; position:relative; z-index:2;">
-        <img src="icons/Logo01.png" alt="羅占盤" style="width:320px; height:320px; object-fit:contain; mix-blend-mode:multiply;">
-      </div>
-      <!-- 12星座SVG背景装飾 -->
-      <div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden;">
-        <img src="Zodiac/Aries.svg"       style="position:absolute; height:120px; width:auto; opacity:0.04; top:4%;  left:3%;  transform:rotate(-15deg);">
-        <img src="Zodiac/Taurus.svg"      style="position:absolute; height:110px; width:auto; opacity:0.04; top:8%;  right:6%; transform:rotate(10deg);">
-        <img src="Zodiac/Gemini.svg"      style="position:absolute; height:130px; width:auto; opacity:0.04; top:22%; left:8%;  transform:rotate(5deg);">
-        <img src="Zodiac/Cancer.svg"      style="position:absolute; height:100px; width:auto; opacity:0.04; top:18%; right:4%; transform:rotate(-8deg);">
-        <img src="Zodiac/Leo.svg"         style="position:absolute; height:125px; width:auto; opacity:0.04; top:38%; left:2%;  transform:rotate(12deg);">
-        <img src="Zodiac/Virgo.svg"       style="position:absolute; height:115px; width:auto; opacity:0.04; top:42%; right:3%; transform:rotate(-5deg);">
-        <img src="Zodiac/Libra.svg"       style="position:absolute; height:120px; width:auto; opacity:0.04; top:58%; left:6%;  transform:rotate(-10deg);">
-        <img src="Zodiac/Ssorpio.svg"     style="position:absolute; height:110px; width:auto; opacity:0.04; top:55%; right:7%; transform:rotate(8deg);">
-        <img src="Zodiac/Sagittarius.svg" style="position:absolute; height:130px; width:auto; opacity:0.04; top:72%; left:3%;  transform:rotate(6deg);">
-        <img src="Zodiac/Capricorn.svg"   style="position:absolute; height:115px; width:auto; opacity:0.04; top:68%; right:5%; transform:rotate(-12deg);">
-        <img src="Zodiac/Aquarius.svg"    style="position:absolute; height:125px; width:auto; opacity:0.04; top:84%; left:7%;  transform:rotate(-7deg);">
-        <img src="Zodiac/Pices.svg"       style="position:absolute; height:110px; width:auto; opacity:0.04; top:80%; right:4%; transform:rotate(15deg);">
+        <img src="icons/TopImage.png" alt="羅占盤" style="width:640px; max-width:90%; height:auto; object-fit:contain;">
       </div>
       <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%;">
-      <!-- 12星座横並び帯 -->
-      <div style="display:flex; justify-content:center; align-items:center; margin-bottom:24px; flex-wrap:nowrap; overflow:hidden; max-width:100%;">
-        <img src="Zodiac/Aries.svg"       style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Taurus.svg"      style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Gemini.svg"      style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Cancer.svg"      style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Leo.svg"         style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Virgo.svg"       style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Libra.svg"       style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Ssorpio.svg"     style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Sagittarius.svg" style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Capricorn.svg"   style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Aquarius.svg"    style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0; margin-right:-24px;">
-        <img src="Zodiac/Pices.svg"       style="height:84px; width:auto; mix-blend-mode:multiply; flex-shrink:0;">
-      </div>
-      <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">ひとつの占術では見えない、あなたの全体像。<br>9つの占術が重なり合う場所に、人生の設計図が浮かび上がる。</div>
-      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">東洋・西洋の占術を横断し、複数が一致して指し示すテーマを統合解釈。<br>AIと対話しながら、あなただけの傾向・才能・転換期を深く読み解きます。</div>
+      <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">リーダーなのに孤独。楽観的なのに慎重。社交的なのに一人が好き。<br>ひとつの占術では説明できない「矛盾」こそが、あなたの本質です。</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">羅占盤は、9つの占術を横断して、あなたの多面性を立体的に解読します。<br>生まれてから、どこへ、どのように向かうのか。</div>
 
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
