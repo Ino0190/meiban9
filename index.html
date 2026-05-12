@@ -8517,10 +8517,6 @@ function renderConsult(){
           // 拡張情報なし: 画像のみ中央表示
           (typeImageSrc ? '<div style="max-width:340px; margin:0 auto 20px;"><img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;"></div>' : '')
         ) +
-        // 4軸バー
-        '<div style="max-width:600px; margin:0 auto 16px; text-align:left;">' +
-        axisBar(tj.a1) + axisBar(tj.a2) + axisBar(tj.a3) + axisBar(tj.a4) +
-        '</div>' +
         // 生き方の傾向
         '<div style="font-size:13px; color:var(--muted); margin-bottom:14px;">' +
         '生き方の傾向: <span style="color:var(--gold);">' + tj.m1.label + '</span> / <span style="color:var(--gold);">' + tj.m2.label + '</span>' +
@@ -8549,7 +8545,107 @@ function renderConsult(){
           '<div id="share-status" style="font-size:13px; color:var(--muted); margin-top:8px;"></div>' +
         '</div>';
       })() +
-      // タイプ相性
+      // 人格レイヤー表示
+      (() => {
+        try {
+          const sunSign2 = SIGNS[signOf(d.sunLon)];
+          const moonSign2 = SIGNS[signOf(d.moonLon)];
+          const dayMasterEl2 = STEM_EL[STEMS.indexOf(d.day.stem)];
+          const lifeStarName2 = ((d.ziweiDistrib||{})[d.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
+          const ky3 = calcKyusei(d.y, d.m);
+          const ma3 = calcMaya(d.y, d.m, d.d);
+          const shukuIdx3 = calcShukuyo(d.moonLon);
+          const shuku3 = SHUKUYO_27[shukuIdx3] ? SHUKUYO_27[shukuIdx3].n : "";
+          const officialIdx3 = (d.lifeIdx - 8 + 12) % 12;
+          const officialStars3 = ((d.ziweiDistrib||{})[officialIdx3]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s));
+          // 五行欠如
+          const wxMissing = d.wx ? Object.entries(d.wx).filter(([k,v])=>v===0).map(([k])=>k) : [];
+          // 天中殺
+          const tenchuName = sm2.tenchuType ? sm2.tenchuType.name : "";
+          // 化忌の宮
+          let huajiPalace = "";
+          if (d.sihua && d.lifeIdx !== undefined && d.ziweiDistrib) {
+            const ki = d.sihua.find(s => s.type === '化忌');
+            if (ki && !ki.unplaced) {
+              for (let i = 0; i < 12; i++) {
+                const bi = (d.lifeIdx - i + 12) % 12;
+                if ((d.ziweiDistrib[bi]||[]).includes(ki.star)) { huajiPalace = PALACE_NAMES[i]; break; }
+              }
+            }
+          }
+          // ダシャー
+          const currentAge3 = getCurrentAge(d.y, d.m, d.d);
+          let currentDasha = "";
+          try {
+            if (typeof ayanamsha === 'function') {
+              const aya3 = ayanamsha(d.jd);
+              const moonSid3 = norm360(d.moonLon - aya3);
+              const dashas = calcDasha(moonSid3, d.y);
+              if (Array.isArray(dashas)) {
+                const cd = dashas.find(dd => currentAge3 >= dd.startAge && currentAge3 < dd.endAge);
+                if (cd) currentDasha = cd.planet + "期";
+              }
+            }
+          } catch(e2) { /* ダシャー取得失敗は無視 */ }
+
+          const layerCard = (title, subtitle, interpretation) =>
+            '<div style="display:flex; gap:12px; align-items:flex-start; padding:14px 16px; background:rgba(255,255,255,0.5); border-radius:8px; border:1px solid var(--border);">' +
+              '<div style="flex-shrink:0; width:8px; height:8px; background:var(--gold); border-radius:50%; margin-top:6px;"></div>' +
+              '<div style="flex:1;">' +
+                '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px; letter-spacing:1px;">'+title+'</div>' +
+                '<div style="font-size:13px; color:#8a7050; margin-bottom:6px;">'+subtitle+'</div>' +
+                '<div style="font-size:15px; color:var(--text); line-height:1.8;">'+interpretation+'</div>' +
+              '</div>' +
+            '</div>';
+
+          // 解釈テキスト生成
+          const elMeaning = {火:"情熱的で行動的",土:"安定感があり堅実",風:"知的で社交的",水:"感受性が豊かで共感力が高い"};
+          const smStarMeaning = {"貫索星":"自分の信念を貫く","石門星":"人と協力して動く","鳳閣星":"楽しみながら表現する","調舒星":"繊細に感じ取る","禄存星":"人を惹きつける魅力","司禄星":"コツコツ蓄える","車騎星":"即行動する突破力","牽牛星":"責任感で人を率いる","龍高星":"未知を探求する","玉堂星":"知識を深く学ぶ"};
+          const zwStarWork = {"紫微":"統率力で組織を動かす","天機":"知恵と変化で道を切り拓く","太陽":"社会に広く影響を与える","武曲":"目標を形にする実行力","天同":"人を和ませ調和を作る","廉貞":"情熱を注いで極める","天府":"安定した基盤を築く","太陰":"静かに深く影響を与える","貪狼":"多方面に才能を発揮する","巨門":"言葉で人を動かす","天相":"人と人を繋ぐ","天梁":"知恵で人を導く","七殺":"独自の道を切り拓く","破軍":"ゼロから創り出す"};
+          const moonElMeaning = {火:"感情が激しく、直感で動く",土:"感情は安定しているが、変化を嫌う",風:"感情を言語化でき、客観的に自分を見る",水:"感情が深く、人の気持ちに敏感"};
+          const wxMissingMeaning = {火:"情熱を表に出すのが苦手。内側では燃えているのに、外からは冷静に見える",土:"安定を築くのが苦手。変化は得意だが、一箇所に留まりにくい",木:"成長や柔軟性が課題。決めたことを変えにくい",金:"決断力が弱め。優しいが、切り捨てるべき時に切れない",水:"柔軟性が足りない。論理は強いが、流れに身を任せるのが苦手"};
+
+          const sunInterp = `初対面の人には「${elMeaning[sunSign2.e]||""}」という印象を与えます。${KYUSEI_NAMES[ky3.honmei].desc.split("。")[0]}。`;
+          const socialInterp = `仕事では「${smStarMeaning[sm2.stars.east]||sm2.stars.east}」力を発揮します。${officialStars3.length>0 ? "官禄宮に"+officialStars3[0]+"があり、"+( zwStarWork[officialStars3[0]]||"独自の力を発揮する")+"配置。" : ""}`;
+          const moonInterp = `素の自分は${moonElMeaning[moonSign2.e]||""}。${lifeStarName2 ? "命宮"+lifeStarName2+"は「"+(zwStarWork[lifeStarName2]||"")+"」人であることを示します。" : ""}`;
+          const stressInterp = `${tenchuName ? tenchuName+"の時期は本来の力が出にくくなります。" : ""}${wxMissing.length>0 ? wxMissingMeaning[wxMissing[0]]||"" : ""}${huajiPalace ? " 化忌が"+huajiPalace+"にあり、この領域で苦労しやすい。" : ""}`;
+          const talentTag = (() => { try { const rv = calcPersonalityRadar(d, sm2, nu2); const hl = personalityHighlight(rv, typeInfo.name, tj.a3.winner); return hl && hl.tag ? hl.tag : ""; } catch(e){ return ""; } })();
+          const talentInterp = `${talentTag ? "あなたの最大の武器は「"+talentTag+"」としての力。" : ""}${tj.m2.label}で物事を処理し、同じタイプの中でも独自の個性を持っています。`;
+          const soulInterp = `${MAYA_SEALS[ma3.seal].desc.split("。")[0]}。${SHUKUYO_27[shukuIdx3].desc.split("。")[0]}。${currentDasha ? "今は"+currentDasha+"で、"+({太陽:"社会的な活躍",月:"内面の充実",火星:"行動と挑戦",ラーフ:"予想外の変化",木星:"恵みと拡大",土星:"試練と成熟",水星:"学びと交流",ケートゥ:"手放しと悟り",金星:"喜びと豊かさ"}[currentDasha.replace("期","")]||"変化")+"の時期。" : ""}`;
+
+          const layers = [
+            layerCard('表層人格 — 外から見える顔',
+              `太陽${sunSign2.n}（${sunSign2.e}）・LP${nu2.lifePath}・${KYUSEI_NAMES[ky3.honmei].name}`,
+              sunInterp),
+            layerCard('社会人格 — 仕事の顔',
+              `算命学の東: ${sm2.stars.east}・官禄宮: ${officialStars3.join("・")||"無主星"}`,
+              socialInterp),
+            layerCard('本能人格 — 素の自分',
+              `月${moonSign2.n}・日主${d.day.stem}（${dayMasterEl2}）・命宮${lifeStarName2||"無主星"}`,
+              moonInterp),
+            layerCard('ストレス時人格 — 壊れ方',
+              `${tenchuName}${huajiPalace ? "・化忌→"+huajiPalace : ""}${wxMissing.length>0 ? "・五行"+wxMissing.join("")+"欠如" : ""}`,
+              stressInterp),
+            layerCard('才能人格 — 強み',
+              `${tj.m2.label}・${talentTag||typeInfo.name}型`,
+              talentInterp),
+            layerCard('魂の傾向 — 深層の方向性',
+              `マヤ: ${MAYA_SEALS[ma3.seal].n}・宿曜: ${shuku3}${currentDasha ? "・"+currentDasha : ""}`,
+              soulInterp),
+          ];
+
+          return '<div style="max-width:1040px; margin:0 auto 24px; text-align:left;">' +
+            '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:14px; font-weight:700; text-align:center;">あなたの人格レイヤー</div>' +
+            '<div style="font-size:14px; color:var(--muted); text-align:center; margin-bottom:16px; line-height:1.7;">人は一面では語れない。6つの層で、あなたの多面性を可視化します。</div>' +
+            '<div style="display:flex; flex-direction:column; gap:10px;">' +
+            layers.join('') +
+            '</div>' +
+          '</div>';
+        } catch(e) {
+          console.warn("人格レイヤー表示エラー:", e);
+          return "";
+        }
+      })() +
       (() => {
         const TYPES_ALL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
         const myParts = tj.key.split("_");
