@@ -10622,11 +10622,9 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   canvas.height = S;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#1a1208";
+  // 背景: クリーム色
+  ctx.fillStyle = "#fdf6e8";
   ctx.fillRect(0, 0, S, S);
-  ctx.strokeStyle = "#c9933a";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(16, 16, S-32, S-32);
 
   const typeImageMap = {
     "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
@@ -10636,75 +10634,133 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   };
   const imgFile = typeImageMap[typeInfo.name];
 
-  const drawOverlay = () => {
-    const overlay = ctx.createLinearGradient(480, 0, S, 0);
-    overlay.addColorStop(0, "rgba(26,18,8,0)");
-    overlay.addColorStop(0.3, "rgba(26,18,8,0.85)");
-    overlay.addColorStop(1, "rgba(26,18,8,0.95)");
-    ctx.fillStyle = overlay;
-    ctx.fillRect(0, 0, S, S);
+  // 人格レイヤーの短縮テキストを生成
+  const getLayerTexts = () => {
+    try {
+      const d = currentData;
+      const sunSign2 = SIGNS[signOf(d.sunLon)];
+      const moonSign2 = SIGNS[signOf(d.moonLon)];
+      const sm2 = calcJintai(d);
+      const nu2 = calcNumerology(d.y, d.m, d.d);
+      const ky3 = calcKyusei(d.y, d.m);
+      const ma3 = calcMaya(d.y, d.m, d.d);
+      const shukuIdx3 = calcShukuyo(d.moonLon);
+      const elMeaning = {火:"情熱的",土:"堅実",風:"知的",水:"共感的"};
+      const smStarShort = {"貫索星":"信念を貫く","石門星":"人を繋ぐ","鳳閣星":"表現する","調舒星":"感じ取る","禄存星":"惹きつける","司禄星":"蓄える","車騎星":"突破する","牽牛星":"率いる","龍高星":"探求する","玉堂星":"学ぶ"};
+      const zwStarShort = {"紫微":"統率","天機":"知恵","太陽":"影響力","武曲":"実行力","天同":"調和","廉貞":"情熱","天府":"安定","太陰":"静かな力","貪狼":"多才","巨門":"言葉","天相":"繋ぐ","天梁":"導く","七殺":"開拓","破軍":"創造"};
+      const lifeStarName2 = d.ziweiDistrib ? (d.ziweiDistrib[d.lifeIdx] || [])[0] : null;
+      const talentTag = highlight && highlight.tag ? highlight.tag : "";
+      return [
+        {label:"表層", text: elMeaning[sunSign2.e] || sunSign2.n},
+        {label:"社会", text: smStarShort[sm2.stars.east] || sm2.stars.east},
+        {label:"本能", text: lifeStarName2 ? (zwStarShort[lifeStarName2] || lifeStarName2) : moonSign2.n},
+        {label:"才能", text: talentTag || tj.m2.label},
+        {label:"魂", text: MAYA_SEALS[ma3.seal].n.replace(/^(赤い|白い|青い|黄色い)/, "")},
+      ];
+    } catch(e) { return []; }
+  };
 
-    const bottomOv = ctx.createLinearGradient(0, S-140, 0, S);
-    bottomOv.addColorStop(0, "rgba(26,18,8,0)");
-    bottomOv.addColorStop(1, "rgba(26,18,8,0.9)");
-    ctx.fillStyle = bottomOv;
-    ctx.fillRect(0, S-140, S, 140);
+  const drawCard = () => {
+    const half = S / 2;
 
-    const rx = 550;
+    // ── 右半分: 裏面（テキスト情報）──
+    // 裏面背景
+    ctx.fillStyle = "#1a1208";
+    ctx.fillRect(half, 0, half, S);
+
+    // 装飾ボーダー（裏面）
+    ctx.strokeStyle = "#c9933a";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(half + 20, 20, half - 40, S - 40);
+    ctx.strokeRect(half + 28, 28, half - 56, S - 56);
+
+    // ロゴ
     ctx.fillStyle = "#c9933a";
-    ctx.font = "bold 18px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("🔮 羅占盤", rx, 70);
+    ctx.font = "bold 16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("🔮 羅占盤", half + half/2, 70);
 
+    // タイプ名
     ctx.fillStyle = "#c9933a";
-    ctx.font = "bold 56px sans-serif";
-    ctx.fillText(typeInfo.name, rx, 140);
+    ctx.font = "bold 52px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(typeInfo.name, half + half/2, 150);
 
+    // タグライン
     ctx.fillStyle = "#d8ccb8";
     ctx.font = "18px sans-serif";
+    ctx.textAlign = "center";
     const desc = typeInfo.desc;
-    if (desc.length > 16) {
-      ctx.fillText(desc.slice(0, 16), rx, 185);
-      ctx.fillText(desc.slice(16), rx, 212);
+    if (desc.length > 14) {
+      ctx.fillText(desc.slice(0, 14), half + half/2, 200);
+      ctx.fillText(desc.slice(14), half + half/2, 228);
     } else {
-      ctx.fillText(desc, rx, 185);
+      ctx.fillText(desc, half + half/2, 200);
     }
 
+    // 区切り線
     ctx.strokeStyle = "rgba(201,147,58,0.5)";
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(rx, 240); ctx.lineTo(S-50, 240); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(half + 60, 260); ctx.lineTo(S - 60, 260); ctx.stroke();
 
+    // 個性タグ
+    let nextY = 310;
     if (highlight && highlight.tag) {
       ctx.fillStyle = "#c9933a";
-      ctx.font = "bold 16px sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText(`あなたの${typeInfo.name}像`, rx, 280);
+      ctx.font = "bold 14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`あなたの${typeInfo.name}像`, half + half/2, 295);
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 32px sans-serif";
-      ctx.fillText(highlight.tag, rx, 325);
-      ctx.fillStyle = "#d8ccb8";
-      ctx.font = "16px sans-serif";
-      const maxW = S - rx - 50;
-      let line = "", lineY = 365;
-      for (const ch of highlight.text) {
-        if (ctx.measureText(line + ch).width > maxW) {
-          ctx.fillText(line, rx, lineY);
-          line = ch; lineY += 26;
-        } else { line += ch; }
-      }
-      if (line) ctx.fillText(line, rx, lineY);
-      ctx.fillStyle = "#c9933a";
-      ctx.font = "bold 18px sans-serif";
-      ctx.fillText(`${highlight.top1.label}(${highlight.top1.v}) / ${highlight.top2.label}(${highlight.top2.v})`, rx, lineY + 50);
+      ctx.font = "bold 30px sans-serif";
+      ctx.fillText(highlight.tag, half + half/2, 340);
+      nextY = 390;
     }
 
+    // 区切り線2
+    ctx.strokeStyle = "rgba(201,147,58,0.3)";
+    ctx.beginPath(); ctx.moveTo(half + 60, nextY); ctx.lineTo(S - 60, nextY); ctx.stroke();
+    nextY += 40;
+
+    // 人格レイヤー表
+    const layers = getLayerTexts();
+    if (layers.length > 0) {
+      ctx.fillStyle = "#c9933a";
+      ctx.font = "bold 14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("人格レイヤー", half + half/2, nextY);
+      nextY += 35;
+
+      layers.forEach(l => {
+        ctx.fillStyle = "#8a7050";
+        ctx.font = "14px sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText(l.label, half + 140, nextY);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 22px sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(l.text, half + 160, nextY);
+        nextY += 42;
+      });
+    }
+
+    // 生き方の傾向
+    nextY = Math.max(nextY + 30, S - 140);
     ctx.fillStyle = "#8a7050";
-    ctx.font = "16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(`生き方の傾向: ${tj.m1.label} / ${tj.m2.label}`, S/2, S-65);
-    ctx.fillStyle = "#c9933a";
     ctx.font = "14px sans-serif";
-    ctx.fillText("rasenban — 9つの占術で読む、あなたの命盤", S/2, S-38);
+    ctx.textAlign = "center";
+    ctx.fillText(`生き方の傾向: ${tj.m1.label} / ${tj.m2.label}`, half + half/2, nextY);
+
+    // フッター
+    ctx.fillStyle = "#c9933a";
+    ctx.font = "13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("rasenban — 9つの占術で読む、あなたの命盤", half + half/2, S - 40);
+
+    // ── 左半分: 表面（カード画像）──
+    // 左半分の枠線
+    ctx.strokeStyle = "#c9933a";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, half - 40, S - 40);
   };
 
   const finalize = () => {
@@ -10715,17 +10771,29 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
+      // 左半分にカード画像を描画（アスペクト比を保ちつつ左半分に収める）
+      const half = S / 2;
       const imgRatio = img.width / img.height;
-      const drawH = S;
-      const drawW = drawH * imgRatio;
-      ctx.drawImage(img, 0, 0, drawW, drawH);
-      drawOverlay();
+      let drawW, drawH, drawX, drawY;
+      if (imgRatio > half / S) {
+        drawW = half;
+        drawH = half / imgRatio;
+        drawX = 0;
+        drawY = (S - drawH) / 2;
+      } else {
+        drawH = S;
+        drawW = S * imgRatio;
+        drawX = (half - drawW) / 2;
+        drawY = 0;
+      }
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      drawCard();
       finalize();
     };
-    img.onerror = () => { drawOverlay(); finalize(); };
+    img.onerror = () => { drawCard(); finalize(); };
     img.src = "16typecard/" + imgFile;
   } else {
-    drawOverlay();
+    drawCard();
     finalize();
   }
 }
