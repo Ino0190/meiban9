@@ -10679,19 +10679,19 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
 
     // タイプ名
     ctx.fillStyle = "#c9933a";
-    ctx.font = "bold 120px 'Noto Serif JP', serif";
+    ctx.font = "bold 100px 'Noto Serif JP', serif";
     ctx.textAlign = "center";
-    ctx.fillText(typeInfo.name, cx, 480);
+    ctx.fillText(typeInfo.name, cx, 496);
 
     // タグライン
     ctx.fillStyle = "#d8ccb8";
     ctx.font = "36px 'Noto Serif JP', serif";
     const desc = typeInfo.desc;
     if (desc.length > 20) {
-      ctx.fillText(desc.slice(0, 20), cx, 560);
-      ctx.fillText(desc.slice(20), cx, 605);
+      ctx.fillText(desc.slice(0, 20), cx, 580);
+      ctx.fillText(desc.slice(20), cx, 625);
     } else {
-      ctx.fillText(desc, cx, 560);
+      ctx.fillText(desc, cx, 580);
     }
 
     // 区切り線
@@ -10713,7 +10713,7 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
       ctx.font = "28px 'Noto Serif JP', serif";
       const hlText = highlight.text || "";
       const maxW = half - 160;
-      let line = "", lineY = 710;
+      let line = "", lineY = 840;
       for (const ch of hlText) {
         if (ctx.measureText(line + ch).width > maxW) {
           ctx.fillText(line, cx, lineY);
@@ -10721,14 +10721,14 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
         } else { line += ch; }
       }
       if (line) ctx.fillText(line, cx, lineY);
-      nextY = lineY + 60;
+      nextY = lineY + 80;
     }
 
     // 人格レイヤーボックス
     const layers = getLayerTexts();
     if (layers.length > 0) {
       const boxX = half + 80, boxW = half - 160;
-      const boxY = nextY, boxH = layers.length * 60 + 80;
+      const boxY = nextY, boxH = layers.length * 60 + 100;
       // ボックス背景
       ctx.fillStyle = "rgba(201,147,58,0.06)";
       ctx.fillRect(boxX, boxY, boxW, boxH);
@@ -10743,7 +10743,7 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
       ctx.fillText("人格レイヤー", cx, boxY + 40);
 
       // 各行
-      let rowY = boxY + 80;
+      let rowY = boxY + 100;
       layers.forEach(l => {
         ctx.fillStyle = "#8a7050";
         ctx.font = "24px 'Noto Serif JP', serif";
