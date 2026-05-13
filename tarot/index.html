@@ -17,7 +17,7 @@
     font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
     min-height:100vh;
   }
-  .container{ max-width:1100px; margin:0 auto; padding:30px 24px 60px; overflow-x:hidden; }
+  .container{ max-width:1100px; margin:0 auto; padding:30px 24px 60px; }
   header{ text-align:center; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;
     background:linear-gradient(180deg,#f5f2ec 0%,#faf8f4 100%); margin:-30px -24px 32px; padding:26px 32px 20px; }
   header .small{ font-size:12px; letter-spacing:5px; color:#8a8070; margin-bottom:6px;}
@@ -82,31 +82,44 @@
     .container{ padding:16px 12px 40px; }
     header{ margin:-16px -12px 24px; padding:20px 16px 16px; }
     header h1{ font-size:20px; }
+    /* ケルト十字: 横スクロール可能なラッパー */
     .spread-layout{
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(4, auto);
-      gap:4px 3px;
-      padding:10px 4px;
-      max-width:100%;
-      width:100%;
-      overflow-x:hidden;
+      display:grid !important;
+      grid-template-columns: repeat(5, 60px) !important;
+      grid-template-rows: repeat(4, auto) !important;
+      gap:6px 4px !important;
+      padding:12px 8px !important;
+      width:max-content !important;
+      min-width:100% !important;
+      max-width:none !important;
+      box-sizing:border-box !important;
+      overflow:visible !important;
+    }
+    /* スクロール可能なコンテナ */
+    #cardsStage .spread-layout{
+      margin-left:0; margin-right:0;
+    }
+    #cardsStage{
+      overflow-x:auto !important;
+      -webkit-overflow-scrolling:touch;
     }
     .drawn-card{
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding:2px;
+      width:auto !important;
+      min-width:0 !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      padding:1px !important;
+      grid-template-columns:none !important;
     }
-    .drawn-card .face{ width:100%; max-width:56px; }
-    .drawn-card .info{ display:none; }
+    .drawn-card .face{ width:100% !important; max-width:54px !important; }
+    .drawn-card .info{ display:none !important; }
     .drawn-card .reversed-mark{ font-size:7px; top:1px; right:1px; padding:0 2px; }
     .spread-layout .drawn-card.pos-2{
       transform:rotate(90deg) !important;
       transform-origin:center;
     }
-    .drawn-card.reversed .face img{ transform:rotate(180deg); }
+    .drawn-card.reversed .face img{ transform:rotate(180deg) !important; }
     .mini-row{ grid-template-columns:repeat(5, 1fr); }
     .tab-bar{ flex-wrap:wrap; }
     .tab-bar button{ flex:1 1 auto; font-size:13px; padding:8px 6px; }
