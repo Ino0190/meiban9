@@ -10685,6 +10685,41 @@ function goToTarot(){
 
 function exportForAI(){
   if (!currentData) return;
+
+  // 初回のみプライバシー注意モーダルを表示
+  const PRIVACY_KEY = 'ra_ai_privacy_acknowledged';
+  if (!localStorage.getItem(PRIVACY_KEY)) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:10000;';
+    modal.innerHTML = `
+      <div style="background:#faf8f4; border-radius:12px; padding:32px; max-width:440px; margin:20px; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+        <h3 style="font-size:18px; color:#2c2418; margin-bottom:16px; font-weight:700;">個人情報に関するご注意</h3>
+        <p style="font-size:15px; color:#4a4030; line-height:1.8; margin-bottom:12px;">
+          羅占盤はお客様の生年月日等の情報を外部に送信・保存していません。すべての計算はブラウザ内で完結しています。
+        </p>
+        <p style="font-size:15px; color:#4a4030; line-height:1.8; margin-bottom:24px;">
+          ただし、AI鑑定用スクリプトには生年月日・出生時刻・出生地が含まれます。コピーした内容をAIサービスに貼り付ける際の個人情報の取り扱いは、ご使用になるAIサービスのプライバシーポリシーに依存します。
+        </p>
+        <div style="display:flex; gap:12px; justify-content:flex-end;">
+          <button id="privacy-cancel" style="padding:10px 20px; background:#e8e4dc; color:#4a4030; border:none; border-radius:6px; font-size:15px; cursor:pointer;">キャンセル</button>
+          <button id="privacy-ok" style="padding:10px 20px; background:var(--gold); color:#fff; border:none; border-radius:6px; font-size:15px; font-weight:700; cursor:pointer;">了承してコピー</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('#privacy-cancel').onclick = () => modal.remove();
+    modal.querySelector('#privacy-ok').onclick = () => {
+      localStorage.setItem(PRIVACY_KEY, '1');
+      modal.remove();
+      doExportCopy();
+    };
+    return;
+  }
+
+  doExportCopy();
+}
+
+function doExportCopy(){
   const text = (currentMode === "compat" && dataB) ? buildCompatExportText() : buildExportText();
 
   navigator.clipboard.writeText(text).then(() => {
