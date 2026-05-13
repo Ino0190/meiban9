@@ -1397,13 +1397,13 @@ function cast(){
     { label: '宿曜',       chars: '角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫' },
     { label: 'インド占星術', chars: 'अआइईउऊएऐओऔकखगघचछजझटठडढणतथ' },
   ];
-  const COLS = 18;
+  const COLS = window.innerWidth <= 768 ? 12 : 18;
 
   let matrixHtml = '<div style="text-align:center;"><div style="display:inline-block; text-align:left;">';
   for (let r = 0; r < 9; r++) {
     matrixHtml += `<div style="display:flex; align-items:center; margin-bottom:6px;">`;
-    matrixHtml += `<span style="font-size:11px; color:rgba(139,105,20,0.6); width:90px; text-align:right; margin-right:12px; font-family:sans-serif;">${MATRIX_CHARSETS[r].label}</span>`;
-    matrixHtml += `<span id="mrow-${r}" style="font-family:'Noto Serif JP',monospace; font-size:17px; color:rgba(139,105,20,0.7); letter-spacing:3px; white-space:pre; transition:color 0.3s, opacity 0.3s;"></span>`;
+    matrixHtml += `<span style="font-size:11px; color:rgba(139,105,20,0.6); width:${window.innerWidth <= 768 ? '70px' : '90px'}; text-align:right; margin-right:${window.innerWidth <= 768 ? '8px' : '12px'}; font-family:sans-serif;">${MATRIX_CHARSETS[r].label}</span>`;
+    matrixHtml += `<span id="mrow-${r}" style="font-family:'Noto Serif JP',monospace; font-size:${window.innerWidth <= 768 ? '13px' : '17px'}; color:rgba(139,105,20,0.7); letter-spacing:${window.innerWidth <= 768 ? '1px' : '3px'}; white-space:pre; transition:color 0.3s, opacity 0.3s;"></span>`;
     matrixHtml += `<span id="mcheck-${r}" style="margin-left:10px; font-size:14px; opacity:0; transition:opacity 0.3s;">✓</span>`;
     matrixHtml += `</div>`;
   }
