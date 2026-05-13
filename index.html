@@ -8690,11 +8690,13 @@ function renderConsult(){
           '<div style="font-size:15px; color:var(--text); line-height:1.8;">'+typeInfo.remedies+'</div>' +
         '</div>' : '') +
         // さらに詳しくAIに聞くセクション
-        '<div style="margin-top:20px; padding:20px 24px; border-top:1px solid rgba(139,105,20,0.2); text-align:center; max-width:1040px; margin-left:auto; margin-right:auto;">' +
-          '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px;">さらに詳しくAIに聞く</div>' +
-          '<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px; text-align:left;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>' +
+        '<div style="margin-top:20px; padding:20px 0; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">' +
+          '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px; text-align:center;">さらに詳しくAIに聞く</div>' +
+          '<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>' +
+          '<div style="text-align:center;">' +
           '<button onclick="exportForAI()" style="padding:12px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
           '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
+          '</div>' +
         '</div>' +
         (typeInfo.etymology ? '<div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700; text-align:center;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8; text-align:left;">'+typeInfo.etymology+'</div></div>' : '') +
       '</div>' +
