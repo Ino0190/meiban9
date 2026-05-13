@@ -1378,77 +1378,113 @@ function cast(){
     dataB = null;
   }
 
-  // ローディング演出（数字マトリクス切替→タイプライター）
+  // ローディング演出（9占術マトリクス — 各行が占術固有の文字でバラバラ切替→確定）
   const main = document.querySelector('main');
   const aside = document.querySelector('aside');
   if (aside) aside.style.opacity = '0.3';
   const overlay = document.createElement('div');
   overlay.id = 'calc-overlay';
-  overlay.style.cssText = 'position:fixed; inset:0; background:rgba(253,246,232,0.97); display:flex; align-items:center; justify-content:center; z-index:9999;';
+  overlay.style.cssText = 'position:fixed; inset:0; background:rgba(44,36,24,0.96); display:flex; align-items:center; justify-content:center; z-index:9999;';
 
-  // 固定グリッド（8行×20列）の数字が切り替わる
-  const ROWS = 8, COLS = 30;
-  let matrixHtml = '<div style="text-align:center; position:relative; display:flex; align-items:center; justify-content:center; min-height:300px;"><div style="display:inline-block; text-align:left; position:relative;"><div id="calc-matrix" style="font-family:monospace; font-size:15px; color:var(--gold); opacity:0.5; line-height:1.6; letter-spacing:2px; white-space:pre;">';
-  for (let r = 0; r < ROWS; r++) {
-    matrixHtml += '0'.repeat(COLS) + '\n';
+  const MATRIX_CHARSETS = [
+    { label: '西洋占星術', chars: '0°1°2°3°4°5°6°7°8°9°15°22°28°120°90°60°180°ASC・MC' },
+    { label: '四柱推命',   chars: '甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥' },
+    { label: '紫微斗数',   chars: '紫微天機太陽武曲同廉貞府陰貪狼巨門相梁殺破' },
+    { label: '算命学',     chars: '貫石鳳調禄司車牽龍玉天報寿禄初中晩' },
+    { label: '数秘術',     chars: '1234567890' },
+    { label: '九星気学',   chars: '一二三四五六七八九白黒碧緑黄赤紫火水木金土' },
+    { label: 'マヤ暦',     chars: 'KIN1234567890太陽月風夜種蛇死鹿星水犬猿道鷲戦士' },
+    { label: '宿曜',       chars: '角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫' },
+    { label: 'インド占星術', chars: 'अआइईउऊएऐओऔकखगघचछजझटठडढणतथ' },
+  ];
+  const COLS = 18;
+
+  let matrixHtml = '<div style="text-align:center;"><div style="display:inline-block; text-align:left;">';
+  for (let r = 0; r < 9; r++) {
+    matrixHtml += `<div style="display:flex; align-items:center; margin-bottom:6px;">`;
+    matrixHtml += `<span style="font-size:11px; color:rgba(139,105,20,0.6); width:90px; text-align:right; margin-right:12px; font-family:sans-serif;">${MATRIX_CHARSETS[r].label}</span>`;
+    matrixHtml += `<span id="mrow-${r}" style="font-family:'Noto Serif JP',monospace; font-size:17px; color:rgba(139,105,20,0.7); letter-spacing:3px; white-space:pre; transition:color 0.3s, opacity 0.3s;"></span>`;
+    matrixHtml += `<span id="mcheck-${r}" style="margin-left:10px; font-size:14px; opacity:0; transition:opacity 0.3s;">✓</span>`;
+    matrixHtml += `</div>`;
   }
-  matrixHtml += '</div><div id="calc-msg" style="position:absolute; top:0; left:0; width:100%; font-size:22px; color:var(--gold); font-weight:700; letter-spacing:3px; opacity:0; white-space:nowrap; text-align:left; padding-top:40%;"></div></div></div>';
+  matrixHtml += '</div></div>';
   overlay.innerHTML = matrixHtml;
   document.body.appendChild(overlay);
 
-  const matrixEl = overlay.querySelector('#calc-matrix');
-  const msgEl = overlay.querySelector('#calc-msg');
+  // 各行の確定タイミングをランダムに分散（1.2s〜2.8sの間）
+  const lockTimes = Array.from({length:9}, () => 1200 + Math.random() * 1600).sort();
+  const locked = Array(9).fill(false);
 
-  // 数字が高速で切り替わる（2秒間）
+  // 高速切替
   const matrixInterval = setInterval(() => {
-    let text = '';
-    for (let r = 0; r < ROWS; r++) {
+    for (let r = 0; r < 9; r++) {
+      if (locked[r]) continue;
+      const chars = MATRIX_CHARSETS[r].chars;
+      let row = '';
       for (let c = 0; c < COLS; c++) {
-        text += Math.floor(Math.random() * 10);
+        row += chars[Math.floor(Math.random() * chars.length)];
       }
-      text += '\n';
+      document.getElementById('mrow-' + r).textContent = row;
     }
-    matrixEl.textContent = text;
-  }, 60);
+  }, 50);
 
+  // 各行を確定
+  lockTimes.forEach((t, r) => {
+    setTimeout(() => {
+      locked[r] = true;
+      const rowEl = document.getElementById('mrow-' + r);
+      rowEl.style.color = '#c9a84c';
+      rowEl.style.opacity = '1';
+      const checkEl = document.getElementById('mcheck-' + r);
+      checkEl.style.opacity = '1';
+      checkEl.style.color = '#c9a84c';
+    }, t);
+  });
+
+  // 3秒後にタイプライター→フェードアウト→結果表示
   setTimeout(() => {
     clearInterval(matrixInterval);
-    matrixEl.style.transition = 'opacity 0.3s';
-    matrixEl.style.opacity = '0';
+    // マトリクスをフェードアウト
+    const matrixRows = overlay.querySelectorAll('[id^="mrow-"]');
+    const matrixLabels = overlay.querySelectorAll('span[style*="width:90px"]');
+    const matrixChecks = overlay.querySelectorAll('[id^="mcheck-"]');
+    matrixRows.forEach(el => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0.2'; });
+    matrixLabels.forEach(el => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0.2'; });
+    matrixChecks.forEach(el => { el.style.transition = 'opacity 0.4s'; el.style.opacity = '0.2'; });
 
-    // タイプライター演出（左から一文字ずつ）
-    setTimeout(() => {
-      msgEl.style.opacity = '1';
-      msgEl.style.textAlign = 'left';
-      msgEl.style.width = '100%';
-      const typewriterText = 'あなたの鑑定結果が出ました';
-      let charIdx = 0;
-      const typeInterval = setInterval(() => {
-        if (charIdx < typewriterText.length) {
-          msgEl.textContent += typewriterText[charIdx];
-          charIdx++;
-        } else {
-          clearInterval(typeInterval);
+    // タイプライターメッセージ
+    const msgEl = document.createElement('div');
+    msgEl.style.cssText = 'position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:22px; color:#c9a84c; font-weight:700; letter-spacing:3px; white-space:nowrap; font-family:"Noto Serif JP",serif;';
+    overlay.style.position = 'fixed';
+    overlay.appendChild(msgEl);
+
+    const typewriterText = 'あなたの命盤が完成しました';
+    let charIdx = 0;
+    const typeInterval = setInterval(() => {
+      if (charIdx < typewriterText.length) {
+        msgEl.textContent += typewriterText[charIdx];
+        charIdx++;
+      } else {
+        clearInterval(typeInterval);
+        setTimeout(() => {
+          // 先に結果を描画（オーバーレイの裏で）
+          renderAll();
+          // フェードアウト
+          overlay.style.transition = 'opacity 0.5s';
+          overlay.style.opacity = '0';
           setTimeout(() => {
-            // 先に結果を描画（オーバーレイの裏で）
-            renderAll();
-            // その後フェードアウト
-            overlay.style.transition = 'opacity 0.4s';
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-              overlay.remove();
-              if (aside) aside.style.opacity = '1';
-              // スマホ: タイプ結果セクションまでスクロール
-              if (window.innerWidth <= 768) {
-                const typeSection = document.getElementById('type-result-section');
-                if (typeSection) typeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }, 400);
+            overlay.remove();
+            if (aside) aside.style.opacity = '1';
+            // スマホ: タイプ結果セクションまでスクロール
+            if (window.innerWidth <= 768) {
+              const typeSection = document.getElementById('type-result-section');
+              if (typeSection) typeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
           }, 500);
-        }
-      }, 60);
-    }, 400);
-  }, 2000);
+        }, 600);
+      }
+    }, 70);
+  }, 3000);
 }
 
 // ページ読み込み時にフォームを復元
