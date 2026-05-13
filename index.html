@@ -403,6 +403,12 @@
     .star-kw { display: none; }
     .palace { min-height: 50px !important; padding: 6px !important; }
   }
+  @keyframes artsSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes artsCounterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+  .arts-ring-cw { animation: artsSpin 40s linear infinite; }
+  .arts-item { position:absolute; display:flex; flex-direction:column; align-items:center; gap:1px; animation: artsCounterSpin 40s linear infinite; }
+  .arts-item-icon { color:#8B6914; font-size:14px; line-height:1; }
+  .arts-item-label { color:#7a5c0a; font-size:9px; letter-spacing:0.03em; white-space:nowrap; opacity:0.85; }
 </style>
 </head>
 <body>

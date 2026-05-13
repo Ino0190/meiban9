@@ -105,14 +105,10 @@ function initCelestialSphere(container) {
     );
   }
 
-  // Equatorial + ecliptic rings
-  mainGroup.add(makeRing(2.15, 2.15, 0, 0xc8a040, 0.32));
+  // Ecliptic rings (23.5° tilt)
   mainGroup.add(makeRing(2.2, 2.2, 23.5, 0xb8860b, 0.88));
   mainGroup.add(makeRing(2.18, 2.18, 23.5, 0xe8c84a, 0.25));
   mainGroup.add(makeRing(2.23, 2.23, 23.5, 0xd4a820, 0.10));
-  mainGroup.add(makeRing(2.5, 2.5, 0, 0xd8c090, 0.38));
-  mainGroup.add(makeRing(2.65, 2.65, 0, 0xc8a830, 0.20));
-  mainGroup.add(makeRing(2.70, 2.70, 10, 0xd8c090, 0.13));
 
   // Meridian
   const mp = [];
@@ -124,6 +120,13 @@ function initCelestialSphere(container) {
     new THREE.BufferGeometry().setFromPoints(mp),
     new THREE.LineBasicMaterial({ color: 0xc8a040, transparent: true, opacity: 0.28 })
   ));
+
+  // Moon on ecliptic
+  const moonGeo = new THREE.SphereGeometry(0.18, 16, 16);
+  const moonMat = new THREE.MeshBasicMaterial({ color: 0xf0d040 });
+  const moon = new THREE.Mesh(moonGeo, moonMat);
+  const moonOrbitR = 2.35;
+  mainGroup.add(moon);
 
   // Constellations on ecliptic
   const tiltRad = 23.5 * Math.PI / 180;
@@ -201,6 +204,8 @@ function initCelestialSphere(container) {
   function onTM(e) {
     if (!drag) return;
     tY += (e.touches[0].clientX - px) * 0.005;
+    tX += (e.touches[0].clientY - py) * 0.003;
+    tX = Math.max(-0.7, Math.min(0.7, tX));
     px = e.touches[0].clientX; py = e.touches[0].clientY;
   }
 
@@ -222,6 +227,16 @@ function initCelestialSphere(container) {
     mainGroup.rotation.x = cX;
     mainGroup.rotation.y = cY;
     stars.rotation.y = clock.getElapsedTime() * 0.004;
+
+    // Moon orbits on ecliptic
+    var moonAngle = clock.getElapsedTime() * 0.15;
+    var tiltRad2 = 23.5 * Math.PI / 180;
+    moon.position.set(
+      Math.cos(moonAngle) * moonOrbitR,
+      Math.sin(moonAngle) * moonOrbitR * Math.sin(tiltRad2),
+      Math.sin(moonAngle) * moonOrbitR * Math.cos(tiltRad2)
+    );
+
     renderer.render(scene, camera);
   }
   animate();
