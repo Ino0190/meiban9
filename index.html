@@ -1655,7 +1655,11 @@ function buildExportText(){
     ? `${String(d.h).padStart(2,"0")}:${String(d.mi).padStart(2,"0")}`
     : "不明";
 
-  return `以下は羅占盤（西洋占星術・四柱推命・紫微斗数）の計算結果です。この命盤データをもとに総合鑑定をお願いします。
+  return `以下は羅占盤（9つの占術）の計算結果です。この命盤データをもとに総合鑑定をお願いします。
+
+まず16タイプ判定を鑑定の入り口として扱い、「この人は${(() => { try { const sm=calcJintai(d); const nu=calcNumerology(d.y,d.m,d.d); const ky=calcKyusei(d.y,d.m); const ma=calcMaya(d.y,d.m,d.d); const si=calcShukuyo(d.moonLon); let jy=null; if(typeof ayanamsha==='function'){const ay=ayanamsha(d.jd);jy={sunRashi:Math.floor(norm360(d.sunLon-ay)/30),moonRashi:Math.floor(norm360(d.moonLon-ay)/30),lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};} return TypeJudge.judge(d,sm,nu,ky,ma,si,jy).type.name; } catch(e){return "このタイプ";}})()}としてどのような人生を歩む人か」を物語として描写してください。
+その後、9占術のデータを根拠として、なぜその人格になるのかを補強してください。
+占術の羅列ではなく、人格アーキテクチャを中心に統合してください。
 
 ━━━━━━━━━━━━━━━━━━━━
 基本情報
