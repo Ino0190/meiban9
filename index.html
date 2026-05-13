@@ -423,12 +423,12 @@
     <div class="label">あなたの生年月日</div>
     <div style="display:flex; gap:6px; align-items:center;">
       <input type="date" id="birthdate" min="1900-01-01" max="2099-12-31" style="flex:1;">
-      <input type="text" id="birthdate-quick" placeholder="19731216" maxlength="8"
-        style="width:90px; font-size:14px; text-align:center; letter-spacing:1px;"
+      <input type="text" id="birthdate-quick" placeholder="19990707" maxlength="8"
+        style="width:90px; font-size:12px; text-align:center; letter-spacing:1px;"
         oninput="quickDateInput(this,'birthdate')"
-        title="8桁で入力（例：19731216）">
+        title="8桁で入力（例：19990707）">
     </div>
-    <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19731216）で入力すると自動設定</div>
+    <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19990707）で入力すると自動設定</div>
 
     <div class="label">出生時刻</div>
     <div class="row">
@@ -456,10 +456,10 @@
       <div class="label">お相手の生年月日</div>
       <div style="display:flex; gap:6px; align-items:center;">
         <input type="date" id="birthdate-b" min="1900-01-01" max="2099-12-31" style="flex:1;">
-        <input type="text" id="birthdate-b-quick" placeholder="19731216" maxlength="8"
-          style="width:90px; font-size:14px; text-align:center; letter-spacing:1px;"
+        <input type="text" id="birthdate-b-quick" placeholder="19990707" maxlength="8"
+          style="width:90px; font-size:12px; text-align:center; letter-spacing:1px;"
           oninput="quickDateInput(this,'birthdate-b')"
-          title="8桁で入力（例：19731216）">
+          title="8桁で入力（例：19990707）">
       </div>
 
       <div class="label">出生時刻</div>
@@ -499,7 +499,7 @@
       </div>
       <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%;">
       <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">リーダーなのに孤独。楽観的なのに慎重。社交的なのに一人が好き。<br>ひとつの占術では説明できない「矛盾」こそが、あなたの本質です。</div>
-      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">羅占盤は、9つの占術を横断して、あなたの多面性を立体的に解読します。<br>生まれてから、どこへ、どのように向かうのか。</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">9つの占術が交差する点に、あなたがいる。<br>性格診断では見えない「なぜそう動くのか」「なぜそこで迷うのか」を、星の配置から読み解きます。</div>
 
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
@@ -1323,7 +1323,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   };
 }
 
-// 8桁入力（例：19731216）→ date inputに自動変換
+// 8桁入力（例：19990707）→ date inputに自動変換
 function quickDateInput(el, targetId) {
   const v = el.value.replace(/\D/g, ""); // 数字のみ
   if (v.length === 8) {
@@ -1435,6 +1435,11 @@ function cast(){
             setTimeout(() => {
               overlay.remove();
               if (aside) aside.style.opacity = '1';
+              // スマホ: タイプ結果セクションまでスクロール
+              if (window.innerWidth <= 768) {
+                const typeSection = document.getElementById('type-result-section');
+                if (typeSection) typeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
             }, 400);
           }, 500);
         }
@@ -8644,7 +8649,7 @@ function renderConsult(){
           '</div>';
       })();
 
-      return '<div style="text-align:center; margin-bottom:28px; padding:28px 20px; background:linear-gradient(135deg, #fdf6e8 0%, #f5f0e4 100%); border-radius:12px; border:1px solid var(--gold);">' +
+      return '<div id="type-result-section" style="text-align:center; margin-bottom:28px; padding:28px 20px; background:linear-gradient(135deg, #fdf6e8 0%, #f5f0e4 100%); border-radius:12px; border:1px solid var(--gold);">' +
         '<div style="font-size:13px; color:var(--gold); letter-spacing:3px; margin-bottom:8px;">あなたの羅占盤タイプ</div>' +
         '<div style="font-size:32px; color:var(--gold); font-weight:900; font-family:\'Noto Serif JP\',serif; letter-spacing:6px; margin-bottom:12px;">'+typeInfo.name+'</div>' +
         // 語源・タグラインは2カラムの上（全幅中央）
@@ -8674,8 +8679,24 @@ function renderConsult(){
             '<span style="color:var(--gold); font-weight:700;">⚡ '+eType+'</span>（青年'+eY+' → 壮年'+eM+' → 晩年'+eD+'）' +
             '<div style="font-size:13px; color:#6a6050; margin-top:4px;">'+eDesc+'</div></div>';
         })() +
-        '<div style="font-size:12px; color:var(--muted); margin-top:10px;">タイプコード: '+tj.key+'</div>' +
-        (typeInfo.etymology ? '<div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8;">'+typeInfo.etymology+'</div></div>' : '') +
+        '<div style="font-size:12px; color:var(--muted); margin-top:10px;">タイプコード: '+tj.key.replace("狭い","深い")+'</div>' +
+        // 物語・苦悩・処方箋（レベル1テキスト）
+        (typeInfo.story ? '<div style="margin-top:20px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">' +
+          '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">'+typeInfo.name+'の物語</div>' +
+          '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:18px;">'+typeInfo.story+'</div>' +
+          '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">'+typeInfo.name+'の苦悩</div>' +
+          '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:18px;">'+typeInfo.struggles+'</div>' +
+          '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">処方箋</div>' +
+          '<div style="font-size:15px; color:var(--text); line-height:1.8;">'+typeInfo.remedies+'</div>' +
+        '</div>' : '') +
+        // さらに詳しくAIに聞くセクション
+        '<div style="margin-top:20px; padding:20px 24px; border-top:1px solid rgba(139,105,20,0.2); text-align:center; max-width:1040px; margin-left:auto; margin-right:auto;">' +
+          '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px;">さらに詳しくAIに聞く</div>' +
+          '<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px; text-align:left;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>' +
+          '<button onclick="exportForAI()" style="padding:12px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
+          '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
+        '</div>' +
+        (typeInfo.etymology ? '<div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700; text-align:center;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8; text-align:left;">'+typeInfo.etymology+'</div></div>' : '') +
       '</div>' +
       // シェアボタン
       (() => {
@@ -8686,6 +8707,8 @@ function renderConsult(){
           '<div id="share-status" style="font-size:13px; color:var(--muted); margin-top:8px;"></div>' +
         '</div>';
       })() +
+      // 区切り装飾
+      '<div style="text-align:center; margin:24px auto 16px;"><img src="icons/boarder01.png" alt="" style="width:100%; height:64px; object-fit:contain; opacity:0.6;"></div>' +
       // 人格レイヤー表示
       (() => {
         try {
