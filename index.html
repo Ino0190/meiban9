@@ -409,12 +409,13 @@
 <div class="shell">
 
   <aside>
-    <div style="text-align:center; margin-bottom:8px; cursor:pointer;" onclick="goHome()">
-      <img src="icons/Logo01.png" alt="羅占盤" style="width:160px; height:160px; object-fit:contain; mix-blend-mode:multiply;">
+    <div style="text-align:center; margin-bottom:8px; cursor:pointer; position:relative; width:280px; height:280px; margin-left:auto; margin-right:auto;" onclick="goHome()">
+      <div id="celestial-sphere-container" style="position:absolute; inset:0;"></div>
+      <img src="icons/Logo01.png" alt="羅占盤" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:220px; height:auto; object-fit:contain; pointer-events:none; z-index:2;">
     </div>
 
     <!-- モード選択 -->
-    <div style="display:flex; gap:6px; margin-bottom:16px;">
+    <div style="display:flex; gap:6px; margin-bottom:16px; margin-top:30px;">
       <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:10px 0; border:1px solid var(--border); border-radius:4px; font-size:13px; cursor:pointer; background:var(--hi); color:var(--gold); transition:.15s;" id="mode-self-label" onclick="document.getElementById('mode-self').checked=true; toggleMode();">
         <input type="radio" name="mode" value="self" id="mode-self" checked style="display:none;"><span>自分について</span>
       </div>
@@ -11174,6 +11175,16 @@ function triggerDownload(canvas, typeName) {
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="celestial-sphere.js"></script>
+<script>
+(function() {
+  var el = document.getElementById('celestial-sphere-container');
+  if (el && typeof initCelestialSphere === 'function') {
+    initCelestialSphere(el);
+  }
+})();
 </script>
 </body>
 </html>
