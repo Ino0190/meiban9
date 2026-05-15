@@ -10807,7 +10807,7 @@ async function requestDirectAI() {
   const prompt = (currentMode === "compat" && dataB) ? buildCompatExportText() : buildExportText();
   
   try {
-    const res = await fetch('https://rasenban-ai.number0190.workers.dev', {
+    const res = await fetch('https://quiet-snowflake-ea62.number0190.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
