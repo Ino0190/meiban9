@@ -10796,6 +10796,8 @@ function doExportCopy(){
 // ── AI直接鑑定機能 ──
 async function requestDirectAI() {
   if (!currentData) return;
+  const btn = document.querySelector('[onclick="requestDirectAI()"]');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
   const resultDiv = document.getElementById('ai-direct-result');
   const loadingDiv = document.getElementById('ai-direct-loading');
   const textDiv = document.getElementById('ai-direct-text');
