@@ -10793,7 +10793,7 @@ function shareTypeResult() {
   const highlight = personalityHighlight(radarVotes, typeInfo.name, tj.a3.winner);
   const tagLine = highlight && highlight.tag ? `\n✨ ${highlight.tag}\n${highlight.text}` : '';
   const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」${tagLine}`;
-  const shareUrl = 'https://ino0190.github.io/meiban9/';
+  const shareUrl = 'https://rasenban.com/';
 
   // Canvas画像を生成してからシェア
   generateShareImage(typeInfo, tj, highlight, (blob) => {
