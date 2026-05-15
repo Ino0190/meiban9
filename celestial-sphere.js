@@ -189,7 +189,7 @@ function initCelestialSphere(container) {
 
   // Mouse/touch interaction
   let drag = false, px = 0, py = 0;
-  let tX = 0.15, tY = 0, cX = 0.15, cY = 0, autoSpd = 0.0005;
+  let tX = 0.55, tY = 0.4, cX = 0.55, cY = 0.4, autoSpd = 0.0005;
 
   function onDown(e) { drag = true; px = e.clientX; py = e.clientY; autoSpd = 0; }
   function onMove(e) {
