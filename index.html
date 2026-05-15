@@ -8774,9 +8774,9 @@ function renderConsult(){
           '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px; text-align:center;">さらに詳しくAIに聞く</div>' +
           '<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>' +
           '<div style="text-align:center;">' +
-          '<button onclick="exportForAI()" style="padding:12px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
+          '<button onclick="exportForAI()" style="display:block; width:100%; padding:14px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
           '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
-          '<div style="margin-top:12px;"><button onclick="requestDirectAI()" style="padding:12px 32px; background:var(--gold); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">✦ AIに直接鑑定してもらう</button></div>' +
+          '<div style="margin-top:12px;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>' +
           '<div id="ai-direct-result" style="display:none; margin-top:16px; padding:20px; background:rgba(139,105,20,0.05); border-radius:8px; text-align:left;"><div id="ai-direct-loading" style="text-align:center; color:var(--gold); font-size:14px;">鑑定中... 詳しく観ていますので2分ほどお待ちください。</div><div id="ai-direct-text" style="font-size:15px; color:var(--text); line-height:1.9; white-space:pre-wrap;"></div></div>' +
           '</div>' +
         '</div>' +
@@ -9860,6 +9860,7 @@ function renderConsult(){
       <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">命盤データをAI（Claude・ChatGPT等）に渡すと、9占術を統合した詳細な鑑定文を生成できます。</p>
       <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
       <div style="font-size:13px; color:var(--muted); margin-top:10px;">コピー後、AIに貼り付けて「総合鑑定をお願いします」と送ってください</div>
+      <div style="margin-top:12px;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:13px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
     </div>
     `;
   } // end summary
@@ -10798,6 +10799,7 @@ async function requestDirectAI() {
   if (!currentData) return;
   const btn = document.querySelector('[onclick="requestDirectAI()"]');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
+  document.querySelectorAll('.ai-direct-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; b.style.cursor = 'not-allowed'; });
   const resultDiv = document.getElementById('ai-direct-result');
   const loadingDiv = document.getElementById('ai-direct-loading');
   const textDiv = document.getElementById('ai-direct-text');
