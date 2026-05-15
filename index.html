@@ -1476,6 +1476,35 @@ function cast(){
         setTimeout(() => {
           // 先に結果を描画（オーバーレイの裏で）
           renderAll();
+          // 利用ログ送信（非同期・失敗しても無視）
+          try {
+            const sm_ = calcJintai(currentData);
+            const nu_ = calcNumerology(currentData.y, currentData.m, currentData.d);
+            const ky_ = calcKyusei(currentData.y, currentData.m);
+            const ma_ = calcMaya(currentData.y, currentData.m, currentData.d);
+            const si_ = calcShukuyo(currentData.moonLon);
+            let jy_ = null;
+            if (typeof ayanamsha === 'function') {
+              const ay_ = ayanamsha(currentData.jd);
+              jy_ = {sunRashi:Math.floor(norm360(currentData.sunLon-ay_)/30), moonRashi:Math.floor(norm360(currentData.moonLon-ay_)/30), lagnaRashi:currentData.ascLon!==null?Math.floor(norm360(currentData.ascLon-ay_)/30):null};
+            }
+            const tj_ = TypeJudge.judge(currentData, sm_, nu_, ky_, ma_, si_, jy_);
+            const rv_ = calcPersonalityRadar(currentData, sm_, nu_);
+            const hl_ = personalityHighlight(rv_, tj_.type.name, tj_.a3.winner);
+            fetch('https://script.google.com/macros/s/AKfycbwfxX5WQ3Sho2gYkpNSJbqDz4srz8-4G_H2LJk_ehu-uR2akBkAI_iH7rDYlr5xRB9Z4A/exec', {
+              method: 'POST', mode: 'no-cors',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({
+                type: tj_.type.name,
+                typeCode: tj_.key.replace("狭い","深い"),
+                confidence: tj_.confidence,
+                modifier1: tj_.m1.label,
+                modifier2: tj_.m2.label,
+                highlight: hl_ ? hl_.tag : "",
+                userAgent: navigator.userAgent.slice(0, 100),
+              })
+            }).catch(()=>{});
+          } catch(e) { /* ログ失敗は無視 */ }
           // フェードアウト
           overlay.style.transition = 'opacity 0.5s';
           overlay.style.opacity = '0';
@@ -11183,7 +11212,7 @@ function triggerDownload(canvas, typeName) {
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="celestial-sphere.js"></script>
+<script src="celestial-sphere.js?v=2"></script>
 <script>
 (function() {
   var el = document.getElementById('celestial-sphere-container');
