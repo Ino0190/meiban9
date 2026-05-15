@@ -1492,6 +1492,7 @@ function cast(){
             const rv_ = calcPersonalityRadar(currentData, sm_, nu_);
             const hl_ = personalityHighlight(rv_, tj_.type.name, tj_.a3.winner);
             const logParams = new URLSearchParams({
+              action: 'cast',
               type: tj_.type.name,
               typeCode: tj_.key.replace("狭い","深い"),
               confidence: tj_.confidence,
@@ -8764,6 +8765,8 @@ function renderConsult(){
           '<div style="text-align:center;">' +
           '<button onclick="exportForAI()" style="padding:12px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
           '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
+          '<div style="margin-top:12px;"><button onclick="requestDirectAI()" style="padding:12px 32px; background:var(--gold); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">✦ AIに直接鑑定してもらう</button></div>' +
+          '<div id="ai-direct-result" style="display:none; margin-top:16px; padding:20px; background:rgba(139,105,20,0.05); border-radius:8px; text-align:left;"><div id="ai-direct-loading" style="text-align:center; color:var(--gold); font-size:14px;">鑑定中...</div><div id="ai-direct-text" style="font-size:15px; color:var(--text); line-height:1.9; white-space:pre-wrap;"></div></div>' +
           '</div>' +
         '</div>' +
         (typeInfo.etymology ? '<div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700; text-align:center;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8; text-align:left;">'+typeInfo.etymology+'</div></div>' : '') +
@@ -10719,6 +10722,12 @@ function goToTarot(){
 function exportForAI(){
   if (!currentData) return;
 
+  // ログ送信
+  try {
+    const lp = new URLSearchParams({action:'export', type:'', typeCode:'', confidence:'', modifier1:'', modifier2:'', highlight:'', userAgent:navigator.userAgent.slice(0,80)});
+    fetch('https://script.google.com/macros/s/AKfycbxLSqZds8AnBUl3MJe6WQuQr1_Q4D1mhf_ik7UHwgWmKEzWaaNdzAqdBuzFfzrMRx0_fg/exec?'+lp.toString(),{mode:'no-cors'}).catch(()=>{});
+  } catch(e){}
+
   // 初回のみプライバシー注意モーダルを表示
   const PRIVACY_KEY = 'ra_ai_privacy_acknowledged';
   if (!localStorage.getItem(PRIVACY_KEY)) {
@@ -10773,6 +10782,39 @@ function doExportCopy(){
   });
 }
 
+// ── AI直接鑑定機能 ──
+async function requestDirectAI() {
+  if (!currentData) return;
+  const resultDiv = document.getElementById('ai-direct-result');
+  const loadingDiv = document.getElementById('ai-direct-loading');
+  const textDiv = document.getElementById('ai-direct-text');
+  
+  resultDiv.style.display = 'block';
+  loadingDiv.style.display = 'block';
+  textDiv.textContent = '';
+  
+  const prompt = (currentMode === "compat" && dataB) ? buildCompatExportText() : buildExportText();
+  
+  try {
+    const res = await fetch('https://rasenban-ai.number0190.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    
+    if (!res.ok) {
+      throw new Error('API error: ' + res.status);
+    }
+    
+    const data = await res.json();
+    loadingDiv.style.display = 'none';
+    textDiv.textContent = data.text;
+  } catch (e) {
+    loadingDiv.style.display = 'none';
+    textDiv.textContent = '鑑定に失敗しました。しばらく経ってからもう一度お試しください。\n(' + e.message + ')';
+  }
+}
+
 // ── SNSシェア機能（画像＋テキスト＋URL一括）──
 function shareTypeResult() {
   if (!currentData) return;
@@ -10794,6 +10836,12 @@ function shareTypeResult() {
   const tagLine = highlight && highlight.tag ? `\n✨ ${highlight.tag}\n${highlight.text}` : '';
   const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」${tagLine}`;
   const shareUrl = 'https://rasenban.com/';
+
+  // ログ送信
+  try {
+    const lp = new URLSearchParams({action:'share', type:typeInfo.name, typeCode:tj.key.replace("狭い","深い"), confidence:tj.confidence, modifier1:tj.m1.label, modifier2:tj.m2.label, highlight:highlight?highlight.tag:"", userAgent:navigator.userAgent.slice(0,80)});
+    fetch('https://script.google.com/macros/s/AKfycbxLSqZds8AnBUl3MJe6WQuQr1_Q4D1mhf_ik7UHwgWmKEzWaaNdzAqdBuzFfzrMRx0_fg/exec?'+lp.toString(),{mode:'no-cors'}).catch(()=>{});
+  } catch(e){}
 
   // Canvas画像を生成してからシェア
   generateShareImage(typeInfo, tj, highlight, (blob) => {
