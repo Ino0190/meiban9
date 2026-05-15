@@ -1491,19 +1491,16 @@ function cast(){
             const tj_ = TypeJudge.judge(currentData, sm_, nu_, ky_, ma_, si_, jy_);
             const rv_ = calcPersonalityRadar(currentData, sm_, nu_);
             const hl_ = personalityHighlight(rv_, tj_.type.name, tj_.a3.winner);
-            fetch('https://script.google.com/macros/s/AKfycbwfxX5WQ3Sho2gYkpNSJbqDz4srz8-4G_H2LJk_ehu-uR2akBkAI_iH7rDYlr5xRB9Z4A/exec', {
-              method: 'POST', mode: 'no-cors',
-              headers: {'Content-Type':'application/json'},
-              body: JSON.stringify({
-                type: tj_.type.name,
-                typeCode: tj_.key.replace("狭い","深い"),
-                confidence: tj_.confidence,
-                modifier1: tj_.m1.label,
-                modifier2: tj_.m2.label,
-                highlight: hl_ ? hl_.tag : "",
-                userAgent: navigator.userAgent.slice(0, 100),
-              })
-            }).catch(()=>{});
+            const logParams = new URLSearchParams({
+              type: tj_.type.name,
+              typeCode: tj_.key.replace("狭い","深い"),
+              confidence: tj_.confidence,
+              modifier1: tj_.m1.label,
+              modifier2: tj_.m2.label,
+              highlight: hl_ ? hl_.tag : "",
+              userAgent: navigator.userAgent.slice(0, 80),
+            });
+            fetch('https://script.google.com/macros/s/AKfycbxLSqZds8AnBUl3MJe6WQuQr1_Q4D1mhf_ik7UHwgWmKEzWaaNdzAqdBuzFfzrMRx0_fg/exec?' + logParams.toString(), {mode:'no-cors'}).catch(()=>{});
           } catch(e) { /* ログ失敗は無視 */ }
           // フェードアウト
           overlay.style.transition = 'opacity 0.5s';
