@@ -1799,6 +1799,8 @@ ${(() => {
   return `◆ 判定結果: ${typeInfo.name}
 ◆ タイプコード: ${tj.key.replace("狭い","深い")}
 ◆ タグライン: ${typeInfo.desc}
+◆ 一言で言うと（占術データから導いた矛盾）:
+${(() => { const pl = buildParadoxLines(d, tj, typeInfo); return pl.length ? pl.map(t => "  " + t).join("\n") : "  —"; })()}
 ◆ 信頼度: ${tj.confidence}
 ${tj.warnings.length > 0 ? "◆ 警告: " + tj.warnings.join(" / ") : ""}
 
@@ -7313,6 +7315,37 @@ function setConsultCategory(cat) {
   renderConsult();
 }
 
+// 個人の占術データから「矛盾の一文」を動的に組み立てる（9占術が交差する点＝その人固有の矛盾）
+// d: currentData, tj: TypeJudge.judge結果, typeInfo: TYPES[tj.key]
+function buildParadoxLines(d, tj, typeInfo){
+  const lines = [];
+  const parts = (tj && tj.key ? tj.key : "").split("_"); // [革新/継承, 広い/狭い, リーダー/参謀, 楽天/慎重]
+  // 1) 表層(太陽元素) vs 素の自分(月元素/日主元素) の食い違い ← 個人差が出る主軸
+  const facade = {火:"情熱的で勢いがあるように見えるのに", 土:"どっしり落ち着いて見えるのに", 風:"知的で誰とでも打ち解けるように見えるのに", 水:"穏やかで優しげに見えるのに"};
+  const core   = {火:"本当は人に見せない激しさを内に抱えている", 土:"本当は変化が怖くて、安定にしがみつきたい", 風:"心のどこかで常に一歩引いて自分を眺めている", 水:"素顔はひどく繊細で、人の感情に飲み込まれやすい"};
+  try {
+    const sunEl = SIGNS[signOf(d.sunLon)].e;
+    const moonEl = SIGNS[signOf(d.moonLon)].e;
+    const dayEl = STEM_EL[STEMS.indexOf(d.day.stem)];
+    if (sunEl !== moonEl) lines.push(facade[sunEl] + "、" + core[moonEl] + "人。");
+    else if (sunEl !== dayEl) lines.push(facade[sunEl] + "、" + core[dayEl] + "人。");
+  } catch(e) { /* 元素取得失敗は無視 */ }
+  // 2) 4軸の組み合わせから生じる構造的な矛盾
+  const axisLines = [];
+  if (parts[2]==="リーダー" && parts[3]==="慎重") axisLines.push("人を率いる力があるのに、誰より慎重に石橋を叩く人。");
+  if (parts[2]==="リーダー" && parts[1]==="狭い")  axisLines.push("人を導く力があるのに、本当は自分の世界に閉じこもっていたい人。");
+  if (parts[2]==="参謀"   && parts[1]==="広い")  axisLines.push("全体を見渡せるのに、自分から前に立とうとしない人。");
+  if (parts[0]==="革新"   && parts[3]==="慎重")  axisLines.push("新しいものに惹かれるのに、飛びつく前に長く考え込む人。");
+  if (parts[3]==="楽天"   && parts[1]==="狭い")  axisLines.push("明るく見えるのに、心から打ち解ける相手はごくわずかな人。");
+  if (parts[0]==="革新"   && parts[2]==="参謀")  axisLines.push("流れを変える力があるのに、表舞台より裏方を好む人。");
+  if (parts[0]==="継承"   && parts[2]==="リーダー" && parts[3]==="楽天") axisLines.push("伝統を背負う立場なのに、自分らしさを出したくてうずうずしている人。");
+  if (parts[0]==="継承"   && parts[1]==="狭い"   && parts[3]==="慎重") axisLines.push("守りに徹して見えて、内側では誰より深く一点を掘り下げている人。");
+  axisLines.forEach(t => { if (lines.length < 3) lines.push(t); });
+  // 3) どれも作れなければ固定文にフォールバック
+  if (!lines.length && typeInfo && typeInfo.paradox) lines.push(typeInfo.paradox);
+  return lines;
+}
+
 function renderConsult(){
   const d = currentData;
   if (!d) return;
@@ -8732,6 +8765,15 @@ function renderConsult(){
       return '<div id="type-result-section" style="text-align:center; margin-bottom:28px; padding:28px 20px; background:linear-gradient(135deg, #fdf6e8 0%, #f5f0e4 100%); border-radius:12px; border:1px solid var(--gold);">' +
         '<div style="font-size:13px; color:var(--gold); letter-spacing:3px; margin-bottom:8px;">あなたの羅占盤タイプ</div>' +
         '<div style="font-size:32px; color:var(--gold); font-weight:900; font-family:\'Noto Serif JP\',serif; letter-spacing:6px; margin-bottom:12px;">'+typeInfo.name+'</div>' +
+        // 矛盾サマリー（個人の占術データから動的生成。9占術が交差する点＝その人固有の矛盾）
+        (() => {
+          const lines = buildParadoxLines(d, tj, typeInfo);
+          if (!lines.length) return '';
+          return '<div style="max-width:760px; margin:0 auto 20px; padding:16px 0; border-top:1px solid rgba(139,105,20,0.25); border-bottom:1px solid rgba(139,105,20,0.25);">' +
+            '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:10px;">要するにあなたは</div>' +
+            lines.map(t => '<div style="font-size:20px; color:var(--text); font-weight:700; line-height:1.7; font-family:\'Noto Serif JP\',serif; margin:4px 0;">'+t+'</div>').join('') +
+          '</div>';
+        })() +
         // 語源・タグラインは2カラムの上（全幅中央）
         (typeInfo.etymology ? '<div style="font-size:15px; color:#6a5a3a; line-height:1.8; max-width:1040px; margin:0 auto 6px; text-align:center; padding:0 4px;">9つの占術で見たあなたを、16の羅占盤タイプのどれになるかを見定めます。</div>' : '') +
         '<div style="font-size:17px; color:var(--text); line-height:1.8; max-width:720px; margin:0 auto 20px;">'+typeInfo.desc+'</div>' +
@@ -8776,7 +8818,7 @@ function renderConsult(){
           '<div style="text-align:center;">' +
           '<button onclick="exportForAI()" style="display:block; width:100%; padding:14px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
           '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
-          '<div style="margin-top:12px;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>' +
+          '<div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>' +
           '<div id="ai-direct-result" style="display:none; margin-top:16px; padding:20px; background:rgba(139,105,20,0.05); border-radius:8px; text-align:left;"><div id="ai-direct-loading" style="text-align:center; color:var(--gold); font-size:14px;">鑑定中... 詳しく観ていますので2分ほどお待ちください。</div><div id="ai-direct-text" style="font-size:15px; color:var(--text); line-height:1.9; white-space:pre-wrap;"></div></div>' +
           '</div>' +
         '</div>' +
@@ -9860,7 +9902,7 @@ function renderConsult(){
       <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">命盤データをAI（Claude・ChatGPT等）に渡すと、9占術を統合した詳細な鑑定文を生成できます。</p>
       <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
       <div style="font-size:13px; color:var(--muted); margin-top:10px;">コピー後、AIに貼り付けて「総合鑑定をお願いします」と送ってください</div>
-      <div style="margin-top:12px;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:13px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
+      <div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:13px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
     </div>
     `;
   } // end summary
@@ -10849,7 +10891,9 @@ function shareTypeResult() {
   const radarVotes = calcPersonalityRadar(d, sm2, nu2);
   const highlight = personalityHighlight(radarVotes, typeInfo.name, tj.a3.winner);
   const tagLine = highlight && highlight.tag ? `\n✨ ${highlight.tag}\n${highlight.text}` : '';
-  const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！\n「${typeInfo.desc}」${tagLine}`;
+  const paradoxLines = buildParadoxLines(d, tj, typeInfo);
+  const paradoxLine = paradoxLines.length ? `\n${paradoxLines[0]}` : '';
+  const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！${paradoxLine}\n「${typeInfo.desc}」${tagLine}`;
   const shareUrl = 'https://rasenban.com/';
 
   // ログ送信
