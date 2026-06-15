@@ -10516,9 +10516,14 @@ function renderReading(text){
   document.getElementById("reading-empty").style.display = "none";
   document.getElementById("reading-content").style.display = "block";
 
+  // 貼り付けテキスト（AI出力＝信頼できない入力）はHTMLエスケープしてから整形する。
+  // これをしないと <img src=x onerror=...> 等が innerHTML で実行されてしまう（XSS）。
+  // **太字** / "---" / "1. 見出し" の整形はエスケープ後でも動く（記号は不変）。
+  const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
   // プレーンテキストを構造化HTMLに変換
   // セクション分割: "1. " "2. " ... "6. " または "---" で区切る
-  const lines = text.split("\n");
+  const lines = escHtml(text).split("\n");
   let html = "";
   let inSection = false;
   let titleDone = false;
