@@ -8790,8 +8790,8 @@ function renderConsult(){
         '<div style="font-size:13px; color:var(--muted); margin-bottom:14px;">' +
         '生き方の傾向: <span style="color:var(--gold);">' + tj.m1.label + '</span> / <span style="color:var(--gold);">' + tj.m2.label + '</span>' +
         '</div>' +
-        '<div style="font-size:16px; color:var(--text); line-height:1.8; max-width:1040px; margin:0 auto; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);">'+personalityText+'</div>' +
-        '<div style="font-size:15px; color:#6a6050; line-height:1.7; max-width:1040px; margin:6px auto 0;">'+timingText+'</div>' +
+        // 矛盾の一言は冒頭「要するにあなたは」ブロックで既に表示済みのため、ここでの重複表示（personalityText）は削除
+        '<div style="font-size:15px; color:#6a6050; line-height:1.7; max-width:1040px; margin:14px auto 0; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);">'+timingText+'</div>' +
         (() => {
           // エネルギー分布（算命十二大従星）。開花時期の判定はM1（早咲き/晩成）を唯一の正とし、
           // ここはエネルギー量の重心（前半優位/後半優位/山型/フラット）のみを示す。両者をM1と組み合わせて統合説明する。
@@ -8905,10 +8905,16 @@ function renderConsult(){
           const moonElMeaning = {火:"感情が激しく、直感で動く",土:"感情は安定しているが、変化を嫌う",風:"感情を言語化でき、客観的に自分を見る",水:"感情が深く、人の気持ちに敏感"};
           const wxMissingMeaning = {火:"情熱を表に出すのが苦手。内側では燃えているのに、外からは冷静に見える",土:"安定を築くのが苦手。変化は得意だが、一箇所に留まりにくい",木:"成長や柔軟性が課題。決めたことを変えにくい",金:"決断力が弱め。優しいが、切り捨てるべき時に切れない",水:"柔軟性が足りない。論理は強いが、流れに身を任せるのが苦手"};
 
-          const sunInterp = `初対面の人には「${elMeaning[sunSign2.e]||""}」という印象を与えます。${KYUSEI_NAMES[ky3.honmei].desc.split("。")[0]}。`;
+          const sunInterp = `社会的な場面では「${elMeaning[sunSign2.e]||""}」という顔を見せます（第一印象そのものはASC＝命盤の核が示します）。基盤にあるのは${KYUSEI_NAMES[ky3.honmei].desc.split("。")[0]}。`;
           const socialInterp = `仕事では「${smStarMeaning[sm2.stars.east]||sm2.stars.east}」力を発揮します。${officialStars3.length>0 ? "官禄宮に"+officialStars3[0]+"があり、"+( zwStarWork[officialStars3[0]]||"独自の力を発揮する")+"配置。" : ""}`;
-          const moonInterp = `素の自分は${moonElMeaning[moonSign2.e]||""}。${lifeStarName2 ? "命宮"+lifeStarName2+"は「"+(zwStarWork[lifeStarName2]||"")+"」人であることを示します。" : ""}`;
-          const stressInterp = `${tenchuName ? tenchuName+"の時期は本来の力が出にくくなります。" : ""}${wxMissing.length>0 ? wxMissingMeaning[wxMissing[0]]||"" : ""}${huajiPalace ? " 化忌が"+huajiPalace+"にあり、この領域で苦労しやすい。" : ""}`;
+          const moonInterp = `素の自分は${moonElMeaning[moonSign2.e]||""}。${lifeStarName2 ? "命宮の"+lifeStarName2+"は「"+(zwStarWork[lifeStarName2]||"")+"」性質を表します。" : ""}`;
+          const stressInterp = (() => {
+            const parts = [];
+            if (tenchuName) parts.push(tenchuName+"の時期は本来の力が出にくくなります。");
+            if (wxMissing.length > 0 && wxMissingMeaning[wxMissing[0]]) parts.push(wxMissingMeaning[wxMissing[0]]+"。");
+            if (huajiPalace) parts.push("化忌が"+huajiPalace+"にあり、この領域で苦労しやすい。");
+            return parts.join("");
+          })();
           const talentTag = (() => { try { const rv = calcPersonalityRadar(d, sm2, nu2); const hl = personalityHighlight(rv, typeInfo.name, tj.a3.winner); return hl && hl.tag ? hl.tag : ""; } catch(e){ return ""; } })();
           const talentInterp = `${talentTag ? "あなたの最大の武器は「"+talentTag+"」としての力。" : ""}${tj.m2.label}で物事を処理し、同じタイプの中でも独自の個性を持っています。`;
           const soulInterp = `${MAYA_SEALS[ma3.seal].desc.split("。")[0]}。${SHUKUYO_27[shukuIdx3].desc.split("。")[0]}。${currentDasha ? "今は"+currentDasha+"で、"+({太陽:"社会的な活躍",月:"内面の充実",火星:"行動と挑戦",ラーフ:"予想外の変化",木星:"恵みと拡大",土星:"試練と成熟",水星:"学びと交流",ケートゥ:"手放しと悟り",金星:"喜びと豊かさ"}[currentDasha.replace("期","")]||"変化")+"の時期。" : ""}`;
@@ -9122,10 +9128,10 @@ function renderConsult(){
         // ── 西洋占星術（太陽・月・ASC・火星・金星から多面的に投票）──
         const sunEl = sunSign.e;
         // 太陽: 外に見せる力
-        if (sunEl === "火") { addVote("leadership","西洋"); addVote("action","西洋"); }
-        else if (sunEl === "土") { addVote("stable","西洋"); }
-        else if (sunEl === "風") { addVote("social","西洋"); addVote("think","西洋"); }
-        else if (sunEl === "水") { addVote("intuition","西洋"); addVote("nurture","西洋"); }
+        if (sunEl === "火") { addVote("leadership","西洋☉"); addVote("action","西洋☉"); }
+        else if (sunEl === "土") { addVote("stable","西洋☉"); }
+        else if (sunEl === "風") { addVote("social","西洋☉"); addVote("think","西洋☉"); }
+        else if (sunEl === "水") { addVote("intuition","西洋☉"); addVote("nurture","西洋☉"); }
         // 月: 内面の力
         const moonEl = moonSign.e;
         if (moonEl === "火") { addVote("action","西洋☽"); }
@@ -9165,11 +9171,11 @@ function renderConsult(){
         }
 
         // ── 四柱推命（日主＋十神構成から投票）──
-        if (dayMasterEl === "木") { addVote("creative","四柱"); }
-        else if (dayMasterEl === "火") { addVote("action","四柱"); addVote("leadership","四柱"); }
-        else if (dayMasterEl === "土") { addVote("stable","四柱"); addVote("nurture","四柱"); }
-        else if (dayMasterEl === "金") { addVote("think","四柱"); addVote("leadership","四柱"); }
-        else if (dayMasterEl === "水") { addVote("think","四柱"); addVote("intuition","四柱"); }
+        if (dayMasterEl === "木") { addVote("creative","四柱日主"); }
+        else if (dayMasterEl === "火") { addVote("action","四柱日主"); addVote("leadership","四柱日主"); }
+        else if (dayMasterEl === "土") { addVote("stable","四柱日主"); addVote("nurture","四柱日主"); }
+        else if (dayMasterEl === "金") { addVote("think","四柱日主"); addVote("leadership","四柱日主"); }
+        else if (dayMasterEl === "水") { addVote("think","四柱日主"); addVote("intuition","四柱日主"); }
         // 十神から追加投票（偏官=リーダーシップ、食神/傷官=創造性、財星=行動力）
         const tenGods = d.pillars ? d.pillars.map(p=>p.ten).filter(Boolean) : [];
         if (tenGods.includes("偏官") || tenGods.includes("正官")) addVote("leadership","四柱官");
@@ -9187,7 +9193,7 @@ function renderConsult(){
 
         // ── 紫微斗数（命宮主星で投票）──
         const zwVote = {"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
-        if (zwVote[lifeStarName]) addVote(zwVote[lifeStarName],"紫微");
+        if (zwVote[lifeStarName]) addVote(zwVote[lifeStarName],"紫微命");
         // 武曲は行動力も
         if (lifeStarName === "武曲") addVote("action","紫微武");
         // 官禄宮に紫微/武曲がある場合→仕事でリーダーシップを発揮する配置
@@ -9365,19 +9371,21 @@ function renderConsult(){
           const lifeAxis = palaceToLife[palaceName];
           if (!lifeAxis) continue;
           const branchIdx = (d.lifeIdx - i + 12) % 12;
-          let stars = (d.ziweiDistrib[branchIdx] || []).filter(s => strongStars.includes(s));
+          let rawStars = (d.ziweiDistrib[branchIdx] || []);
+          let stars = rawStars.filter(s => strongStars.includes(s));
           let borrowed = false;
           // 3. 無主星の宮は対宮の主星を借りる
           if (stars.length === 0) {
             const oppIdx = (branchIdx + 6) % 12;
-            stars = (d.ziweiDistrib[oppIdx] || []).filter(s => strongStars.includes(s));
+            rawStars = (d.ziweiDistrib[oppIdx] || []);
+            stars = rawStars.filter(s => strongStars.includes(s));
             borrowed = true;
           }
           if (stars.length === 0) continue;
-          // 1. 化忌の入った宮は票を出さない
-          if (ziKi && stars.includes(ziKi)) continue;
-          // 2. 疾厄宮は化禄がある場合のみ健康に票
-          if (palaceName === "疾厄宮" && !(ziLu && stars.includes(ziLu))) continue;
+          // 1. 化忌の入った宮は票を出さない（化忌は文昌・文曲等の副星のこともあるため、主星フィルタ前の生の星リストで判定）
+          if (ziKi && rawStars.includes(ziKi)) continue;
+          // 2. 疾厄宮は化禄がある場合のみ健康に票（化禄も生の星リストで判定）
+          if (palaceName === "疾厄宮" && !(ziLu && rawStars.includes(ziLu))) continue;
           addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮","")+(borrowed ? "(借)" : ""));
         }
 
