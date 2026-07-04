@@ -1844,7 +1844,7 @@ ${aspectLines}
   火: ${elems.火} / 土: ${elems.土} / 風: ${elems.風} / 水: ${elems.水}
 
 ━━━━━━━━━━━━━━━━━━━━
-【2】四柱推命
+【3】四柱推命
 ━━━━━━━━━━━━━━━━━━━━
 ◆ 四柱八字
 ${pillarLines}
@@ -1858,11 +1858,11 @@ ${wxLines}
 ${shichuDayunLines}
 
 ━━━━━━━━━━━━━━━━━━━━
-【3】紫微斗数
+【4】紫微斗数
 ━━━━━━━━━━━━━━━━━━━━
 ◆ 命宮: ${BRANCHES[lifeIdx]}宮
 ◆ 十二宮の主星配置
-${palaceLines.join("\\n")}
+${palaceLines.join("\n")}
 
 ◆ 四化（生年干：${d.year.stem}）
 ${(d.sihua || []).map(sh => {
@@ -1875,7 +1875,7 @@ ${(d.sihua || []).map(sh => {
     }
   }
   return `  ${sh.type}: ${sh.star} → ${palaceName}`;
-}).join("\\n")}
+}).join("\n")}
 
 ◆ 流年四化（${new Date().getFullYear()}年・${STEMS[((new Date().getFullYear() - 1984) % 10 + 10) % 10]}年）
 ${(() => {
@@ -1900,7 +1900,7 @@ ${(() => {
 ${ziweiDayunLines}
 
 ━━━━━━━━━━━━━━━━━━━━
-【4】算命学
+【5】算命学
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const sm = calcJintai(d);
@@ -1923,7 +1923,7 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
-【5】数秘術
+【6】数秘術
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const n = calcNumerology(d.y, d.m, d.d);
@@ -1936,7 +1936,7 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
-【6】九星気学
+【7】九星気学
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const k = calcKyusei(d.y, d.m);
@@ -1950,7 +1950,7 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
-【7】マヤ暦
+【8】マヤ暦
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const m = calcMaya(d.y, d.m, d.d);
@@ -1964,7 +1964,7 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
-【8】宿曜占星術
+【9】宿曜占星術
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const idx = calcShukuyo(d.moonLon);
@@ -1974,7 +1974,7 @@ ${(() => {
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
-【9】インド占星術（ジョーティシュ）
+【10】インド占星術（ジョーティシュ）
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
   const aya = ayanamsha(d.jd);
@@ -2012,49 +2012,43 @@ ${(() => {
 ━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
 ━━━━━━━━━━━━━━━━━━━━
-上記のデータを統合して、以下の形式で鑑定してください。
-各セクションは「読み物」として成立する文章で書いてください（箇条書きの羅列ではなく）。
-占術間で矛盾する結果がある場合は、それぞれの占術の立場から議論し、統合的な解釈を示してください。
-16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台にしつつ、9占術の個人データで個人化してください。
+上記のデータを統合して、以下の8セクションで鑑定してください。
 
-1. この人の物語 — 占術データから読み取れる人生のストーリー
-   幼少期→青年期→壮年期→現在→未来の流れを、占術データに基づいて「読み物」として描写してください。
-   大運・ダシャー・パーソナルイヤーの転換期を物語の節目に使い、
-   16タイプの個性を主人公の性格として描いてください。
+【共通指示】
+- 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
+- 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
+- 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
+- 抽象的・神秘的な表現で終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込む。読み手が「結局、自分はどう生きればいいのか」がわかること。
+- 健康に関する記述は生活習慣の目安であり、医学的助言ではないことを前提とした書き方にする。
+- 分量: 各セクション400〜700字、セクション8のみ300〜500字。全体で4000〜5500字に収める。
 
-2. この人の苦悩 — 何に苦しみ、何と戦っているか
-   16タイプの共通苦悩を土台に、この人固有の占術データ（五行バランス・アスペクト・天中殺等）から
-   「この人特有の苦しみ」を具体的に描写してください。
+【出力フォーマット（厳守）】
+- 各セクションの見出しは「## 1. この人の物語」の形式で、下記の見出し文言を一字も変えずに使う。
+- 見出し以外の装飾（太字の乱用、区切り線）は使わない。前置き・後書き・要約は書かない。
 
-3. 処方箋 — 具体的に何をすべきか
-   16タイプの共通処方箋を土台に、この人の占術データに基づいて個人化してください。
-   抽象的な「気をつけましょう」ではなく、「具体的にこれをやれ」「これはやめろ」のレベルで。
+## 1. この人の物語
+幼少期→青年期→壮年期→現在→未来の流れを描写する。大運・大限・ダシャー・パーソナルイヤーの転換期を物語の節目に使い、16タイプの個性を主人公の性格として描く。
 
-4. この人への手紙 — 総合メッセージ
-   全体を通じて、この人に最も伝えたいことを、温かく、しかし正直に。
+## 2. 性格の核 — 矛盾こそ本質
+九占術を統合して「要するにこういう人」を描く。占術間の矛盾（例: ある占術では社交的、別の占術では孤独を好む）を最低2つ取り上げ、それが何を意味するかを議論する。
 
-抽象的、神秘的な表現だけで終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込んでください。読み手が「結局、自分はどう生きればいいのか」がわかる文章にしてください。
+## 3. この人の苦悩
+16タイプの共通苦悩を土台に、この人固有のデータ（五行バランス・アスペクト・天中殺・化忌等)から「この人特有の苦しみ」を具体的に描く。
 
-5. 性格の核 — この人はどんな人か
-   九占術の結果を統合して「要するにこういう人」を具体的に描写してください。
-   占術間で矛盾する点（例：ある占術では社交的、別の占術では孤独を好む等）があれば、
-   「Aの占術ではこう出ているが、Bの占術ではこう出ている。これは〜を意味する」と議論してください。
+## 4. 処方箋 — やるべきこと・やめるべきこと
+「具体的にこれをやれ」「これはやめろ」のレベルで書く。健康面の注意点も含める。
 
-6. 現在の時期の意味 — 今どういう時期で、何をすべきか
-   各占術の大運/大限/パーソナルイヤー等を統合して、今の時期の意味を具体的に。
-   「待つべき」と「動くべき」が矛盾する場合は、どの領域で待ち、どの領域で動くかを示してください。
+## 5. 現在の時期の意味
+大運・大限・ダシャー・パーソナルイヤーを統合し、今がどういう時期かを示す。「待つべき」と「動くべき」が矛盾する場合、どの領域で待ち、どの領域で動くかを示す。
 
-7. 仕事・キャリア — 具体的にどんな仕事が合うか
-   九占術それぞれが示す仕事の方向性を統合。矛盾があれば議論。
-   「今の仕事をどうすべきか」「次に何をすべきか」の具体的なアドバイスを含めてください。
+## 6. 仕事・キャリア
+九占術が示す仕事の方向性を統合し、矛盾があれば議論する。「今の仕事をどうすべきか」「次に何をすべきか」の具体的アドバイスを含める。
 
-8. 人間関係 — どんな相手と合うか、何に気をつけるか
-   パートナーシップ、友人関係、仕事の人間関係それぞれについて。
-   占術間で異なる傾向が出ている場合は「場面によって違う顔が出る」として統合してください。
+## 7. 人間関係
+パートナー・友人・仕事の人間関係それぞれについて。占術間で異なる傾向は「場面によって違う顔が出る」として統合する。
 
-9. 注意点と強み — 具体的に何をすべきで何を避けるべきか
-   抽象的な「気をつけましょう」ではなく、「具体的にこれをやれ」「これはやめろ」のレベルで。
-   健康面の注意点も含めてください。
+## 8. この人への手紙
+全体を通じて最も伝えたいことを、温かく、しかし正直に。
 
 ※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星＋四化（生年干・大限干・流年干）を実装済み。算命学は人体星図（十大主星＋十二大従星）＋天中殺を実装。マヤ暦・宿曜・インド占星術（ダシャー＋ナクシャトラ）も計算済みです。
 `;
@@ -2219,34 +2213,35 @@ ${typeInfoText}
 ━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
 ━━━━━━━━━━━━━━━━━━━━
-上記の2人の九占術データと相性判定結果を統合して、以下の形式で相性鑑定をお願いします。
-各セクションは「読み物」として成立する文章で書いてください。
-占術間で矛盾する結果がある場合は、それぞれの占術の立場から議論し、統合的な解釈を示してください。
+上記の2人の九占術データと相性判定結果を統合して、以下の6セクションで相性鑑定をお願いします。
 
-1. 2人の関係の本質 — どういう組み合わせか
-   9占術の相性判定を統合して「要するにこの2人はこういう関係」を描写。
-   特に宿曜の関係（${shukuyoRel.name}）を重視しつつ、他の占術との整合性を議論。
-   16タイプ判定の結果（あなた・お相手のタイプ名と異なる軸）も参考にしてください。
+【共通指示】
+- 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
+- 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
+- 抽象的・神秘的な表現で終わらせず、必ず「現実の付き合い方」「距離感」「具体的な行動」に落とし込む。
+- 分量: 各セクション400〜600字、全体3000字以内に収める。
 
-2. 恋愛の相性 — 惹かれ合うか、長続きするか
-   金星の元素、宿曜の関係、数秘の組み合わせ等から恋愛面を分析。
-   「惹かれ合う理由」と「衝突するポイント」の両面を具体的に。
+【出力フォーマット（厳守）】
+- 各セクションの見出しは「## 1. 2人の関係の本質」の形式で、下記の見出し文言を一字も変えずに使う。
+- 見出し以外の装飾（太字の乱用、区切り線）は使わない。前置き・後書き・要約は書かない。
 
-3. 仕事・友人としての相性 — 一緒に何かできるか
-   四柱推命の五行関係、算命学の中心星、九星の相生相剋から分析。
+## 1. 2人の関係の本質 — どういう組み合わせか
+9占術の相性判定を統合して「要するにこの2人はこういう関係」を描写。特に宿曜の関係（${shukuyoRel.name}）を重視しつつ、他の占術との整合性を議論。16タイプ判定の結果（あなた・お相手のタイプ名と異なる軸）も参考にする。
 
-4. この関係で気をつけること — 具体的な注意点
-   占術間で「危険信号」が出ている部分を率直に指摘。
-   「こうすればうまくいく」の具体的アドバイスも。
+## 2. 恋愛の相性 — 惹かれ合うか、長続きするか
+金星の元素、宿曜の関係、数秘の組み合わせ等から恋愛面を分析。「惹かれ合う理由」と「衝突するポイント」の両面を具体的に。
 
-5. 2人の物語 — この2人が出会い、関係を深めていくストーリー
-   それぞれの人生の物語（幼少期→青年期→現在）を簡潔に描いた上で、
-   2人が出会った必然性、惹かれ合う理由、ぶつかるポイント、
-   乗り越えた先の関係を物語として描写してください。
-   宿曜の関係性（${shukuyoRel.name}）と16タイプの軸差を物語の骨格に使ってください。
+## 3. 仕事・友人としての相性 — 一緒に何かできるか
+四柱推命の五行関係、算命学の中心星、九星の相生相剋から分析する。
 
-6. 総合メッセージ — この2人への手紙
-   全体を通じて、この2人に最も伝えたいことを温かく、しかし正直に。
+## 4. この関係で気をつけること — 具体的な注意点
+占術間で「危険信号」が出ている部分を率直に指摘。「こうすればうまくいく」の具体的アドバイスも。
+
+## 5. 2人の物語 — 出会い、関係を深めていくストーリー
+それぞれの人生の物語（幼少期→青年期→現在）を簡潔に描いた上で、2人が出会った必然性、惹かれ合う理由、ぶつかるポイント、乗り越えた先の関係を物語として描写する。宿曜の関係性（${shukuyoRel.name}）と16タイプの軸差を物語の骨格に使う。
+
+## 6. この2人への手紙
+全体を通じて、この2人に最も伝えたいことを温かく、しかし正直に。
 `;
 }
 
@@ -8699,7 +8694,14 @@ function renderConsult(){
       const starAction2 = {"紫微":"人を率いる","天府":"実務を支える","武曲":"目標を形にする","廉貞":"情熱を注ぐ","天機":"知恵で道を切り拓く","天同":"人を和ませる","貪狼":"多方面に才能を発揮する","巨門":"言葉で人を動かす","天相":"人と人を繋ぐ","天梁":"知恵で人を導く","七殺":"独自の道を切り拓く","破軍":"ゼロから創り出す","太陽":"社会に光を放つ","太陰":"静かに深く影響を与える"};
       const mainStar2 = lifeStar2 && lifeStar2[0] ? lifeStar2[0] : "";
       personality2.push((starAction2[mainStar2] || "独自の力を発揮する") + "人。");
-      const personalityText = personality2.join("");
+      // 冒頭要約は16タイプ判定の「一言で言うと（矛盾）」1文目と連動させる。取得不可時は従来の要約にフォールバック。
+      let personalityText;
+      try {
+        const _paradoxSummary = buildParadoxLines(d, tj, typeInfo);
+        personalityText = (_paradoxSummary && _paradoxSummary.length) ? _paradoxSummary[0] : personality2.join("");
+      } catch (e) {
+        personalityText = personality2.join("");
+      }
 
       // 今の時期テキスト
       const shichuDayunT = calcDayun(d);
@@ -8769,14 +8771,14 @@ function renderConsult(){
         (() => {
           const lines = buildParadoxLines(d, tj, typeInfo);
           if (!lines.length) return '';
-          return '<div style="max-width:760px; margin:0 auto 20px; padding:16px 0; border-top:1px solid rgba(139,105,20,0.25); border-bottom:1px solid rgba(139,105,20,0.25);">' +
+          return '<div style="max-width:1040px; margin:0 auto 20px; padding:16px 0; border-top:1px solid rgba(139,105,20,0.25); border-bottom:1px solid rgba(139,105,20,0.25);">' +
             '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:10px;">要するにあなたは</div>' +
             lines.map(t => '<div style="font-size:20px; color:var(--text); font-weight:700; line-height:1.7; font-family:\'Noto Serif JP\',serif; margin:4px 0;">'+t+'</div>').join('') +
           '</div>';
         })() +
         // 語源・タグラインは2カラムの上（全幅中央）
         (typeInfo.etymology ? '<div style="font-size:15px; color:#6a5a3a; line-height:1.8; max-width:1040px; margin:0 auto 6px; text-align:center; padding:0 4px;">9つの占術で見たあなたを、16の羅占盤タイプのどれになるかを見定めます。</div>' : '') +
-        '<div style="font-size:17px; color:var(--text); line-height:1.8; max-width:720px; margin:0 auto 20px;">'+typeInfo.desc+'</div>' +
+        '<div style="font-size:17px; color:var(--text); line-height:1.8; max-width:1040px; margin:0 auto 20px;">'+typeInfo.desc+'</div>' +
         // 画像と詳細カードを2カラムで同じ高さに
         (typeInfo.personality ?
           '<div style="max-width:1040px; margin:0 auto 20px; text-align:left;">' + typeDetailCard + '</div>'
@@ -8788,22 +8790,40 @@ function renderConsult(){
         '<div style="font-size:13px; color:var(--muted); margin-bottom:14px;">' +
         '生き方の傾向: <span style="color:var(--gold);">' + tj.m1.label + '</span> / <span style="color:var(--gold);">' + tj.m2.label + '</span>' +
         '</div>' +
-        '<div style="font-size:16px; color:var(--text); line-height:1.8; max-width:760px; margin:0 auto; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);">'+personalityText+'</div>' +
-        '<div style="font-size:15px; color:#6a6050; line-height:1.7; max-width:760px; margin:6px auto 0;">'+timingText+'</div>' +
+        '<div style="font-size:16px; color:var(--text); line-height:1.8; max-width:1040px; margin:0 auto; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);">'+personalityText+'</div>' +
+        '<div style="font-size:15px; color:#6a6050; line-height:1.7; max-width:1040px; margin:6px auto 0;">'+timingText+'</div>' +
         (() => {
-          // エネルギー分布（算命十二大従星）
+          // エネルギー分布（算命十二大従星）。開花時期の判定はM1（早咲き/晩成）を唯一の正とし、
+          // ここはエネルギー量の重心（前半優位/後半優位/山型/フラット）のみを示す。両者をM1と組み合わせて統合説明する。
           const eY = sm.juuniYear?.e || 0;
           const eM = sm.juuniMonth?.e || 0;
           const eD = sm.juuniDay?.e || 0;
-          const eType = eY >= eM && eY >= eD ? "前半型" : eD >= eY && eD >= eM ? "後半型" : "均等型";
-          const eDesc = eType === "前半型" ? "人生の前半で大きく動き、後半は蓄えた知恵で影響を与える" : eType === "後半型" ? "じっくり力を蓄え、人生の後半で大きく花開く" : "生涯を通じて安定したエネルギーで歩む";
-          return '<div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(139,105,20,0.2); font-size:13px; color:var(--muted);">' +
-            '<span style="color:var(--gold); font-weight:700;">⚡ '+eType+'</span>（青年'+eY+' → 壮年'+eM+' → 晩年'+eD+'）' +
+          const eMax = Math.max(eY, eM, eD);
+          const eMaxCount = [eY, eM, eD].filter(v => v === eMax).length;
+          let eType;
+          if (eMaxCount > 1) eType = "フラット";
+          else if (eY === eMax) eType = "前半優位";
+          else if (eD === eMax) eType = "後半優位";
+          else eType = "山型";
+          const bloom = (tj.m1 && tj.m1.winner === '晩成') ? '晩成' : '早咲き';
+          const eDescMap = {
+            "前半優位_晩成": "燃料は若い頃に多く、精度は歳とともに上がるタイプ。前半に蓄えた経験が、後半に形になる。",
+            "前半優位_早咲き": "若いうちに動き、若いうちに実る先行型。後半は蓄えた知恵で影響を与える。",
+            "後半優位_晩成": "じっくり力を蓄え、人生の後半でエネルギーも成果も花開く。",
+            "後半優位_早咲き": "早くから評価されるが、本当の底力が出るのは後半。二度咲きのタイプ。",
+            "山型_晩成": "壮年期にエネルギーの山がある。その勢いで築いたものが、後半に実る。",
+            "山型_早咲き": "早くから評価され、壮年期に最盛期を迎えるタイプ。",
+            "フラット_晩成": "エネルギーは生涯安定。積み重ねが後半に実る。",
+            "フラット_早咲き": "エネルギーは生涯安定。早くから力を発揮できる。",
+          };
+          const eDesc = eDescMap[eType + "_" + bloom] || "";
+          return '<div style="max-width:1040px; margin:14px auto 0; padding-top:12px; border-top:1px solid rgba(139,105,20,0.2); font-size:13px; color:var(--muted);">' +
+            '<span style="color:var(--gold); font-weight:700;">⚡ エネルギー分布：'+eType+'</span>（青年'+eY+' → 壮年'+eM+' → 晩年'+eD+'）' +
             '<div style="font-size:13px; color:#6a6050; margin-top:4px;">'+eDesc+'</div></div>';
         })() +
-        '<div style="font-size:12px; color:var(--muted); margin-top:10px;">タイプコード: '+tj.key.replace("狭い","深い")+'</div>' +
+        '<div style="max-width:1040px; margin:10px auto 0; font-size:12px; color:var(--muted);">タイプコード: '+tj.key.replace("狭い","深い")+'</div>' +
         // 物語・苦悩・処方箋（レベル1テキスト）
-        (typeInfo.story ? '<div style="margin-top:20px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">' +
+        (typeInfo.story ? '<div style="max-width:1040px; margin:20px auto 0; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">' +
           '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">'+typeInfo.name+'の物語</div>' +
           '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:18px;">'+typeInfo.story+'</div>' +
           '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">'+typeInfo.name+'の苦悩</div>' +
@@ -8811,18 +8831,8 @@ function renderConsult(){
           '<div style="font-size:14px; color:var(--gold); letter-spacing:2px; margin-bottom:8px; font-weight:700; text-align:center;">処方箋</div>' +
           '<div style="font-size:15px; color:var(--text); line-height:1.8;">'+typeInfo.remedies+'</div>' +
         '</div>' : '') +
-        // さらに詳しくAIに聞くセクション
-        '<div style="margin-top:20px; padding:20px 0; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">' +
-          '<div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px; text-align:center;">さらに詳しくAIに聞く</div>' +
-          '<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>' +
-          '<div style="text-align:center;">' +
-          '<button onclick="exportForAI()" style="display:block; width:100%; padding:14px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>' +
-          '<div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>' +
-          '<div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>' +
-          '<div id="ai-direct-result" style="display:none; margin-top:16px; padding:20px; background:rgba(139,105,20,0.05); border-radius:8px; text-align:left;"><div id="ai-direct-loading" style="text-align:center; color:var(--gold); font-size:14px;">鑑定中... 詳しく観ていますので2分ほどお待ちください。</div><div id="ai-direct-text" style="font-size:15px; color:var(--text); line-height:1.9; white-space:pre-wrap;"></div></div>' +
-          '</div>' +
-        '</div>' +
-        (typeInfo.etymology ? '<div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700; text-align:center;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8; text-align:left;">'+typeInfo.etymology+'</div></div>' : '') +
+        // 「さらに詳しくAIに聞く」CTAは読み物を全部読んだ後の最後尾へ移動した（総合タブ末尾に配置）
+        (typeInfo.etymology ? '<div style="max-width:1040px; margin:16px auto 0; padding-top:14px; border-top:1px solid rgba(139,105,20,0.2);"><div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; font-weight:700; text-align:center;">語源</div><div style="font-size:14px; color:#6a6050; line-height:1.8; text-align:left;">'+typeInfo.etymology+'</div></div>' : '') +
       '</div>' +
       // シェアボタン
       (() => {
@@ -9339,18 +9349,36 @@ function renderConsult(){
         lifeAxes.forEach(a => lifeVotes[a.id] = []);
         const addLifeVote = (axis, voter) => { if (!lifeVotes[axis].includes(voter)) lifeVotes[axis].push(voter); };
 
-        // ── 紫微斗数: 各宮の主星の強さで投票 ──
-        // 各宮1票のみ（「強」追加投票は廃止）。命宮・兄弟宮は除外
+        // ── 紫微斗数: 各宮の主星で投票 ──
+        // 各宮1票のみ。命宮・兄弟宮は除外。以下の教義的ルールを適用:
+        //   1. 化忌の入った宮（＝課題の領域）は票を出さない
+        //   2. 疾厄宮は化禄がある場合のみ健康に票（強星があるだけでは健康の課題を示すため）
+        //   3. 無主星の宮は対宮の主星で判定（借星・(branchIdx+6)%12）。借星にも1・2を適用
         const palaceToLife = {"財帛宮":"wealth","夫妻宮":"love","疾厄宮":"health","官禄宮":"career","遷移宮":"influence","福德宮":"spirit","田宅宮":"home","父母宮":"study","子女宮":"love","僕役宮":"influence"};
         const strongStars = ["紫微","天府","太陽","太陰","武曲","天同","天機","廉貞","貪狼","巨門","天相","天梁","七殺","破軍"];
+        const ziKiStar = (d.sihua || []).find(s => s.type === '化忌' && !s.unplaced);
+        const ziLuStar = (d.sihua || []).find(s => s.type === '化禄' && !s.unplaced);
+        const ziKi = ziKiStar ? ziKiStar.star : null;
+        const ziLu = ziLuStar ? ziLuStar.star : null;
         for (let i=0; i<12; i++){
-          const branchIdx = (d.lifeIdx - i + 12) % 12;
-          const stars = (d.ziweiDistrib[branchIdx] || []).filter(s => strongStars.includes(s));
           const palaceName = PALACE_NAMES[i];
           const lifeAxis = palaceToLife[palaceName];
-          if (lifeAxis && stars.length > 0) {
-            addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮",""));
+          if (!lifeAxis) continue;
+          const branchIdx = (d.lifeIdx - i + 12) % 12;
+          let stars = (d.ziweiDistrib[branchIdx] || []).filter(s => strongStars.includes(s));
+          let borrowed = false;
+          // 3. 無主星の宮は対宮の主星を借りる
+          if (stars.length === 0) {
+            const oppIdx = (branchIdx + 6) % 12;
+            stars = (d.ziweiDistrib[oppIdx] || []).filter(s => strongStars.includes(s));
+            borrowed = true;
           }
+          if (stars.length === 0) continue;
+          // 1. 化忌の入った宮は票を出さない
+          if (ziKi && stars.includes(ziKi)) continue;
+          // 2. 疾厄宮は化禄がある場合のみ健康に票
+          if (palaceName === "疾厄宮" && !(ziLu && stars.includes(ziLu))) continue;
+          addLifeVote(lifeAxis, "紫微"+palaceName.replace("宮","")+(borrowed ? "(借)" : ""));
         }
 
         // ── 四柱推命: 十神から投票（各十神1軸のみ）──
@@ -9465,16 +9493,33 @@ function renderConsult(){
           const barW = Math.max(s.pct, 8);
           lifeHtml += '<div style="margin-bottom:10px;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;"><span style="font-size:14px; font-weight:700; color:var(--text); width:140px;">'+s.label+'</span><span style="font-size:13px; color:#3c648c; font-weight:700;">'+s.count+'票</span></div>';
           lifeHtml += '<div style="display:flex; align-items:center; gap:6px;"><div style="flex:1; background:#e8eef4; border-radius:3px; height:8px; overflow:hidden;"><div style="width:'+barW+'%; height:100%; background:#3c648c; border-radius:3px;"></div></div></div>';
-          lifeHtml += '<div style="font-size:12px; color:var(--muted); margin-top:2px;">'+s.voters.join(' / ')+'</div></div>';
+          lifeHtml += '</div>';
         });
         lifeHtml += '</div></div>';
 
-        // 上位3つのサマリー
-        const lifeTop3 = lifeScores.slice(0, 3);
+        // 投票の根拠（占術別の内訳）は専門的な生データなので、既定は畳んで開けたい人だけ開ける（誠実さは担保）
+        lifeHtml += '<details style="max-width:1040px; margin:8px auto 0;"><summary style="font-size:13px; color:#3c648c; cursor:pointer;">各領域の投票根拠（占術別の内訳）を見る</summary>' +
+          '<div style="font-size:12px; color:var(--muted); line-height:1.9; margin-top:6px;">' +
+          lifeScores.map(s => '<div><strong>'+s.label+'</strong>（'+s.count+'票）: '+(s.voters.length ? s.voters.join(' / ') : '—')+'</div>').join('') +
+          '</div></details>';
+
+        // 上位3つのサマリー（同数は同率扱い。3位が同数なら全て列挙）
+        const rankedLife = lifeScores.slice().sort((a,b) => b.count - a.count);
+        const lifeTop3 = [];
+        let lifeRank = 0, lifePrevCount = null;
+        for (let i = 0; i < rankedLife.length; i++) {
+          const s = rankedLife[i];
+          if (s.count !== lifePrevCount) { lifeRank = i + 1; lifePrevCount = s.count; }
+          if (lifeRank > 3) break;
+          lifeTop3.push({...s, rank: lifeRank});
+        }
+        const lifeCountFreq = {};
+        lifeTop3.forEach(s => { lifeCountFreq[s.count] = (lifeCountFreq[s.count] || 0) + 1; });
         lifeHtml += '<div style="margin-top:16px; padding:12px 14px; background:#eef2f8; border-radius:6px; border:1px solid #c8d4e0;">';
         lifeHtml += '<div style="font-size:14px; color:#3c648c; font-weight:700; margin-bottom:8px;">✦ 人生で特に恵まれている領域 TOP3</div>';
-        lifeTop3.forEach((s,i) => {
-          lifeHtml += '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:4px;"><strong>'+(i+1)+'. '+s.label+'</strong>（'+s.count+'票）— '+s.desc+'</div>';
+        lifeTop3.forEach(s => {
+          const tie = lifeCountFreq[s.count] > 1 ? '（同率）' : '';
+          lifeHtml += '<div style="font-size:15px; color:var(--text); line-height:1.8; margin-bottom:4px;"><strong>'+s.rank+'. '+s.label+'</strong>'+tie+'（'+s.count+'票）— '+s.desc+'</div>';
         });
         lifeHtml += '</div>';
 
@@ -10035,6 +10080,18 @@ function renderConsult(){
       <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">10枚のカードで状況の全体像を物語的に読み解きます。</p>
       <a href="tarot/index.html" style="display:inline-block; padding:12px 28px; background:none; border:1px solid var(--gold); color:var(--gold); border-radius:4px; text-decoration:none; font-size:16px; font-weight:700; letter-spacing:2px;">タロットを開く</a>
     </div>
+
+    <!-- さらに詳しくAIに聞く（読み物を全部読んだ後の最後尾CTA。流れを一方向にするため末尾に配置） -->
+    <div style="max-width:1040px; margin:32px auto 0; padding-top:20px; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">
+      <div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px; text-align:center;">さらに詳しくAIに聞く</div>
+      <div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>
+      <div style="text-align:center;">
+        <button onclick="exportForAI()" style="display:block; width:100%; padding:14px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>
+        <div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>
+        <div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
+        <div id="ai-direct-result" style="display:none; margin-top:16px; padding:20px; background:rgba(139,105,20,0.05); border-radius:8px; text-align:left;"><div id="ai-direct-loading" style="text-align:center; color:var(--gold); font-size:14px;">鑑定中... 詳しく観ていますので2分ほどお待ちください。</div><div id="ai-direct-text" style="font-size:15px; color:var(--text); line-height:1.9; white-space:pre-wrap;"></div></div>
+      </div>
+    </div>
     `;
   } // end decision
 
@@ -10594,85 +10651,8 @@ function loadReading(){
 }
 
 // 1973-12-16の鑑定結果をプリセット（デモ用）
-const PRESET_READINGS = {
-  "sanmeiban_reading_1973_12_16": `九占術統合鑑定 — 1973年12月16日 05:00 男性 徳島県
-
-1. 性格の核 — この人はどんな人か
-
-初対面の印象は穏やかで落ち着いている。ASC牡牛座とインド占星術のラグナ・ヴリシャバ（牡牛座）が一致しているので、この「安定感のある外見」は東西両方の占星術が裏付けている。九星気学の二黒土星も「大地の母のような包容力」、四柱推命の日主・戊も「山の土」。外側から見たこの人は、どこから見ても「大地」の人。
-
-ところが中身は全然違う。太陽射手座の冒険心、風の元素が10天体中5つを占める知的好奇心、数秘術のライフパス3の「表現者・楽天家」。頭の中では常に10個のタブが開いていて、新しいアイデアが止まらない。
-
-ここに最初の矛盾がある。数秘術のライフパス3は「社交的で明るく、場を盛り上げる」と言っている。一方、宿曜の亢宿は「独立心が強く、妥協しない孤高の存在」と言っている。バースデーナンバー7も「一人の時間を大切にし、表面的な付き合いを好まない探究者」。これは矛盾ではなく、場面の違い。人前に出れば射手座とライフパス3の「楽しませる力」が全開になる。でも家に帰ると亢宿とバースデー7の「一人で深く考えたい」モードに切り替わる。
-
-もう一つの矛盾。算命学の貫索星（中央）は「自我・独立・頑固」で、自分の世界を守り抜く意志の星。しかし牽牛星が東と南に2つあり、これは「名誉・責任・プライド」の星。つまり「自分のやり方を貫きたい」のに「社会的な責任を果たさなければ」という圧力が常にかかっている。四柱推命の官星2つ（偏官＋正官）もこれを裏付けている。
-
-マヤ暦のKIN257・赤い地球は「シンクロニシティの紋章」で、偶然の一致を通じて導かれる人生。インド占星術で月がシンハ（獅子座）にあるのも興味深い。西洋では月が乙女座（分析的・控えめ）なのに、インドでは獅子座（表現・誇り）。感情の奥底には、もっと堂々と自分を表現したい欲求がある。
-
-要するにこの人は、「安定した大地の外見の中に、風のような知性と、火のような表現欲求と、水のような繊細さを全部持っている人」。
-
-2. 現在の時期の意味 — 今どういう時期で、何をすべきか
-
-九占術の時期読みを並べると、面白い矛盾が見える。
-
-四柱推命の大運・己未（比肩）は「自分とは何者かを再定義する時期」で、能動的に動くことを促している。紫微斗数の大限・財帛宮（天同）は「がむしゃらに稼ぐのをやめて、楽しいことで自然にお金が回るフェーズへ」と言っている。ここまでは「動け、ただし方向を変えろ」で一致。
-
-ところが数秘術のパーソナルイヤー2は「待つ年。人間関係を育てる時期。焦らず信頼を積む」と言っている。これは明確に「動くな」のサイン。
-
-この矛盾の答えは「領域によって違う」。仕事の方向性や自分の在り方については積極的に再定義していい。でも人間関係については焦らず育てる年。転職や独立の「決断」は2026年中にしていいが、「実行」は2027年（パーソナルイヤー3＝表現と行動の年）まで待つのが賢い。
-
-53歳以降は戊午の大運で、命式にゼロだった火が初めて入る。マヤ暦の銀河の音10は「現実化する」音。今はまさに「薪を積み終えて、火をつける直前」の時期。
-
-具体的に：2026年は「設計図を描く年」。2027年に「着工する年」。今年中にやるべきは、自分が本当にやりたいことの言語化、信頼できる人との関係の深化、体力の基盤づくり。
-
-3. 仕事・キャリア — 具体的にどんな仕事が合うか
-
-九占術が示す仕事の方向性は、驚くほど一致している部分と、明確にずれている部分がある。
-
-一致：「複数の領域を横断する仕事」。紫微斗数の官禄宮・貪狼、四柱推命の官星2つ、数秘術のライフパス3、マヤ暦の音10。全て「一つの専門に閉じこもるな」と言っている。
-
-ずれ：九星気学の二黒土星は「農業・不動産・教育・管理職」と地味で堅実。一方、ライフパス3は「作家・アーティスト・講師」と華やか。算命学の車騎星は「即断即決の行動力」、牽牛星×2は「名誉と責任のリーダー」。
-
-統合：「地味な基盤の上に、華やかな表現を乗せる仕事」が最適解。具体的には教育（二黒土星＋ライフパス3＋牽牛星）、テクノロジー×デザインのコンサルティング（貪狼＋車騎星＋風5）、執筆・講演（ライフパス3＋亢宿＋太陽-木星六分）。
-
-寅卯天中殺の人は組織の枠が外れやすい。「組織に属しながら独自のポジションを作る」か「独立して複数の組織と関わる」方が合う。
-
-4. 人間関係 — どんな相手と合うか、何に気をつけるか
-
-紫微斗数の夫妻宮に太陽＝「社会的に活躍するパートナー」。金星双子座＝「知的な会話ができる相手」。インド占星術の月シンハ＝「尊敬できる堂々とした相手」。ここまでは「対等で自立した知的な相手」で一致。
-
-ところが牽牛星×2は「責任を取る側に回りがち」、二黒土星は「面倒見がよく尽くす」、亢宿は「妥協しない」。つまり「対等な相手を求めている」のに「気づくと自分が面倒を見る側になっている」。そして「妥協しない」ので、相手が期待に応えないとフラストレーションが溜まる。
-
-この人に合うパートナーは「自分の世界を持っていて、依存しない人」。ただし「面倒を見たい欲求」も本物なので、完全に放任される関係も寂しい。「お互いが自立した上で、時々甘え合える関係」が理想。
-
-月乙女座＋牽牛星×2は「相手のために尽くしているのに、それが伝わっていない」パターンを生みやすい。やっていることを言葉にする。「察してほしい」は通じない。
-
-5. 注意点と強み — 具体的に何をすべきで何を避けるべきか
-
-やるべきこと：筋トレを続けろ（火がゼロの命式に火を補う最も効果的な方法）。「3つに絞って話す」を意識しろ（風5＋ライフパス3は言葉が多すぎる）。毎日15分、一人で考える時間を確保しろ（バースデー7＋亢宿は内省の時間がないと消耗する）。胃腸を大事にしろ（二黒土星＋戊日主はストレスが胃に出る）。「NO」と言う練習をしろ（官星2つ＋牽牛星×2＋二黒土星は断れない三重苦）。
-
-やめるべきこと：10個のプロジェクトを同時に走らせるな（最大3つに絞る）。「自分でやった方が早い」をやめろ（70%の出来でも任せた方が長期的に成長する）。深夜の作業をやめろ（天胡星4点の晩年に向けて睡眠の質を上げておく）。
-
-強み：太陽-木星-水星-天王星-冥王星のアスペクト網（100人に1人の配置）。二重の大地（ASC牡牛座＋戊日主＋二黒土星）。KIN257・赤い地球のシンクロニシティ（偶然を味方にできる）。
-
-6. 総合メッセージ — この人への手紙
-
-あなたへ。
-
-9つの占術があなたを見て、9つとも同じことを言っています。「この人は大地の人だ」と。戊の山、牡牛座の大地、二黒土星の母なる土、赤い地球の紋章。あなたの足元は、どこにいても揺るがない。
-
-でも9つの占術は、もう一つ同じことを言っています。「この人は、大地の上で風を起こしている」と。射手座の冒険心、風5の知性、ライフパス3の表現力、貪狼の多才さ。あなたの頭の中は、いつも嵐が吹いている。
-
-亢宿は「孤高の存在」と言いました。牽牛星×2は「責任を取る人」と言いました。あなたはずっと、周囲の期待に応えながら、自分の風を抑えてきたのではないですか。
-
-53歳以降、30年連続で火の大運が来ます。命式にゼロだった火が灯ります。火が灯る時、風は敵ではなく味方になります。風が火を大きくするのです。
-
-ただし、天胡星4点の晩年は「全力疾走」ではなく「焚き火」です。ゆっくり、長く、温かく。量より質。体力より感性。
-
-車騎星が西（パートナーの位置）にあります。行動力のある右腕を見つけてください。山は一人で立っているように見えて、実は裾野の森に支えられています。
-
-薪は十分に積んであります。あとは火をつけるだけです。`
-};
+// 旧エンジン時代のプリセット鑑定文は現行計算と矛盾するため削除（将来復活させる場合は現行プロンプトで再生成した文章を人間が用意する）
+const PRESET_READINGS = {};
 function loadReading(){
   const key = getReadingKey();
   let saved = localStorage.getItem(key);
@@ -10687,6 +10667,49 @@ function clearReading(){
   localStorage.removeItem(getReadingKey());
   renderReading("");
 }
+
+// ── スクロール深度ロガー（結果表示のどこまで読まれるかを自分で計測。GA不要・localStorageのみ・外部送信なし） ──
+// コンソールで rasenScrollReport() を実行すると、到達深度・最深セクションの記録を表で確認できる。
+(function(){
+  let maxDepth = 0, maxSection = '';
+  function record(){
+    const sh = document.documentElement.scrollHeight;
+    if (sh > 0) {
+      const depth = Math.round((window.scrollY + window.innerHeight) / sh * 100);
+      if (depth > maxDepth) maxDepth = depth;
+    }
+    let deepest = '';
+    document.querySelectorAll('.panel:not(.hide) .section-title').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight) deepest = el.textContent.trim();
+    });
+    if (deepest) maxSection = deepest;
+  }
+  let t;
+  window.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(record, 200); }, { passive: true });
+  function flush(){
+    if (maxDepth === 0) return;
+    try {
+      const activeTab = document.querySelector('.tabs button.active');
+      const log = JSON.parse(localStorage.getItem('rasen_scroll_log') || '[]');
+      log.push({ t: Date.now(), depth: maxDepth, section: maxSection, tab: activeTab ? activeTab.textContent.trim() : '' });
+      localStorage.setItem('rasen_scroll_log', JSON.stringify(log.slice(-500)));
+    } catch (e) {}
+    maxDepth = 0; maxSection = '';
+  }
+  window.addEventListener('beforeunload', flush);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+  window.rasenScrollReport = function(){
+    const log = JSON.parse(localStorage.getItem('rasen_scroll_log') || '[]');
+    if (!log.length) { console.log('記録なし。命盤を立てて総合タブをスクロールしてから再実行。'); return log; }
+    console.table(log.slice(-50));
+    const avg = log.reduce((a, b) => a + b.depth, 0) / log.length;
+    const secFreq = {};
+    log.forEach(l => { if (l.section) secFreq[l.section] = (secFreq[l.section] || 0) + 1; });
+    console.log('セッション数:', log.length, '／ 平均到達深度:', Math.round(avg) + '%');
+    console.log('最深到達セクションの頻度:', secFreq);
+    return log;
+  };
+})();
 async function pasteReading(){
   try {
     const text = await navigator.clipboard.readText();
