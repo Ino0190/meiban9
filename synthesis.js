@@ -67,7 +67,7 @@
     const nu = calcNumerology(d.y, d.m, d.d);
     const ky = calcKyusei(d.y, d.m, d);
     const ma = calcMaya(d.y, d.m, d.d);
-    const si = calcShukuyo(d.moonLon);
+    const si = calcShukuyo(d);
     let jy = null;
     if (typeof ayanamsha === "function") {
       const ay = ayanamsha(d.jd);
@@ -169,13 +169,105 @@
     return { tj, type: tj.type, axes, traits, top: traits.slice(0, 3), timing: timing(d, nu), paradox };
   }
 
+  // ===== 今日の羅占盤 =====
+  // 日ごとの運を持つ5つの占術（四柱推命の日干支・九星の日盤・宿曜の日の宿・マヤ暦の今日のKIN・数秘術のパーソナルデイ）を
+  // 「動く／整える／慎重」の3つに振り分け、何種類の占術が同じ側に入ったかを数える
+  const DAYKIND = {
+    go: { label: "動く日", short: "動く", tip: "始める・会う・決めることに向く。", cls: "go" },
+    keep: { label: "整える日", short: "整える", tip: "片づける・続ける・学ぶことに向く。", cls: "keep" },
+    care: { label: "慎重な日", short: "慎重", tip: "無理をせず、大きな決断は先に延ばす。", cls: "care" },
+  };
+  const TEN_DAY = {
+    比肩: ["go", "自分で決めて進めやすい"], 劫財: ["care", "張り合いや出費が増えやすい"],
+    食神: ["go", "楽しむこと・表現が実を結ぶ"], 傷官: ["care", "言葉がとがりやすい"],
+    偏財: ["go", "人と会い、話を広げやすい"], 正財: ["keep", "コツコツ積み、お金を整える"],
+    偏官: ["care", "圧がかかりやすい。無理をしない"], 正官: ["keep", "約束や筋を通すと評価される"],
+    偏印: ["keep", "ひらめきが来る。一人で考える"], 正印: ["keep", "学ぶ・教わる・受け取る"],
+  };
+  const KY_DAY = {
+    1: ["care", "坎宮（北）", "停滞しやすい。内側を整える"], 2: ["keep", "坤宮（南西）", "準備と地道な作業に向く"],
+    3: ["go", "震宮（東）", "動き出しと発信に向く"], 4: ["go", "巽宮（南東）", "人とのつながり・信用が広がる"],
+    5: ["care", "中宮", "良くも悪くも極端に出る"], 6: ["go", "乾宮（北西）", "目上の引き立て。決断に向く"],
+    7: ["keep", "兌宮（西）", "楽しみと実り。使いすぎに注意"], 8: ["care", "艮宮（北東）", "変化と切り替え。予定が動きやすい"],
+    9: ["go", "離宮（南）", "注目される。表に出ると吉"],
+  };
+  const TONE_DAY = { 1: "go", 2: "care", 3: "go", 4: "keep", 5: "go", 6: "keep", 7: "keep", 8: "keep", 9: "go", 10: "go", 11: "care", 12: "keep", 13: "care" };
+  const PD_DAY = {
+    1: ["go", "始まりの日"], 2: ["keep", "待つ・合わせる日"], 3: ["go", "表現する日"], 4: ["keep", "積み上げる日"], 5: ["go", "変化の日"],
+    6: ["keep", "人の世話をする日"], 7: ["care", "一人で考える日"], 8: ["go", "成果を取りに行く日"], 9: ["care", "手放す・片づける日"],
+  };
+  const digitSum = n => String(n).split("").reduce((a, b) => a + Number(b), 0);
+  const WEEK = "日月火水木金土";
+
+  function buildToday(d, date) {
+    const y = date.getFullYear(), m = date.getMonth() + 1, dd = date.getDate();
+    const rows = [];
+    // 四柱推命：今日の日干支を日主から見た十神
+    const dp = getDayPillar(y, m, dd), ten = tenGod(d.day.stem, dp.stem), t = TEN_DAY[ten];
+    if (t) rows.push({ sys: "四柱推命", what: "今日は" + dp.stem + dp.branch + "の日。日主" + d.day.stem + "から見て" + (ten === "正印" ? "印綬" : ten), kind: t[0], say: t[1] });
+    // 九星気学：日盤で本命星が入る宮
+    const ky = calcKyusei(d.y, d.m, d), ds = kyuseiDayStar(y, m, dd);
+    if (ds) {
+      const k = KY_DAY[kyuseiPalaceOf(ky.honmei, ds)];
+      rows.push({ sys: "九星気学", what: "日盤の中宮は" + KYUSEI_NAMES[ds].name + "。" + KYUSEI_NAMES[ky.honmei].name + "は" + k[1] + "に入る", kind: k[0], say: k[2] });
+    }
+    // 宿曜：今日の宿があなたの宿から見て何にあたるか
+    const mine = calcShukuyo(d), td = calcShukuyoTrad(y, m, dd);
+    if (td !== null) {
+      const role = SHUKUYO_SEQ[((td - mine) % 27 + 27) % 27], sd = SHUKUYO_DAY[role];
+      rows.push({ sys: "宿曜", what: "今日は" + SHUKUYO_27[td].n + "。あなたの" + SHUKUYO_27[mine].n + "から見て「" + role + "」の日", kind: sd[0], say: sd[1].split("。").slice(1).join("。").replace(/。$/, "") });
+    }
+    // マヤ暦：今日のKINの音。紋章があなたの関係KINなら添える
+    const me = calcMaya(d.y, d.m, d.d), tk = calcMaya(y, m, dd);
+    const rel = tk.seal === me.seal ? "あなたと同じ紋章" : tk.seal === me.guideSeal ? "あなたのガイドの紋章" : tk.seal === me.analogSeal ? "あなたの類似の紋章"
+      : tk.seal === me.occultSeal ? "あなたの神秘の紋章" : tk.seal === me.antipodeSeal ? "あなたの反対の紋章" : "";
+    rows.push({ sys: "マヤ暦", what: "今日はKIN" + tk.kin + "（" + MAYA_SEALS[tk.seal].n + "・音" + tk.tone + "）" + (rel ? "。" + rel + "の日" : ""), kind: TONE_DAY[tk.tone], say: MAYA_TONES[tk.tone].split("。")[0] });
+    // 数秘術：パーソナルデイ（年＋誕生月日 → ＋今月 → ＋今日）
+    const py = reduceToSingle(digitSum(y) + digitSum(d.m) + digitSum(d.d));
+    const pm = reduceToSingle(py + m), pdRaw = reduceToSingle(pm + dd);
+    const pdKey = pdRaw > 9 ? digitSum(pdRaw) : pdRaw;   // 11・22・33 は 2・4・6 の日として読む
+    rows.push({ sys: "数秘術", what: "パーソナルデイ" + pdRaw + "（" + PD_DAY[pdKey][1] + "）", kind: PD_DAY[pdKey][0], say: "個人年" + py + "・個人月" + pm });
+    const cnt = { go: 0, keep: 0, care: 0 };
+    rows.forEach(r => cnt[r.kind]++);
+    const top = ["go", "keep", "care"].sort((a, b) => cnt[b] - cnt[a])[0];
+    return { date, rows, cnt, top, clear: cnt[top] >= 3 && Object.values(cnt).filter(v => v === cnt[top]).length === 1 };
+  }
+
+  function todayPanelHtml(t) {
+    const k = DAYKIND[t.top];
+    const line = t.clear
+      ? t.rows.length + "つの占術のうち <b>" + t.cnt[t.top] + "つ</b> が「" + k.label + "」。" + k.tip
+      : "占術ごとに割れた日（動く" + t.cnt.go + "・整える" + t.cnt.keep + "・慎重" + t.cnt.care + "）。迷ったら、いつもどおりに過ごすのがよい。";
+    return '<div class="rs-time rs-' + (t.clear ? k.cls : "keep") + '"><div class="rs-verdict">' + (t.clear ? k.label : "割れた日") + "</div>" +
+      '<p class="rs-dayline">' + line + "</p><ul class=\"rs-dayrows\">" +
+      t.rows.map(r => '<li><span class="rs-dk rs-dk-' + r.kind + '">' + DAYKIND[r.kind].short + '</span><b class="rs-dsys">' + r.sys + '</b><span class="rs-dwhat">' + esc(r.what) + "<small>" + esc(r.say) + "</small></span></li>").join("") +
+      "</ul></div>";
+  }
+
+  function todayHtml(d) {
+    const base = new Date();
+    const days = [0, 1].map(i => { const x = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i); return { x, t: buildToday(d, x) }; });
+    const label = (i, x) => (i ? "明日" : "今日") + " " + (x.getMonth() + 1) + "/" + x.getDate() + "（" + WEEK[x.getDay()] + "）";
+    return '<section class="rs-sec rs-today"><h3>今日の羅占盤</h3>' +
+      '<p class="rs-lead">日ごとの運を持つ5つの占術で、今日がどんな日かを見る。占術が同じ側にそろうほど、その日の色ははっきりしている。</p>' +
+      '<div class="rs-today-tabs">' + days.map((o, i) => '<button type="button" class="' + (i ? "" : "on") + '" onclick="RSynth.showDay(' + i + ',this)">' + label(i, o.x) + "</button>").join("") + "</div>" +
+      days.map((o, i) => '<div class="rs-day"' + (i ? " hidden" : "") + ">" + todayPanelHtml(o.t) + "</div>").join("") +
+      '<p class="rs-small">四柱推命＝その日の干支を日主から見た関係、九星気学＝日盤で本命星が入る宮、宿曜＝その日の宿との関係（三九の秘法）、マヤ暦＝その日のKINの音、数秘術＝パーソナルデイ。</p>' +
+      "</section>";
+  }
+  function showDay(i, btn) {
+    const sec = btn.closest(".rs-today");
+    sec.querySelectorAll(".rs-today-tabs button").forEach((b, j) => b.classList.toggle("on", j === i));
+    sec.querySelectorAll(".rs-day").forEach((p, j) => { p.hidden = j !== i; });
+  }
+
   // ===== 画面 =====
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const IMG = {
-    "ヒーロー": "0Hero01.png", "レボリューショナリー": "0Revolutionary01.png", "トリックスター": "0Trickster01.png", "ヴィジョナリー": "0Visionary01.png",
-    "パイオニア": "0Pioneer01.png", "ローンウルフ": "0Lonewolf01.png", "シーカー": "0Seeker01.png", "マーベリック": "0Maverick01.png",
-    "ソブリン": "0Sovereign01.png", "エンペラー": "0Emperor01.png", "セージ": "0Sage01.png", "オラクル": "0Oracle01.png",
-    "アルチザン": "0Artisan01.png", "ガーディアン": "0Guardian01.png", "ケアテイカー": "0Caretaker01.png", "ハーミット": "0Hermit01.png",
+    "ヒーロー": "web/0Hero01.webp", "レボリューショナリー": "web/0Revolutionary01.webp", "トリックスター": "web/0Trickster01.webp", "ヴィジョナリー": "web/0Visionary01.webp",
+    "パイオニア": "web/0Pioneer01.webp", "ローンウルフ": "web/0Lonewolf01.webp", "シーカー": "web/0Seeker01.webp", "マーベリック": "web/0Maverick01.webp",
+    "ソブリン": "web/0Sovereign01.webp", "エンペラー": "web/0Emperor01.webp", "セージ": "web/0Sage01.webp", "オラクル": "web/0Oracle01.webp",
+    "アルチザン": "web/0Artisan01.webp", "ガーディアン": "web/0Guardian01.webp", "ケアテイカー": "web/0Caretaker01.webp", "ハーミット": "web/0Hermit01.webp",
   };
   // 9つの占術の丸（一致した占術だけ色が付く）
   function dots(sys, cls) {
@@ -200,6 +292,11 @@
       '<div class="rs-desc">' + esc(t.desc) + "</div>" +
       (r.paradox.length ? '<ul class="rs-paradox">' + r.paradox.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
       "</div></div>";
+
+    // ── 今日の羅占盤（自分モードだけ） ──
+    if (typeof currentMode === "undefined" || currentMode !== "compat") {
+      try { h += todayHtml(d); } catch (e) { console.warn("今日の羅占盤の描画エラー:", e); }
+    }
 
     // ── 2. 占術が一致したところ（4つの軸） ──
     h += '<section class="rs-sec"><h3>9つの占術が一致したところ</h3>' +
@@ -443,6 +540,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, buildToday, showDay };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);

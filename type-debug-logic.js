@@ -708,7 +708,7 @@
 708	    const nu = (typeof calcNumerology === 'function') ? calcNumerology(d.y, d.m, d.d) : null;
 709	    const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m, d) : null;
 710	    const ma = (typeof calcMaya === 'function') ? calcMaya(d.y, d.m, d.d) : null;
-711	    const shukuIdx = (typeof calcShukuyo === 'function') ? calcShukuyo(d.moonLon) : null;
+711	    const shukuIdx = (typeof calcShukuyo === 'function') ? calcShukuyo(d) : null;
 712	
 713	    // インド占星術（サイデリアル）
 714	    let jy = null;

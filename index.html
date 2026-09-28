@@ -9,15 +9,24 @@
 <meta property="og:description" content="9つの占術を統合し、あなたの人格を16タイプで鑑定。生年月日だけで、あなたの本質を多角的に読み解きます。">
 <meta property="og:url" content="https://rasenban.com">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://rasenban.com/icons/TopImage.png">
+<meta property="og:image" content="https://rasenban.com/icons/og-image.jpg">
 <meta property="og:site_name" content="羅占盤">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="羅占盤 — 9つの占術で読む、あなたの命盤">
 <meta name="twitter:description" content="9つの占術を統合し、あなたの人格を16タイプで鑑定。">
-<meta name="twitter:image" content="https://rasenban.com/icons/TopImage.png">
+<meta name="twitter:image" content="https://rasenban.com/icons/og-image.jpg">
 <link rel="icon" href="icons/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/RaIcon.png">
+<link rel="apple-touch-icon" href="icons/RaIcon-180.png">
+<script>
+// 天文暦（約4MB）は画面の表示を止めずに裏で読む。命盤を立てるとき（cast）だけ読み終わりを待つ
+window.EPH_READY = new Promise(function (resolve, reject) {
+  var s = document.createElement("script");
+  s.src = "ephemeris-data.js"; s.async = true;
+  s.onload = resolve; s.onerror = reject;
+  document.head.appendChild(s);
+});
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
 <style>
@@ -108,7 +117,7 @@
     display:block;
     width:100%;
     height:64px;
-    background:url('icons/boarder01.png') center/auto 100% no-repeat;
+    background:url('icons/boarder01.webp') center/auto 100% no-repeat;
     mix-blend-mode:multiply;
     margin-bottom:16px;
     opacity:0.8;
@@ -521,6 +530,18 @@ a.rs-go:hover{color:#6a4e10}
   .rs-axes,.rs-traits{grid-template-columns:1fr}
   .rs-type{font-size:30px}
 }
+/* 今日の羅占盤 */
+.rs-keep .rs-verdict{color:#3060a0}
+.rs-today-tabs{display:flex;gap:8px;margin:4px 0 12px}
+.rs-today-tabs button{font-family:inherit;font-size:15px;padding:8px 16px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;cursor:pointer}
+.rs-today-tabs button.on{border-color:var(--gold);color:var(--gold);font-weight:700}
+.rs-dayline{font-size:16px;line-height:1.7;margin:0 0 10px;color:var(--text)}
+.rs-dayrows{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.rs-dayrows li{display:grid;grid-template-columns:64px 110px 1fr;gap:10px;align-items:start;font-size:15px;line-height:1.6;padding:8px 0;border-top:1px solid var(--border)}
+.rs-dayrows li small{display:block;font-size:14px;color:var(--muted)}
+.rs-dk{display:inline-block;text-align:center;font-size:14px;font-weight:700;border-radius:4px;padding:2px 0}
+.rs-dk-go{background:#e6f1e7;color:#3a7a40}.rs-dk-keep{background:#e5ecf6;color:#2c5690}.rs-dk-care{background:#f6eedc;color:#8a6010}
+@media (max-width:768px){.rs-dayrows li{grid-template-columns:56px 1fr}.rs-dayrows li .rs-dsys{grid-column:2}.rs-dayrows li .rs-dwhat{grid-column:1 / -1}}
 /* 宿曜：三九の秘法の早見表 */
 .rs-sq-wrap{overflow-x:auto}
 .rs-sq-table{width:100%;border-collapse:collapse;font-size:15px;background:var(--surface)}
@@ -558,7 +579,7 @@ a.rs-go:hover{color:#6a4e10}
   <aside>
     <div style="text-align:center; margin-bottom:8px; cursor:pointer; position:relative; width:280px; height:280px; margin-left:auto; margin-right:auto;" onclick="goHome()">
       <div id="celestial-sphere-container" style="position:absolute; inset:0;"></div>
-      <img src="icons/Logo01.png" alt="羅占盤" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:220px; height:auto; object-fit:contain; pointer-events:none; z-index:2;">
+      <img src="icons/Logo01.webp" alt="羅占盤" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:220px; height:auto; object-fit:contain; pointer-events:none; z-index:2;">
     </div>
 
     <!-- モード選択 -->
@@ -646,7 +667,7 @@ a.rs-go:hover{color:#6a4e10}
     <div class="empty" id="empty" style="height:auto; padding:40px 32px; position:relative;">
       <!-- ロゴ（最前面） -->
       <div style="text-align:center; margin-bottom:8px; position:relative; z-index:2;">
-        <img src="icons/TopImage.png" alt="羅占盤" style="width:640px; max-width:90%; height:auto; object-fit:contain;">
+        <img src="icons/TopImage.webp" alt="羅占盤" fetchpriority="high" style="width:640px; max-width:90%; height:auto; object-fit:contain;">
       </div>
       <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%;">
       <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">リーダーなのに孤独。楽観的なのに慎重。社交的なのに一人が好き。<br>ひとつの占術では説明できない「矛盾」こそが、あなたの本質です。</div>
@@ -773,9 +794,9 @@ a.rs-go:hover{color:#6a4e10}
 
 </div>
 
-<script src="ephemeris-data.js"></script>
-<script src="type-judge.js?v=11"></script>
-<script src="synthesis.js?v=2"></script>
+<script src="lunar-data.js?v=1"></script>
+<script src="type-judge.js?v=13"></script>
+<script src="synthesis.js?v=4"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -897,23 +918,15 @@ function planetLongitude(name, jd){
   return norm360(e.L + e.n*T);
 }
 
-// ASC（ごく簡略：恒星時＋緯度35°想定、時刻なし時は使わない）
-function ascendant(jd, lat){
+// 地方恒星時（度）。出生地は東経135°固定
+function localSiderealDeg(jd){
   const T = (jd - 2451545.0)/36525;
-  // 恒星時（グリニッジ平均恒星時、度）
-  let GMST = 280.46061837 + 360.98564736629*(jd - 2451545.0)
-           + 0.000387933*T*T;
-  GMST = norm360(GMST);
-  // 出生地経度（日本は東経約135°）
-  const LST = norm360(GMST + 135);
-  // 簡易ASC計算
-  const eps = 23.4393*Math.PI/180;
-  const lstR = LST*Math.PI/180;
-  const latR = (lat||35)*Math.PI/180;
-  const y = -Math.cos(lstR);
-  const x = Math.sin(lstR)*Math.cos(eps) + Math.tan(latR)*Math.sin(eps);
-  let asc = Math.atan2(y,x)*180/Math.PI;
-  return norm360(asc);
+  return norm360(280.46061837 + 360.98564736629*(jd - 2451545.0) + 0.000387933*T*T + 135);
+}
+// ASC（上昇点）。北緯35°固定
+function ascendant(jd, lat){
+  const R = Math.PI/180, eps = 23.4393*R, th = localSiderealDeg(jd)*R, phi = (lat||35)*R;
+  return norm360(Math.atan2(Math.cos(th), -(Math.sin(th)*Math.cos(eps) + Math.tan(phi)*Math.sin(eps))) / R);
 }
 
 // MC（天頂、Medium Coeli）
@@ -928,60 +941,29 @@ function midheaven(jd) {
   return norm360(mc);
 }
 
-// プラシーダスハウスカスプ計算（簡易版）
+// プラシーダス（半弧の3等分を反復計算）
 function placidusHouses(jd, lat) {
-  const ascLon = ascendant(jd, lat);
-  const mcLon = midheaven(jd);
-  const cusps = new Array(12);
-  cusps[0] = ascLon;       // 1ハウス = ASC
-  cusps[9] = mcLon;        // 10ハウス = MC
-  cusps[3] = norm360(mcLon + 180); // 4ハウス = IC
-  cusps[6] = norm360(ascLon + 180); // 7ハウス = DSC
-
-  const eps = 23.4393 * Math.PI / 180;
-  const latR = (lat || 35) * Math.PI / 180;
-  const T = (jd - 2451545.0) / 36525;
-  let GMST = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T;
-  const LST = norm360(GMST + 135);
-
-  // プラシーダス中間ハウス: 赤経の3等分を黄経に変換
-  // ASCの赤経(RAMC)
-  const RAMC = LST;
-
-  // 2,3ハウス（ASC〜IC間を3等分）、11,12ハウス（MC〜ASC間を3等分）
-  function cuspFromRA(ra) {
-    const raR = ra * Math.PI / 180;
-    const y = Math.sin(raR);
-    const x = Math.cos(raR) * Math.cos(eps) + Math.tan(latR) * Math.sin(eps);
-    return norm360(Math.atan2(y, x) * 180 / Math.PI);
-  }
-
-  // 11ハウス: MC→ASCの1/3
-  const ra11 = norm360(RAMC + 30);
-  cusps[10] = cuspFromRA(ra11);
-  // 12ハウス: MC→ASCの2/3
-  const ra12 = norm360(RAMC + 60);
-  cusps[11] = cuspFromRA(ra12);
-  // 2ハウス: ASC→ICの1/3
-  const ra2 = norm360(RAMC + 120);
-  cusps[1] = cuspFromRA(ra2);
-  // 3ハウス: ASC→ICの2/3
-  const ra3 = norm360(RAMC + 150);
-  cusps[2] = cuspFromRA(ra3);
-
-  // 5,6ハウス: IC→DSCの1/3, 2/3
-  const ra5 = norm360(RAMC + 210);
-  cusps[4] = cuspFromRA(ra5);
-  const ra6 = norm360(RAMC + 240);
-  cusps[5] = cuspFromRA(ra6);
-
-  // 8,9ハウス: DSC→MCの1/3, 2/3
-  const ra8 = norm360(RAMC + 300);
-  cusps[7] = cuspFromRA(ra8);
-  const ra9 = norm360(RAMC + 330);
-  cusps[8] = cuspFromRA(ra9);
-
-  return cusps;
+  const R = Math.PI/180, eps = 23.4393*R, phi = (lat||35)*R;
+  const ramc = localSiderealDeg(jd);
+  const asc = ascendant(jd, lat), mc = midheaven(jd);
+  const eclOfRA = ra => norm360(Math.atan2(Math.sin(ra*R), Math.cos(ra*R)*Math.cos(eps)) / R);
+  // f＝半弧の割合。above＝MC〜ASC（11・12室）、それ以外＝ASC〜IC（2・3室）
+  const cusp = (f, above) => {
+    let lam = eclOfRA(ramc + (above ? 90*f : 180 - 90*f));
+    for (let k = 0; k < 30; k++) {
+      const x = Math.tan(phi) * Math.tan(Math.asin(Math.sin(eps) * Math.sin(lam*R)));
+      if (Math.abs(x) >= 1) break;
+      const ad = Math.asin(x) / R;
+      lam = eclOfRA(above ? ramc + f*(90 + ad) : ramc + 180 - f*(90 - ad));
+    }
+    return lam;
+  };
+  const c = new Array(12);
+  c[0] = asc; c[9] = mc; c[3] = norm360(mc + 180); c[6] = norm360(asc + 180);
+  c[10] = cusp(1/3, true); c[11] = cusp(2/3, true);
+  c[2] = cusp(1/3, false); c[1] = cusp(2/3, false);
+  [[4,10],[5,11],[7,1],[8,2]].forEach(([i, j]) => { c[i] = norm360(c[j] + 180); });
+  return c;
 }
 
 function norm360(x){ x = x % 360; return x<0 ? x+360 : x; }
@@ -1013,6 +995,33 @@ function getPlanetLon(name, jd) {
 }
 function getRahuLon(jd) { return ephLookup(jd, "rahu"); }
 function getKetuLon(jd) { const r = getRahuLon(jd); return r !== null ? norm360(r + 180) : null; }
+
+/* ============ 旧暦（lunar-data.js の月表を引く・JST・中気のない月が閏月） ============ */
+let _LUNAR_MONTHS = null;
+function lunarMonths(){
+  if (_LUNAR_MONTHS) return _LUNAR_MONTHS;
+  const out = [];
+  let jdn = LUNAR_START_JDN, ly = LUNAR_START_YEAR;
+  for (let i = 0; i < LUNAR_LEN.length; i++) {
+    const c = LUNAR_NUM[i], leap = c !== c.toLowerCase(), num = c.toLowerCase().charCodeAt(0) - 96;
+    if (i > 0 && num === 1 && !leap) ly++;
+    out.push({ start: jdn, num, leap, year: ly });
+    jdn += LUNAR_LEN[i] === "9" ? 29 : 30;
+  }
+  out.push({ start: jdn });
+  return (_LUNAR_MONTHS = out);
+}
+function jdnOf(y, m, d){ return Math.round(Date.UTC(y, m - 1, d) / 86400000) + 2440588; }
+// 新暦の日付 → 旧暦 {year, month, day, leap}。表の範囲外は null
+function lunarDate(y, m, d){
+  if (typeof LUNAR_LEN === "undefined") return null;
+  const L = lunarMonths(), n = jdnOf(y, m, d);
+  if (n < L[0].start || n >= L[L.length - 1].start) return null;
+  let lo = 0, hi = L.length - 2;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (L[mid].start <= n) lo = mid; else hi = mid - 1; }
+  const e = L[lo];
+  return { year: e.year, month: e.num, day: n - e.start + 1, leap: e.leap };
+}
 
 /* ============ 四柱推命 ============ */
 // 節気精密計算（Swiss Ephemerisテーブル使用、誤差±数分）
@@ -1063,52 +1072,38 @@ function getSolarTermDay(year, month) {
   return result ? result.day : (month === 2 ? 4 : 6); // フォールバック
 }
 
-function getYearStem(y, m, d){
-  // 立春（2月の節入り）前は前年扱い
-  const lichunDay = getSolarTermDay(y, 2);
-  const effectiveYear = (m < 2 || (m === 2 && d < lichunDay)) ? y - 1 : y;
-  const idx = ((effectiveYear - 1984) % 10 + 10) % 10;
-  return STEMS[idx];
+// 太陽黄経が target になる瞬間（JD）。approxJd の近くをニュートン法で詰める
+function sunCrossJd(target, approxJd){
+  let t = approxJd;
+  for (let k = 0; k < 6; k++) t += ((target - getSunLon(t) + 540) % 360 - 180) / 0.9856;
+  return t;
 }
-function getYearBranch(y, m, d){
-  const lichunDay = getSolarTermDay(y, 2);
-  const effectiveYear = (m < 2 || (m === 2 && d < lichunDay)) ? y - 1 : y;
-  const idx = ((effectiveYear - 1984) % 12 + 12) % 12;
-  return BRANCHES[idx];
+// 生まれた節月の節入りの日（JST）を1日目として数えた日数（算命学の蔵干の深浅に使う）
+function daysSinceSetsuiri(jd, sunLon){
+  const target = norm360(315 + 30 * Math.floor((((sunLon - 315) % 360) + 360) % 360 / 30));
+  const t = sunCrossJd(target, jd - norm360(sunLon - target) / 0.9856);
+  const jst = x => Math.floor(x + 0.5 + 9/24);
+  return jst(jd) - jst(t) + 1;
 }
-// 月柱（五虎遁、精密節気版）
-function getMonthPillar(y, m, d){
-  // 各月の節入り日を精密計算
-  const termDay = getSolarTermDay(y, m);
-  // 節入り前は前月扱い
-  let effectiveMonth = m;
-  let effectiveYear = y;
-  if (d < termDay) {
-    effectiveMonth = m - 1;
-    if (effectiveMonth === 0) { effectiveMonth = 12; effectiveYear = y - 1; }
-  }
-  // 年柱の年干（立春基準）
-  const lichunDay = getSolarTermDay(effectiveYear, 2);
-  const yearForStem = (effectiveMonth < 2 || (effectiveMonth === 2 && d < lichunDay)) ? effectiveYear - 1 : effectiveYear;
-  const yearStemIdx = ((yearForStem - 1984) % 10 + 10) % 10;
-  // 月支
-  const monthBranchMap = [1,1,2,3,4,5,6,7,8,9,10,11,0]; // [dummy,1月,2月,...,12月]
-  const branchIdx = monthBranchMap[effectiveMonth];
-  // 月干（五虎遁）
-  const fiveTiger = [2,4,6,8,0,2,4,6,8,0];
-  const yinStemIdx = fiveTiger[yearStemIdx];
-  const offset = ((branchIdx - 2) % 12 + 12) % 12;
-  const stemIdx = (yinStemIdx + offset) % 10;
-  return { stem:STEMS[stemIdx], branch:BRANCHES[branchIdx] };
+// 年柱・月柱: 生まれた瞬間の太陽黄経で節月を決める（0＝寅月＝立春315°〜 … 10＝子月・11＝丑月）
+function pillarsFromSun(y, m, sunLon){
+  const mIdx = Math.floor((((sunLon - 315) % 360) + 360) % 360 / 30);
+  const effY = (m <= 2 && mIdx >= 10) ? y - 1 : y;
+  const ys = ((effY - 4) % 10 + 10) % 10, yb = ((effY - 4) % 12 + 12) % 12;
+  return {
+    effY, mIdx,
+    year: { stem: STEMS[ys], branch: BRANCHES[yb] },
+    month: { stem: STEMS[((ys % 5) * 2 + 2 + mIdx) % 10], branch: BRANCHES[(mIdx + 2) % 12] },  // 月干は五虎遁
+  };
 }
 // 日柱（基準日からの日数）
 function getDayPillar(y, m, d){
-  // 2000年1月1日=庚辰（干6、支4）
+  // 2000年1月1日＝戊午（干4、支6）。1900-01-01＝甲戌と同じ系列（ユリウス通日 JDN+49 を60で割った余り）
   const base = new Date(Date.UTC(2000,0,1));
   const target = new Date(Date.UTC(y,m-1,d));
   const days = Math.round((target - base)/86400000);
-  const stemIdx = ((6 + days) % 10 + 10) % 10;
-  const branchIdx = ((4 + days) % 12 + 12) % 12;
+  const stemIdx = ((4 + days) % 10 + 10) % 10;
+  const branchIdx = ((6 + days) % 12 + 12) % 12;
   return { stem:STEMS[stemIdx], branch:BRANCHES[branchIdx] };
 }
 // 時柱（五鼠遁）
@@ -1128,14 +1123,12 @@ function getHourPillar(dayStem, h){
 function tenGod(dayStem, otherStem){
   const d = STEMS.indexOf(dayStem), o = STEMS.indexOf(otherStem);
   if (d<0||o<0) return "";
-  const diff = ((o - d) % 10 + 10) % 10;
-  const dayYin = d%2===1, otherYin = o%2===1;
-  const same = dayYin===otherYin;
+  // 五行の関係（干の番号÷2＝木火土金水）: 0同じ五行・1我が生む・2我が剋す・3我を剋す・4我を生む。陰陽が同じなら偏、違えば正
+  // （干の番号の差で見ていたため、陰干の日主では五行を取り違えていた）
+  const rel = ((Math.floor(o / 2) - Math.floor(d / 2)) % 5 + 5) % 5;
+  const same = (d % 2) === (o % 2);
   const map = ["比肩","劫財","食神","傷官","偏財","正財","偏官","正官","偏印","正印"];
-  // 簡略：同性は偏、異性は正（比/劫、食/傷、偏/正財…）
-  // diff=0:同五行, 2:我生, 4:我剋, 6:剋我, 8:生我
-  const base = [0,0,2,2,4,4,6,6,8,8][diff];
-  return same ? map[base] : map[base+1];
+  return map[rel * 2 + (same ? 0 : 1)];
 }
 
 /* ============ 紫微斗数（正式安星） ============ */
@@ -1148,103 +1141,44 @@ function ziweiLife(monthBranch, hourBranch){
   return lifeIdx;
 }
 
-// 五行局の決定（年干支から）
-// 水二局・木三局・金四局・土五局・火六局
-function calcWuxingJu(yearStem, yearBranch) {
-  // 年干支の納音五行から五行局を決定
-  // 簡略版：年支の五行と年干の陰陽から局数を決定
-  const stemIdx = STEMS.indexOf(yearStem);
-  const branchIdx = BRANCHES.indexOf(yearBranch);
-  // 60干支の納音五行（五行局対応表）
-  // 甲子・乙丑=金四局, 丙寅・丁卯=火六局, 戊辰・己巳=木三局,
-  // 庚午・辛未=土五局, 壬申・癸酉=金四局, 甲戌・乙亥=火六局,
-  // 丙子・丁丑=水二局, 戊寅・己卯=土五局, 庚辰・辛巳=金四局,
-  // 壬午・癸未=木三局, 甲申・乙酉=水二局, 丙戌・丁亥=土五局,
-  // 戊子・己丑=火六局, 庚寅・辛卯=土五局, 壬辰・癸巳=水二局,
-  // 甲午・乙未=金四局, 丙申・丁酉=火六局, 戊戌・己亥=木三局,
-  // 庚子・辛丑=土五局, 壬寅・癸卯=金四局, 甲辰・乙巳=火六局,
-  // 丙午・丁未=水二局, 戊申・己酉=土五局, 庚戌・辛亥=金四局,
-  // 壬子・癸丑=木三局, 甲寅・乙卯=水二局, 丙辰・丁巳=土五局,
-  // 戊午・己未=火六局, 庚申・辛酉=木三局, 壬戌・癸亥=水二局
-  const NAYIN_JU = [
-    4,4,6,6,3,3,5,5,4,4,6,6, // 甲子〜癸亥（前半）
-    2,2,5,5,4,4,3,3,2,2,5,5, // 丙子〜癸未
-    6,6,5,5,2,2,4,4,6,6,3,3, // 甲申〜癸卯
-    2,2,5,5,4,4,6,6,3,3,2,2, // 甲辰〜癸亥（後半）
-    2,2,5,5,6,6,3,3,2,2,      // 壬子〜癸亥
-  ];
-  // 60干支インデックス（甲子=0）
-  const ganzhi60 = ((stemIdx % 10) + 10) % 10;
-  const branch60 = ((branchIdx % 12) + 12) % 12;
-  // 干支の組み合わせから60干支インデックスを算出
-  const idx60 = (ganzhi60 * 6 + Math.floor(branch60 / 2)) % 30 * 2 + (branch60 % 2);
-  // 納音五行局テーブル（30組×2）
-  const NAYIN30 = [4,6,3,5,4,6,2,5,4,3,2,5,6,5,2,4,6,3,5,4,6,3,2,5,4,6,5,6,3,2];
-  const ju = NAYIN30[Math.floor(idx60 / 2)];
-  return ju; // 2,3,4,5,6のいずれか
+// 五行局: 命宮の干支（年干から五虎遁で命宮の干）の納音五行で決める。水二局・木三局・金四局・土五局・火六局
+const NAYIN_JU = [4,6,3,5,4,6,2,5,4,3,2,5,6,3,2,4,6,3,5,4,6,2,5,4,3,2,5,6,3,2]; // 60干支を2つずつ（甲子乙丑＝海中金＝4 …）
+function ziweiPalaceStem(yearStemIdx, branchIdx){
+  return ((yearStemIdx % 5) * 2 + 2 + ((branchIdx - 2) % 12 + 12) % 12) % 10;
+}
+function calcWuxingJu(yearStemIdx, lifeIdx) {
+  const s = ziweiPalaceStem(yearStemIdx, lifeIdx);
+  const i60 = ((6 * s - 5 * lifeIdx) % 60 + 60) % 60;
+  return NAYIN_JU[Math.floor(i60 / 2)];
 }
 
-// 紫微星の位置を五行局と生日から算出
+// 紫微星: 旧暦の日に k を足して局数で割り切れる最小の k、その商 q。寅から q-1 進め、k が奇数なら k 戻し、偶数なら k 進める
 function calcZiweiPos(ju, day) {
-  // 五行局ごとの紫微星配置表（生日1〜30→地支インデックス0〜11）
-  // 各局の「何日生まれが子(0)に紫微が入るか」を基準に計算
-  // 正式な安星表（古典準拠）
-  const ZIWEI_TABLE = {
-    2: [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,0,0,1,1,2,2], // 水二局
-    3: [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],     // 木三局
-    4: [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7],     // 金四局
-    5: [0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5],     // 土五局
-    6: [0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4],     // 火六局
-  };
-  const table = ZIWEI_TABLE[ju] || ZIWEI_TABLE[5];
-  const dayIdx = Math.min(Math.max(day - 1, 0), 29);
-  return table[dayIdx]; // 地支インデックス（子=0）
+  let k = 0;
+  while ((day + k) % ju) k++;
+  const q = (day + k) / ju;
+  return ((2 + q - 1 + (k % 2 ? -k : k)) % 12 + 12) % 12;
 }
 
-// 14主星の正式配置
-// 紫微系：紫微→天機(+1逆)→太陽(+2逆)→武曲(+3逆)→天同(+4逆)→廉貞(+7逆)
-// 天府系：天府→太陰(+1順)→貪狼(+2順)→巨門(+3順)→天相(+4順)→天梁(+5順)→七殺(+6順)→破軍(+10順)
+// 14主星: 紫微系は紫微から 天機-1・太陽-3・武曲-4・天同-5・廉貞-8。天府は寅申を軸に紫微と対称（4-紫微）、天府系は +1〜+6・+10
 function calcMainStarDistrib(ziweiPos) {
   const distrib = {};
   const add = (pos, star) => {
     const idx = ((pos % 12) + 12) % 12;
-    if (!distrib[idx]) distrib[idx] = [];
-    distrib[idx].push(star);
+    (distrib[idx] = distrib[idx] || []).push(star);
   };
-
-  // 紫微系（逆行：子=0から見て逆時計回り＝インデックス減少）
-  add(ziweiPos,       "紫微");
-  add(ziweiPos - 1,   "天機");
-  // 太陽は紫微から2つ逆（ただし丑を飛ばす）→ ziweiPos-2
-  add(ziweiPos - 2,   "太陽");
-  add(ziweiPos - 3,   "武曲");
-  add(ziweiPos - 4,   "天同");
-  // 廉貞は紫微から5つ逆（午を飛ばす）→ ziweiPos-5
-  add(ziweiPos - 5,   "廉貞");
-
-  // 天府の位置：紫微から常に+2（寅方向）の地支
-  // 紫微=子(0)→天府=寅(2)、紫微=丑(1)→天府=卯(3)...全パターンでdiff=2
-  const tianfu = (ziweiPos + 2) % 12;
-
-  // 天府系（順行：インデックス増加）
-  add(tianfu,      "天府");
-  add(tianfu + 1,  "太陰");
-  add(tianfu + 2,  "貪狼");
-  add(tianfu + 3,  "巨門");
-  add(tianfu + 4,  "天相");
-  add(tianfu + 5,  "天梁");
-  add(tianfu + 6,  "七殺");
-  add(tianfu + 10, "破軍");
-
+  add(ziweiPos, "紫微"); add(ziweiPos - 1, "天機"); add(ziweiPos - 3, "太陽");
+  add(ziweiPos - 4, "武曲"); add(ziweiPos - 5, "天同"); add(ziweiPos - 8, "廉貞");
+  const tianfu = ((4 - ziweiPos) % 12 + 12) % 12;
+  add(tianfu, "天府"); add(tianfu + 1, "太陰"); add(tianfu + 2, "貪狼"); add(tianfu + 3, "巨門");
+  add(tianfu + 4, "天相"); add(tianfu + 5, "天梁"); add(tianfu + 6, "七殺"); add(tianfu + 10, "破軍");
   return distrib;
 }
 
-// 生年干支から五行局を算出し、主星配置を返す（外部から呼ぶメイン関数）
-function calcZiweiStars(yearStem, yearBranch, day) {
-  const ju = calcWuxingJu(yearStem, yearBranch);
-  const ziweiPos = calcZiweiPos(ju, day);
-  const distrib = calcMainStarDistrib(ziweiPos);
-  return { distrib, ju, ziweiPos };
+function calcZiweiStars(yearStemIdx, lifeIdx, lunarDay) {
+  const ju = calcWuxingJu(yearStemIdx, lifeIdx);
+  const ziweiPos = calcZiweiPos(ju, lunarDay);
+  return { distrib: calcMainStarDistrib(ziweiPos), ju, ziweiPos };
 }
 
 // 四化テーブル（生年干→[化禄, 化権, 化科, 化忌]）
@@ -1263,73 +1197,24 @@ const SIHUA_TABLE = {
 };
 const SIHUA_NAMES = ["化禄", "化権", "化科", "化忌"];
 
-// 副星6星の安星計算
-function calcFuxing(yearStem, month, hour) {
-  // 左輔：辰(3)起点、生月分だけ順行
-  const zuofu = (3 + month - 1 + 12) % 12;
-  // 右弼：戌(10)起点、生月分だけ逆行
-  const youbi = (10 - month + 1 + 12) % 12;
-  // 文昌：戌(10)起点、生時分だけ逆行（時支インデックスを使用）
-  const wenchang = (10 - hour + 12) % 12;
-  // 文曲：辰(3)起点、生時分だけ順行
-  const wenqu = (3 + hour) % 12;
-  // 天魁・天鉞：生年干による固定対応表
-  const TIANKUI_TABLE = {
-    "甲":2, "戊":2, "庚":2,  // 丑(1)→寅(2)... 正式は丑
-    "乙":11, "己":11,         // 子(0)
-    "丙":10, "丁":10,         // 亥(11)
-    "辛":5,                   // 午(6)
-    "壬":5, "癸":5,           // 卯(3)
-  };
-  const TIANYUE_TABLE = {
-    "甲":1, "戊":1, "庚":1,  // 未(7)
-    "乙":0, "己":0,           // 申(8)
-    "丙":10, "丁":10,         // 酉(9)... 正式は亥
-    "辛":4,                   // 巳(5)
-    "壬":4, "癸":4,           // 卯(3)
-  };
-  // 正式な天魁・天鉞対応表（古典準拠）
-  const KUI_YUE = {
-    "甲": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
-    "乙": [0, 8],   // 天魁=子(0), 天鉞=申(8)
-    "丙": [10, 9],  // 天魁=亥(10), 天鉞=酉(9)
-    "丁": [10, 9],  // 天魁=亥(10), 天鉞=酉(9)
-    "戊": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
-    "己": [0, 8],   // 天魁=子(0), 天鉞=申(8)
-    "庚": [1, 7],   // 天魁=丑(1), 天鉞=未(7)
-    "辛": [5, 4],   // 天魁=午(6)→正式は午, 天鉞=巳(5)
-    "壬": [3, 5],   // 天魁=卯(3), 天鉞=巳(5)
-    "癸": [3, 5],   // 天魁=卯(3), 天鉞=巳(5)
-  };
-  const kuiyue = KUI_YUE[yearStem] || [0, 6];
+// 副星6星: 左輔＝辰から旧暦月で順行、右弼＝戌から逆行、文昌＝戌から時支で逆行、文曲＝辰から順行、天魁・天鉞＝生年干
+function calcFuxing(yearStem, lunarMonth, hour) {
+  const KUI_YUE = { 甲:[1,7], 戊:[1,7], 庚:[1,7], 乙:[0,8], 己:[0,8], 丙:[11,9], 丁:[11,9], 辛:[6,2], 壬:[3,5], 癸:[3,5] };
+  const ky = KUI_YUE[yearStem] || [1, 7];
+  const md = x => ((x % 12) + 12) % 12;
   return {
-    "左輔": zuofu,
-    "右弼": youbi,
-    "文昌": wenchang,
-    "文曲": wenqu,
-    "天魁": kuiyue[0],
-    "天鉞": kuiyue[1],
+    "左輔": md(4 + lunarMonth - 1), "右弼": md(10 - (lunarMonth - 1)),
+    "文昌": md(10 - hour), "文曲": md(4 + hour),
+    "天魁": ky[0], "天鉞": ky[1],
   };
 }
 
-// 厳選副星4星の安星計算（生年支から算出）
-function calcSelectFuxing(yearBranch) {
+// 厳選副星4星: 禄存＝生年干、天馬＝生年支の三合（申子辰→寅・巳酉丑→亥・寅午戌→申・亥卯未→巳）、紅鸞＝卯から生年支で逆行、天喜＝紅鸞の対宮
+function calcSelectFuxing(yearStem, yearBranch) {
   const bi = BRANCHES.indexOf(yearBranch);
-  // 禄存：生年支と同じ宮
-  const luzun = bi;
-  // 天馬：生年支から固定対応表（寅申巳亥グループ）
-  const TIANMA_TABLE = [6,3,0,9,6,3,0,9,6,3,0,9]; // 子→午,丑→卯,寅→子...
-  const tianma = TIANMA_TABLE[bi];
-  // 紅鸞：卯(3)起点、生年支分だけ逆行
-  const hongluan = (3 - bi + 12) % 12;
-  // 天喜：紅鸞の対宮（+6）
-  const tianxi = (hongluan + 6) % 12;
-  return {
-    "禄存": luzun,
-    "天馬": tianma,
-    "紅鸞": hongluan,
-    "天喜": tianxi,
-  };
+  const LUZUN = { 甲:2, 乙:3, 丙:5, 戊:5, 丁:6, 己:6, 庚:8, 辛:9, 壬:11, 癸:0 };
+  const hongluan = ((3 - bi) % 12 + 12) % 12;
+  return { "禄存": LUZUN[yearStem], "天馬": [2, 11, 8, 5][bi % 4], "紅鸞": hongluan, "天喜": (hongluan + 6) % 12 };
 }
 
 // 四化を計算して返す（{star: "廉貞", type: "化禄", unplaced: false} の配列）
@@ -1420,8 +1305,10 @@ function calcPersonData(bd, bt, tm, sex, bp) {
     else lon = getPlanetLon(p.n, jd);
     return { ...p, lon };
   });
-  const year = { stem: getYearStem(y, m, d), branch: getYearBranch(y, m, d) };
-  const month = getMonthPillar(y,m,d);
+  const ym = pillarsFromSun(y, m, sunLon);
+  const setsuDays = daysSinceSetsuiri(jd, sunLon);
+  const year = ym.year;
+  const month = ym.month;
   const day = getDayPillar(y,m,d);
   const hour = getHourPillar(day.stem, h);
   const pillars = [
@@ -1443,15 +1330,18 @@ function calcPersonData(bd, bt, tm, sex, bp) {
       wx[STEM_EL[STEMS.indexOf(stem)]] += weight;
     });
   });
-  const lifeIdx = ziweiLife(month.branch, hour.branch);
-  // 正式安星：五行局から主星配置を算出
-  const ziweiResult = calcZiweiStars(year.stem, year.branch, d);
-  // 副星6星の安星（生月・生時・生年干から算出）
-  // 時支インデックス（子=0, 丑=1, ...）を生時から算出
+  // 紫微斗数: 旧暦の年・月・日と時支で安星（旧暦が引けない範囲は節月・新暦の日で代用）。閏月は同じ番号の月として扱う
   const hourBranchIdx = h >= 23 || h < 1 ? 0 : Math.floor((h + 1) / 2);
-  const fuxingPos = calcFuxing(year.stem, m, hourBranchIdx);
-  // 厳選副星4星（生年支から算出）
-  const selectFuxingPos = calcSelectFuxing(year.branch);
+  const lunar = lunarDate(y, m, d);
+  const zMonth = lunar ? lunar.month : ym.mIdx + 1;
+  const zDay = lunar ? lunar.day : d;
+  const zYear = lunar ? lunar.year : ym.effY;
+  const zyS = ((zYear - 4) % 10 + 10) % 10, zyB = ((zYear - 4) % 12 + 12) % 12;
+  const ziweiYear = { stem: STEMS[zyS], branch: BRANCHES[zyB] };
+  const lifeIdx = ((2 + (zMonth - 1) - hourBranchIdx) % 12 + 12) % 12;
+  const ziweiResult = calcZiweiStars(zyS, lifeIdx, zDay);
+  const fuxingPos = calcFuxing(ziweiYear.stem, zMonth, hourBranchIdx);
+  const selectFuxingPos = calcSelectFuxing(ziweiYear.stem, ziweiYear.branch);
   // 主星配置に副星を統合
   const fullDistrib = JSON.parse(JSON.stringify(ziweiResult.distrib)); // deep copy
   for (const [star, pos] of Object.entries(fuxingPos)) {
@@ -1463,7 +1353,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
     fullDistrib[pos].push(star);
   }
   // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
-  const sihua = calcSihua(year.stem, fuxingPos);
+  const sihua = calcSihua(ziweiYear.stem, fuxingPos);
   return {
     y,m,d,h,mi,sex,bp,tm,
     jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
@@ -1471,6 +1361,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
     ziweiDistrib: fullDistrib,
     ziweiJu: ziweiResult.ju,
     ziweiPos: ziweiResult.ziweiPos,
+    ziweiYear, lunar, setsuDays,
     sihua,
   };
 }
@@ -1499,6 +1390,14 @@ function quickDateInput(el, targetId) {
 }
 
 function cast(){
+  if (typeof EPH === "undefined") {
+    // 天文暦の読み込み待ち（回線が遅いときだけ起きる）
+    const btns = document.querySelectorAll('button[onclick="cast()"]');
+    btns.forEach(b => { b.dataset.label = b.dataset.label || b.textContent; b.textContent = "天文暦を読み込み中…"; b.disabled = true; });
+    const done = () => btns.forEach(b => { b.textContent = b.dataset.label; b.disabled = false; });
+    window.EPH_READY.then(() => { done(); cast(); }).catch(() => { done(); alert("天文暦を読み込めませんでした。通信状況を確認して、ページを再読み込みしてください。"); });
+    return;
+  }
   const bd = document.getElementById("birthdate").value;
   const bt = document.getElementById("birthtime").value;
   const tm = document.getElementById("timemode").value;
@@ -1624,7 +1523,7 @@ function cast(){
             const nu_ = calcNumerology(currentData.y, currentData.m, currentData.d);
             const ky_ = calcKyusei(currentData.y, currentData.m, currentData);
             const ma_ = calcMaya(currentData.y, currentData.m, currentData.d);
-            const si_ = calcShukuyo(currentData.moonLon);
+            const si_ = calcShukuyo(currentData);
             let jy_ = null;
             if (typeof ayanamsha === 'function') {
               const ay_ = ayanamsha(currentData.jd);
@@ -1874,7 +1773,7 @@ function buildExportText(){
 
   return `以下は羅占盤（9つの占術）の計算結果です。この命盤データをもとに総合鑑定をお願いします。
 
-まず16タイプ判定を鑑定の入り口として扱い、「この人は${(() => { try { const sm=calcJintai(d); const nu=calcNumerology(d.y,d.m,d.d); const ky=calcKyusei(d.y, d.m, d); const ma=calcMaya(d.y,d.m,d.d); const si=calcShukuyo(d.moonLon); let jy=null; if(typeof ayanamsha==='function'){const ay=ayanamsha(d.jd);jy={sunRashi:Math.floor(norm360(d.sunLon-ay)/30),moonRashi:Math.floor(norm360(d.moonLon-ay)/30),lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};} return TypeJudge.judge(d,sm,nu,ky,ma,si,jy).type.name; } catch(e){return "このタイプ";}})()}としてどのような人生を歩む人か」を物語として描写してください。
+まず16タイプ判定を鑑定の入り口として扱い、「この人は${(() => { try { const sm=calcJintai(d); const nu=calcNumerology(d.y,d.m,d.d); const ky=calcKyusei(d.y, d.m, d); const ma=calcMaya(d.y,d.m,d.d); const si=calcShukuyo(d); let jy=null; if(typeof ayanamsha==='function'){const ay=ayanamsha(d.jd);jy={sunRashi:Math.floor(norm360(d.sunLon-ay)/30),moonRashi:Math.floor(norm360(d.moonLon-ay)/30),lagnaRashi:d.ascLon!==null?Math.floor(norm360(d.ascLon-ay)/30):null};} return TypeJudge.judge(d,sm,nu,ky,ma,si,jy).type.name; } catch(e){return "このタイプ";}})()}としてどのような人生を歩む人か」を物語として描写してください。
 その後、9占術のデータを根拠として、なぜその人格になるのかを補強してください。
 占術の羅列ではなく、人格アーキテクチャを中心に統合してください。
 
@@ -1894,7 +1793,7 @@ ${(() => {
   const nu = calcNumerology(d.y, d.m, d.d);
   const ky = calcKyusei(d.y, d.m, d);
   const ma = calcMaya(d.y, d.m, d.d);
-  const si = calcShukuyo(d.moonLon);
+  const si = calcShukuyo(d);
   let jy = null;
   if (typeof ayanamsha === 'function') {
     const ay = ayanamsha(d.jd);
@@ -2100,7 +1999,7 @@ ${(() => {
 【9】宿曜占星術
 ━━━━━━━━━━━━━━━━━━━━
 ${(() => {
-  const idx = calcShukuyo(d.moonLon);
+  const idx = calcShukuyo(d);
   const shuku = SHUKUYO_27[idx];
   return `◆ 宿: ${shuku.n}（${shuku.k}）
   ${shuku.desc}`;
@@ -2201,7 +2100,7 @@ function buildCompatExportText(){
   const nA = calcNumerology(d.y, d.m, d.d);
   const kA = calcKyusei(d.y, d.m, d);
   const mA = calcMaya(d.y, d.m, d.d);
-  const shukuIdxA = calcShukuyo(d.moonLon);
+  const shukuIdxA = calcShukuyo(d);
   const shukuA = SHUKUYO_27[shukuIdxA];
   const ayaA = ayanamsha(d.jd);
   const moonRashiA = JYOTISH_RASHIS[Math.floor(norm360(d.moonLon - ayaA)/30)];
@@ -2217,11 +2116,11 @@ function buildCompatExportText(){
   const nB = calcNumerology(db.y, db.m, db.d);
   const kB = calcKyusei(db.y, db.m, db);
   const mB = calcMaya(db.y, db.m, db.d);
-  const shukuIdxB = calcShukuyo(db.moonLon);
+  const shukuIdxB = calcShukuyo(db);
   const shukuB = SHUKUYO_27[shukuIdxB];
   const ayaB = ayanamsha(db.jd);
   const moonRashiB = JYOTISH_RASHIS[Math.floor(norm360(db.moonLon - ayaB)/30)];
-  const lifeIdxB = ziweiLife(db.month.branch, db.hour.branch);
+  const lifeIdxB = db.lifeIdx;
   const lifeStarsB = (db.ziweiDistrib||{})[lifeIdxB] || [];
 
   // 相性判定
@@ -2242,7 +2141,7 @@ function buildCompatExportText(){
   try {
     const kA = calcKyusei(d.y, d.m, d), kB = calcKyusei(db.y, db.m, db);
     const maA2 = calcMaya(d.y, d.m, d.d), maB2 = calcMaya(db.y, db.m, db.d);
-    const siA2 = calcShukuyo(d.moonLon), siB2 = calcShukuyo(db.moonLon);
+    const siA2 = calcShukuyo(d), siB2 = calcShukuyo(db);
     let jyA2 = null, jyB2 = null;
     if (typeof ayanamsha === 'function') {
       const ayaA2 = ayanamsha(d.jd);
@@ -2473,8 +2372,8 @@ function renderCompatTypeCard(d, db, smA, nuA) {
     const kyB = calcKyusei(db.y, db.m, db);
     const maA = calcMaya(d.y, d.m, d.d);
     const maB = calcMaya(db.y, db.m, db.d);
-    const siA = calcShukuyo(d.moonLon);
-    const siB = calcShukuyo(db.moonLon);
+    const siA = calcShukuyo(d);
+    const siB = calcShukuyo(db);
     let jyA = null, jyB = null;
     if (typeof ayanamsha === 'function') {
       const ayaA = ayanamsha(d.jd);
@@ -2492,10 +2391,10 @@ function renderCompatTypeCard(d, db, smA, nuA) {
     const hlB = personalityHighlight(radarB, tjB.type.name, tjB.a3.winner);
 
     const typeImageMap = {
-      "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-      "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
-      "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
-      "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+      "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
+      "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
+      "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
+      "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
     };
     const imgA = typeImageMap[tjA.type.name] ? '16typecard/'+typeImageMap[tjA.type.name] : '';
     const imgB = typeImageMap[tjB.type.name] ? '16typecard/'+typeImageMap[tjB.type.name] : '';
@@ -2562,7 +2461,7 @@ function renderCompatTypeCard(d, db, smA, nuA) {
         // あなた
         '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
           '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">あなた</div>' +
-          (imgA ? '<img src="'+imgA+'" alt="'+tjA.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
+          (imgA ? '<img src="'+imgA+'" loading="lazy" decoding="async" alt=""'+tjA.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
           '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjA.type.name+'</div>' +
           '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjA.type.desc+'</div>' +
           (hlA && hlA.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlA.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlA.text+'</div>' : '') +
@@ -2572,7 +2471,7 @@ function renderCompatTypeCard(d, db, smA, nuA) {
         // お相手
         '<div style="text-align:center; padding:16px; background:rgba(201,147,58,0.05); border:1px solid var(--border); border-radius:8px;">' +
           '<div style="font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:6px;">お相手</div>' +
-          (imgB ? '<img src="'+imgB+'" alt="'+tjB.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
+          (imgB ? '<img src="'+imgB+'" loading="lazy" decoding="async" alt=""'+tjB.type.name+'" style="width:100%; max-width:180px; height:auto; border-radius:4px; margin-bottom:10px;">' : '') +
           '<div style="font-size:20px; color:var(--gold); font-weight:900; margin-bottom:4px;">'+tjB.type.name+'</div>' +
           '<div style="font-size:13px; color:#6a6050; line-height:1.6; margin-bottom:8px;">'+tjB.type.desc+'</div>' +
           (hlB && hlB.tag ? '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+hlB.tag+'</div><div style="font-size:13px; color:var(--text); line-height:1.6;">'+hlB.text+'</div>' : '') +
@@ -2719,7 +2618,7 @@ function compatHeader(tabKey) {
       ];
     }
     if (tabKey === "shukuyo") {
-      const idxA = calcShukuyo(d.moonLon), idxB = calcShukuyo(db.moonLon);
+      const idxA = calcShukuyo(d), idxB = calcShukuyo(db);
       const sA = SHUKUYO_27[idxA], sB = SHUKUYO_27[idxB];
       const comp = shukuyoCompat(idxA, idxB);
       return [
@@ -2826,7 +2725,7 @@ function compatHeader(tabKey) {
       return {good:["互いの違いが学びになる"], bad:[], careful:["違いを理解する時間が必要"]};
     }
     if (tabKey === "shukuyo") {
-      const idxA = calcShukuyo(d.moonLon), idxB = calcShukuyo(db.moonLon);
+      const idxA = calcShukuyo(d), idxB = calcShukuyo(db);
       const comp = shukuyoCompat(idxA, idxB);
       const GOOD_TYPES = {"栄":"発展と繁栄の関係","親":"親しみやすく安心感がある","友":"穏やかで居心地が良い","命":"深い縁で繋がっている"};
       const BAD_TYPES = {"壊":"ぶつかると激しくなりやすい","衰":"一方的になりやすい","危":"リスクを感じる","業":"試練の関係"};
@@ -2932,7 +2831,7 @@ function renderWest(){
   SIGNS.forEach((sg,i)=>{
     const p = pt(i*30+15, 206);
     const iconSize = 90;
-    svg += `<image href="Zodiac/${SIGN_SVG[i]}.svg" x="${p.x - iconSize/2}" y="${p.y - iconSize/2 - 8}" width="${iconSize}" height="${iconSize}"/>`;
+    svg += `<image href="Zodiac/${SIGN_SVG[i]}.webp" x="${p.x - iconSize/2}" y="${p.y - iconSize/2 - 8}" width="${iconSize}" height="${iconSize}"/>`;
     svg += `<text x="${p.x}" y="${p.y + 20}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="600" fill="#6a5e50">${SIGN_JP[i]}</text>`;
   });
   svg += `<circle cx="${cx}" cy="${cy}" r="150" fill="#faf8f4"/>`;
@@ -3011,7 +2910,7 @@ function renderWest(){
   // 中心テキスト
   const sunSign = SIGNS[signOf(d.sunLon)];
   const sunSignIdx = signOf(d.sunLon);
-  svg += `<image href="Zodiac/${SIGN_SVG[sunSignIdx]}.svg" x="${cx-180}" y="${cy-190}" width="360" height="360" opacity="0.18"/>`;
+  svg += `<image href="Zodiac/${SIGN_SVG[sunSignIdx]}.webp" x="${cx-180}" y="${cy-190}" width="360" height="360" opacity="0.18"/>`;
   svg += `<text x="${cx}" y="${cy-14}" text-anchor="middle" font-size="20" font-weight="700" fill="#6a5e50">${sunSign.n}</text>`;
   svg += `<text x="${cx}" y="${cy+8}" text-anchor="middle" font-size="13" fill="#6a7080">☉ ${degIn(d.sunLon)}°</text>`;
   svg += `<text x="${cx}" y="${cy+26}" text-anchor="middle" font-size="11" fill="#2c3848">${d.y}.${String(d.m).padStart(2,"0")}.${String(d.d).padStart(2,"0")}</text>`;
@@ -3810,7 +3709,7 @@ function renderShichu(){
     ${tenGodGuide}
     ${dayunHtml}
 
-    <div class="note">※ 算命学の人体星図は月支・日支の蔵干本気を正式使用しています。十二大従星・天中殺は正式算出済みです。</div>
+    <div class="note">※ 四柱推命の日柱は2000年1月1日＝戊午の系列、年柱・月柱は生まれた瞬間の太陽の位置（立春・節入り）で決めています。日の変わり目は0時です。</div>
     `}
   `;
 }
@@ -4346,7 +4245,7 @@ function renderZiwei(){
 
   // 相性特化モード用コンテンツ
   const ziweiCompatContent = (currentMode === "compat" && dataB) ? (() => {
-    const lifeIdxB = ziweiLife(dataB.month.branch, dataB.hour.branch);
+    const lifeIdxB = dataB.lifeIdx;
     const lifeStarsB = starDistrib[lifeIdxB] || ["無主星"];
     const lifeStarB = lifeStarsB[0] || "無主星";
     const partnerDesc = (() => {
@@ -4528,7 +4427,7 @@ function renderZiwei(){
     </div>
     ${dayunHtml}
 
-    <div class="note">※ 紫微斗数の安星は五行局（納音）＋生日から14主星、生月・生時・生年干から副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）、生年支から厳選副星4星（禄存・天馬・紅鸞・天喜）を正式配置しています。その他の副星・流年四化は未実装です。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星・流年四化は未実装です。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
@@ -4686,24 +4585,20 @@ function palaceExpl(name, starName){
 }
 // 紫微の大限（命宮を起点に順逆、10年ずつ）
 function calcZiweiDayun(d, lifeIdx){
-  // 男陽女陰＝順行、それ以外＝逆行（簡略）
-  const yearStemIdx = STEMS.indexOf(d.year.stem);
-  const yearYang = yearStemIdx % 2 === 0;
+  // 大限: 陽男陰女は順行（命宮→父母宮の向き）、それ以外は逆行（命宮→兄弟宮）。1つ目は五行局の数の歳から10年ずつ
+  const zy = d.ziweiYear || d.year;
+  const yearYang = STEMS.indexOf(zy.stem) % 2 === 0;
   const forward = (d.sex==="M" && yearYang) || (d.sex==="F" && !yearYang);
+  const ju = d.ziweiJu || 3;
   const list = [];
   for (let i=0; i<7; i++){
-    const order = forward ? i : i; // 宮の順番インデックス
-    const step = forward ? i : -i;
-    const branchIdx = ((lifeIdx + step) % 12 + 12) % 12;
-    // 大限の干：命宮の干支から五虎遁で算出
-    // 大限の支 = branchIdx、大限の干 = 命宮の年干から五虎遁で算出
-    const dayunStem = calcDayunStem(d.year.stem, branchIdx, i);
+    const branchIdx = ((lifeIdx + (forward ? i : -i)) % 12 + 12) % 12;
     list.push({
       branchIdx,
-      palaceName: PALACE_NAMES[i], // 命宮→兄弟→...の並び
-      startAge: i===0 ? 3 : 3 + i*10,
-      endAge: 3 + (i+1)*10,
-      stem: dayunStem,
+      palaceName: PALACE_NAMES[(lifeIdx - branchIdx + 12) % 12],
+      startAge: ju + i*10,
+      endAge: ju + (i+1)*10,
+      stem: calcDayunStem(zy.stem, branchIdx, i),
     });
   }
   return list;
@@ -4759,20 +4654,25 @@ const JUUNI_STARS = [
 ];
 
 // 十二大従星の算出テーブル（日干index × 支index → JUUNI_STARSのindex）
-// 甲=0,乙=1,...癸=9 / 子=0,丑=1,...亥=11
-const JUUNI_TABLE = [
-// 子  丑  寅  卯  辰  巳  午  未  申  酉  戌  亥
-  [1,  2,  5,  6,  7,  4,  3,  2, 11, 10,  9,  0], // 甲
-  [10, 9,  0,  1,  2,  5,  6,  7,  4,  3,  2, 11], // 乙
-  [4,  3,  2, 11, 10,  5,  6,  7,  8,  9,  0,  1], // 丙
-  [9,  0,  1,  4,  3,  2, 11, 10,  5,  6,  7,  8], // 丁
-  [4,  5,  2, 11, 10,  3,  6,  7,  8,  9,  0,  1], // 戊
-  [9,  8,  1,  4,  3,  0, 11, 10,  5,  6,  7,  2], // 己
-  [7,  6,  5,  8,  9,  4,  3,  2,  5,  6,  7,  0], // 庚
-  [0, 11, 10,  5,  6,  7,  8,  9,  4,  3,  2,  1], // 辛
-  [7,  6,  5,  0,  1,  4,  3,  2, 11, 10,  9,  8], // 壬
-  [2, 11, 10,  7,  6,  5,  0,  1,  4,  3,  2,  9], // 癸
-];
+// 日干の十二運で決める。長生の支は 甲亥・乙午・丙寅・丁酉・戊寅・己酉・庚巳・辛子・壬申・癸卯。陽干は順行、陰干は逆行
+// 長生＝天貴星・沐浴＝天恍星・冠帯＝天南星・建禄＝天禄星・帝旺＝天将星・衰＝天堂星・病＝天胡星・死＝天極星・墓＝天庫星・絶＝天馳星・胎＝天報星・養＝天印星
+const JUUNI_START = [11, 6, 2, 9, 2, 9, 5, 0, 8, 3];
+const JUUNI_TABLE = JUUNI_START.map((st, s) => Array.from({length: 12}, (_, b) => {
+  const stage = s % 2 === 0 ? (b - st + 12) % 12 : (st - b + 12) % 12;
+  return (2 + stage) % 12;
+}));
+
+// 算命学（高尾式）の蔵干: 節入りの日を1日目として数えた日数で初元・中元・本元を選ぶ（[その日まで, 干]）
+const SANMEI_ZOKAN = {
+  子:[[99,"癸"]], 丑:[[9,"癸"],[12,"辛"],[99,"己"]], 寅:[[7,"戊"],[14,"丙"],[99,"甲"]], 卯:[[99,"乙"]],
+  辰:[[9,"乙"],[12,"癸"],[99,"戊"]], 巳:[[5,"戊"],[14,"庚"],[99,"丙"]], 午:[[19,"己"],[99,"丁"]], 未:[[9,"丁"],[12,"乙"],[99,"己"]],
+  申:[[10,"戊"],[13,"壬"],[99,"庚"]], 酉:[[99,"辛"]], 戌:[[9,"辛"],[12,"丁"],[99,"戊"]], 亥:[[12,"甲"],[99,"壬"]],
+};
+function sanmeiZokan(branch, days){
+  const list = SANMEI_ZOKAN[branch] || [];
+  for (const [upto, stem] of list) if (days <= upto) return stem;
+  return list.length ? list[list.length - 1][1] : null;
+}
 
 // 天中殺の算出（日干支の番号から）
 function getTenchu(dayStem, dayBranch){
@@ -4804,37 +4704,29 @@ function getTenchuType(k1, k2){
   return TENCHU_TYPES[pair] || {name:pair+"天中殺", desc:""};
 }
 
-// 人体星図の算出
+// 人体星図の算出（高尾式）
 function calcJintai(d){
   const dayStemIdx = STEMS.indexOf(d.day.stem);
   const dayBranchIdx = BRANCHES.indexOf(d.day.branch);
-  const yearStemIdx = STEMS.indexOf(d.year.stem);
   const yearBranchIdx = BRANCHES.indexOf(d.year.branch);
-  const monthStemIdx = STEMS.indexOf(d.month.stem);
   const monthBranchIdx = BRANCHES.indexOf(d.month.branch);
 
-  // 算命学・人体星図の正式配置
-  // 北（頭）= 年干との十神
-  // 西（右手）= 月支の蔵干本気との十神
-  // 中央 = 日干自身（陽干=貫索星、陰干=石門星）
-  // 東（左手）= 日支の蔵干本気との十神
-  // 南（腹）= 時干との十神（時刻不明の場合は月干で代用）
-
-  // 蔵干本気（各支の[0]番目が本気）
-  const monthZk = ZOUKAN[d.month.branch] || [];
-  const dayZk = ZOUKAN[d.day.branch] || [];
-  const monthMainStem = monthZk[0] || d.month.stem; // 月支蔵干本気（なければ月干で代用）
-  const dayMainStem = dayZk[0] || d.day.stem;       // 日支蔵干本気（なければ日干で代用）
-
+  // 十大主星（日干から見た十神を算命学の星名に）
+  // 北（頭）＝年干、南（腹）＝月干、東（左手）＝年支の蔵干、中央（胸）＝月支の蔵干、西（右手）＝日支の蔵干
+  // 蔵干は節入りからの日数で選ぶ（日数が無いときは本元）
+  const days = typeof d.setsuDays === "number" ? d.setsuDays : 99;
+  const zk = b => sanmeiZokan(b, days) || b;
+  const star = stem => JUSSHU_MAP[tenGod(d.day.stem, stem)] || "貫索星";
+  const zokan = { year: zk(d.year.branch), month: zk(d.month.branch), day: zk(d.day.branch) };
   const stars = {
-    north:  JUSSHU_MAP[tenGod(d.day.stem, d.year.stem)]    || "貫索星", // 北=年干
-    west:   JUSSHU_MAP[tenGod(d.day.stem, monthMainStem)]  || "貫索星", // 西=月支蔵干本気
-    center: dayStemIdx % 2 === 0 ? "貫索星" : "石門星",                  // 中央=日干自身
-    east:   JUSSHU_MAP[tenGod(d.day.stem, dayMainStem)]    || "貫索星", // 東=日支蔵干本気
-    south:  JUSSHU_MAP[tenGod(d.day.stem, d.hour ? d.hour.stem : d.month.stem)] || "貫索星", // 南=時干（不明時は月干）
+    north:  star(d.year.stem),
+    south:  star(d.month.stem),
+    east:   star(zokan.year),
+    center: star(zokan.month),
+    west:   star(zokan.day),
   };
 
-  // 十二大従星（3箇所: 年支/月支/日支）
+  // 十二大従星（左肩＝年支・初年、左足＝月支・中年、右足＝日支・晩年）
   const juuniYear = JUUNI_STARS[JUUNI_TABLE[dayStemIdx][yearBranchIdx]];
   const juuniMonth = JUUNI_STARS[JUUNI_TABLE[dayStemIdx][monthBranchIdx]];
   const juuniDay = JUUNI_STARS[JUUNI_TABLE[dayStemIdx][dayBranchIdx]];
@@ -4843,7 +4735,7 @@ function calcJintai(d){
   const [k1, k2] = getTenchu(d.day.stem, d.day.branch);
   const tenchuType = getTenchuType(k1, k2);
 
-  return { stars, juuniYear, juuniMonth, juuniDay, tenchuType, k1, k2 };
+  return { stars, zokan, days, juuniYear, juuniMonth, juuniDay, tenchuType, k1, k2 };
 }
 
 // 算命学の柱ごとの意味を生成
@@ -4998,7 +4890,7 @@ function renderSanmei(){
     </div>
 
     <div class="section-title">人体星図 — 9つの星が示すあなたの全体像</div>
-    <div class="note" style="margin-bottom:12px;">中央が自分の本質（十大主星）。上下左右は人生の場面ごとの顔。四隅は人生の時期ごとのエネルギー（十二大従星）。</div>
+    <div class="note" style="margin-bottom:12px;">中央が自分の本質（十大主星）。上下左右は人生の場面ごとの顔。四隅は人生の時期ごとのエネルギー（十二大従星）。高尾式の出し方で、北＝年干・南＝月干・東＝年支・中央＝月支・西＝日支。支は節入りから${sm.days}日目の蔵干（年支${sm.zokan.year}・月支${sm.zokan.month}・日支${sm.zokan.day}）を使う。</div>
     <div class="jintai">
       <div class="cell body-cell">
         <svg viewBox="0 0 80 140" width="60" style="opacity:0.3; margin-bottom:4px;">
@@ -5576,7 +5468,7 @@ function calcPersonalityRadar(pd, smData, nuData) {
     if(slD&&slD.n==="赤い地球") av("stable","マヤ地球");
     const wsD=MAYA_SEALS[maD.ws]; if(wsD&&mayM[wsD.n]) av(mayM[wsD.n],"マヤWS");
     // 宿曜
-    const shI=calcShukuyo(pd.moonLon);
+    const shI=calcShukuyo(pd);
     const shVM=["action","leadership","think","social","creative","stable","intuition","nurture","action","leadership","social","creative","think","stable","intuition","nurture","action","leadership","think","social","creative","stable","intuition","nurture","action","think","social"];
     av(shVM[shI]||"stable","宿曜");
     // インド
@@ -5751,6 +5643,33 @@ const KYUSEI_COMPAT = {
   "4-1":"水生木。柔軟な関係。",
   "9-3":"木生火。創造的なエネルギーの交換。",
 };
+
+// 日盤の九星（日家九星）: 冬至・夏至の日の干支が甲子〜癸巳なら直前、それ以外なら直後の甲子の日から切り替える。
+// 陽遁（冬至から）は一白から数字を増やし、陰遁（夏至から）は九紫から減らす。
+// 切り替えの間隔が240日のときは後半60日が閏。その後ろ30日（甲午の日から）は次の遁を先取りする（三碧・七赤が2日続く）
+const _KYUSEI_SW = {};
+function kyuseiDaySwitches(year){
+  if (_KYUSEI_SW[year]) return _KYUSEI_SW[year];
+  const out = [];
+  for (let y = year - 2; y <= year + 1; y++) {
+    [[270, 12, true], [90, 6, false]].forEach(([L, mm, yang]) => {
+      const n = Math.floor(sunCrossJd(L, julianDay(y, mm, 21, 12, 0)) + 0.5 + 9/24);   // 冬至・夏至の日（JST）
+      const k = (60 - (n + 49) % 60) % 60;                                                // 次の甲子まで
+      out.push({ jdn: k <= 30 ? n + k : n + k - 60, yang });
+    });
+  }
+  out.sort((a, b) => a.jdn - b.jdn);
+  out.forEach((sw, i) => { sw.from = (i > 0 && sw.jdn - out[i - 1].jdn === 240) ? sw.jdn - 30 : sw.jdn; });
+  return (_KYUSEI_SW[year] = out);
+}
+function kyuseiDayStar(y, m, d){
+  if (typeof EPH === "undefined") return null;
+  const n = jdnOf(y, m, d);
+  const sw = kyuseiDaySwitches(y).filter(x => x.from <= n).pop();
+  if (!sw) return null;
+  const k = ((n - sw.jdn) % 9 + 9) % 9;
+  return sw.yang ? k + 1 : 9 - k;
+}
 
 function renderKyusei(){
   const d = currentData;
@@ -6190,29 +6109,31 @@ function mayaRelationReading(mySeal, otherSeal, relationType) {
   return "";
 }
 
+// 2月29日を数えない通し日番号（Dreamspell）。2月29日は2月28日と同じKIN
+function mayaDayNumber(y, m, d){
+  const yy = y - 1;
+  let leaps = Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400);
+  const isLeap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  if (isLeap && (m > 2 || (m === 2 && d === 29))) leaps++;
+  return Math.round(Date.UTC(y, m - 1, d) / 86400000) - leaps;
+}
 function calcMaya(y,m,d){
-  // グレゴリオ暦→マヤ暦KINナンバー変換（簡略版）
-  // 基準日: 2012年12月21日 = KIN 207（冬至・マヤ長期暦の区切り）
-  const base = new Date(2012, 11, 21);
-  const target = new Date(y, m-1, d);
-  const diff = Math.round((target - base) / 86400000);
-  let kin = ((207 + diff - 1) % 260 + 260) % 260 + 1;
+  // Dreamspell（13の月の暦）: 1987年7月26日＝KIN34（2012年12月21日＝KIN207と同じ系列）
+  const kin = ((33 + mayaDayNumber(y, m, d) - mayaDayNumber(1987, 7, 26)) % 260 + 260) % 260 + 1;
   const seal = (kin - 1) % 20; // 太陽の紋章（0-19）
   const tone = (kin - 1) % 13 + 1; // 銀河の音（1-13）
-  // ウェイブスペル（導きの紋章）
-  const ws = Math.floor((kin - 1) / 13) % 20;
+  // ウェイブスペル＝このKINが属する13日の始まりのKINの紋章
+  const ws = (Math.floor((kin - 1) / 13) * 13) % 20;
 
   // === 関係KIN（4種類） ===
-  // 類似KIN: 似た性質。居心地がよく自然体でいられる関係。
-  const analogSeal = (seal + 18) % 20;
-  // 反対KIN: 正反対の性質。刺激と学びを与え合い、成長を促す関係。
+  // 類似KIN: 紋章番号（1〜20）の和が19になる紋章
+  const analogSeal = (17 - seal + 20) % 20;
+  // 反対KIN: 10離れた紋章
   const antipodeSeal = (seal + 10) % 20;
-  // 神秘KIN: 不思議な引力。理屈を超えた深い縁で、予想外の化学反応が起きる関係。
+  // 神秘KIN: 紋章番号の和が21になる紋章
   const occultSeal = (19 - seal + 20) % 20;
-  // ガイドKIN: 人生を導く存在。進むべき方向を照らすナビゲーター。
-  // 銀河の音によって決まる（音ごとに紋章番号へのオフセットが異なる）
-  const guideOffsets = [0, 0, 12, 4, 16, 8, 0, 12, 4, 16, 8, 0, 12];
-  const guideSeal = (seal + guideOffsets[tone - 1]) % 20;
+  // ガイドKIN: 音1・6・11は自分と同じ、音2・7・12は+12、音3・8・13は+4、音4・9は-4、音5・10は+8
+  const guideSeal = (seal + [0, 12, 4, 16, 8][(tone - 1) % 5]) % 20;
 
   return { kin, seal, tone, ws, analogSeal, antipodeSeal, occultSeal, guideSeal };
 }
@@ -6641,9 +6562,19 @@ const SHUKUYO_27 = [
   {n:"胃宿",k:"いしゅく",desc:"開拓と冒険の星。新しいことを始める力がある。負けず嫌いで競争心が強い。",element:"土"},
 ];
 
-function calcShukuyo(moonLon){
-  const idx = Math.floor(moonLon / (360/27)) % 27;
-  return idx;
+// 宿曜の宿（旧暦方式）: 旧暦の各月1日の宿（月宿傍通暦 1月室・2月奎・3月胃・4月畢・5月参・6月鬼・7月張・8月角・9月氐・10月心・11月斗・12月虚）から日数を数える。閏月は同じ番号の月と同じ
+const SHUKUYO_MONTH_START = [0, 22, 24, 26, 1, 3, 5, 8, 11, 13, 15, 18, 20];
+function calcShukuyoTrad(y, m, d){
+  const L = lunarDate(y, m, d);
+  return L ? (SHUKUYO_MONTH_START[L.month] + L.day - 1) % 27 : null;
+}
+// 人データを渡すと旧暦方式。数値（月の黄経）を渡すと旧来の「黄経を27等分」（旧暦が引けないときの代用）
+function calcShukuyo(p){
+  if (p && typeof p === "object") {
+    const t = calcShukuyoTrad(p.y, p.m, p.d);
+    return t !== null ? t : Math.floor(p.moonLon / (360/27)) % 27;
+  }
+  return Math.floor(p / (360/27)) % 27;
 }
 
 // 宿曜の相性判定（三九の秘法）
@@ -6671,6 +6602,20 @@ const SHUKUYO_BAND_NOTE = {
   中距離:"中距離＝ほどよい距離で、関係の性質が素直に出る。",
   遠距離:"遠距離＝縁は穏やかで、影響はゆっくり出る。",
 };
+// 今日の宿があなたの宿から見て何にあたるか（宿曜の日運）。[動く go／整える keep／慎重 care, 文]
+const SHUKUYO_DAY = {
+  命:["keep","命の日。自分と向き合う日。大きな勝負は避け、足元を固める。"],
+  栄:["go","栄の日。何事も進めやすい。始めること・頼みごとに向く。"],
+  衰:["care","衰の日。体調と気力が落ちやすい。無理をしない。"],
+  安:["go","安の日。移動・旅行・引越しなど、環境を変えることに向く。"],
+  危:["care","危の日。軽はずみな言動がトラブルになりやすい。慎重に。"],
+  成:["go","成の日。学びや仕事が形になりやすい。仕上げに向く。"],
+  壊:["care","壊の日。物事が壊れやすい。新しいことは控え、片づけに回す。"],
+  友:["go","友の日。人付き合いが実る。人に会う予定を入れるとよい。"],
+  親:["go","親の日。親しい人と過ごすと吉。信頼が深まる。"],
+  業:["keep","業の日。過去の縁や積み残しが動く。振り返りに向く。"],
+  胎:["keep","胎の日。次の準備の日。休んで力をためる。"],
+};
 function shukuyoBand(dist){
   if (dist === 0 || dist === 9 || dist === 18) return "";
   const g = Math.min(dist, 27 - dist);
@@ -6696,12 +6641,12 @@ function shukuyoCompat(idxA, idxB) {
 
 function renderShukuyo(){
   const d = currentData;
-  const idx = calcShukuyo(d.moonLon);
+  const idx = calcShukuyo(d);
   const shuku = SHUKUYO_27[idx];
 
   // 相性特化モード用コンテンツ
   const shukuyoCompatContent = (currentMode === "compat" && dataB) ? (() => {
-    const idxB = calcShukuyo(dataB.moonLon);
+    const idxB = calcShukuyo(dataB);
     const shukuB = SHUKUYO_27[idxB];
     const compat = shukuyoCompat(idx, idxB);
     const compatReverse = shukuyoCompat(idxB, idx);
@@ -6742,31 +6687,16 @@ function renderShukuyo(){
       const todayJd = julianDay(now.getFullYear(), now.getMonth()+1, now.getDate(), 12, 0);
       const todayMoonLon = getMoonLon(todayJd);
       if (todayMoonLon === null) return '';
-      const todayIdx = calcShukuyo(todayMoonLon);
+      const todayIdx = calcShukuyoTrad(now.getFullYear(), now.getMonth() + 1, now.getDate()) ?? calcShukuyo(todayMoonLon);
       const todayShuku = SHUKUYO_27[todayIdx];
       const rel = shukuyoCompat(idx, todayIdx);
       const isSame = idx === todayIdx;
 
-      let fortune = '';
-      if (isSame) {
-        fortune = '命の日。自分自身と向き合う日。直感が冴え、本質的な判断ができる。大きな決断に向く。';
-      } else if (rel.pair === '栄親') {
-        fortune = '発展の日。新しいことを始めるのに最適。人との出会いにも恵まれやすい。積極的に動いて吉。';
-      } else if (rel.pair === '安壊') {
-        fortune = '変化の日。良くも悪くも物事が動く。慎重さと大胆さのバランスが鍵。衝動的な判断は避ける。';
-      } else if (rel.pair === '友衰') {
-        fortune = '穏やかな日。日常の延長で過ごすのが吉。無理に新しいことを始めず、今あるものを大切に。';
-      } else if (rel.pair === '危成') {
-        fortune = '刺激の日。予想外の展開がある可能性。柔軟に対応すれば成長のチャンスに変わる。';
-      } else if (rel.pair === '業胎') {
-        fortune = '宿命の日。過去のカルマが動く日。避けられない出来事が起きやすいが、それは必要なプロセス。';
-      } else {
-        fortune = '通常の日。特別な吉凶はなし。自分のペースで過ごすのが良い。';
-      }
+      const dayRole = SHUKUYO_SEQ[rel.dist];
+      const fortune = SHUKUYO_DAY[dayRole][1];
 
       const dateStr = now.getFullYear() + '/' + (now.getMonth()+1) + '/' + now.getDate();
-      const colors = {栄親:'#22c55e',安壊:'#ef4444',友衰:'#3b82f6',危成:'#f59e0b',業胎:'#a855f7'};
-      const relColor = isSame ? 'var(--gold)' : (colors[rel.pair] || 'var(--muted)');
+      const relColor = {go:'#4a8c50', keep:'#3060a0', care:'#a07020'}[SHUKUYO_DAY[dayRole][0]];
 
       return `<div class="card" style="margin-bottom:20px; border-color:${relColor};">
         <h3 style="color:${relColor}; margin-bottom:8px;">— 今日の宿曜運勢 — ${dateStr}</h3>
@@ -6780,7 +6710,7 @@ function renderShukuyo(){
             <div style="font-size:13px; color:var(--muted);">今日の宿</div>
             <div style="font-size:20px; color:${relColor}; font-weight:700;">${todayShuku.n}</div>
           </div>
-          <div style="font-size:16px; color:${relColor}; font-weight:700; margin-left:8px;">${isSame ? '命（同宿）' : SHUKUYO_SEQ[rel.dist] + 'の日（' + rel.pair + '）'}</div>
+          <div style="font-size:16px; color:${relColor}; font-weight:700; margin-left:8px;">${isSame ? '命の日（同じ宿）' : dayRole + 'の日（' + rel.pair + '）'}</div>
         </div>
         <p style="font-size:16px; line-height:1.8;">${fortune}</p>
       </div>`;
@@ -6788,7 +6718,7 @@ function renderShukuyo(){
 
     <div class="section-title">あなたの宿 — ${shuku.n}（${shuku.k}）</div>
     <div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.8;">
-      宿曜占星術は、生まれた時の<strong>月の位置</strong>から27の宿（しゅく）を算出します。インド占星術のナクシャトラが起源で、日本では空海が伝えたとされます。西洋占星術の12星座より細かい<strong>27分類</strong>で性格を読むため、「12星座だとしっくり来ない」人にも刺さることがあります。特に<strong>人との相性</strong>を見るのに強い占術です。
+      宿曜占星術は、生まれた日の<strong>旧暦の日付（月の満ち欠け）</strong>から27の宿（しゅく）を算出します。インド占星術のナクシャトラが起源で、日本では空海が伝えたとされます。西洋占星術の12星座より細かい<strong>27分類</strong>で性格を読むため、「12星座だとしっくり来ない」人にも刺さることがあります。特に<strong>人との相性</strong>を見るのに強い占術です。
     </div>
     <div style="text-align:center; margin:30px 0;">
       <div style="font-size:64px; color:var(--gold); font-family:'Noto Serif JP',serif; font-weight:700;">${shuku.n}</div>
@@ -6800,7 +6730,7 @@ function renderShukuyo(){
     <div class="section-title">三九の秘法 — 27宿それぞれとの関係</div>
     <div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.7;">宿曜の相性の元になる早見表。あなたの${shuku.n}から数えた位置で、残り26宿との関係が決まる。知り合いの宿がわかれば、ここを見るだけで相性の種類がわかる。「あなた＝○」は相手から見たあなたの役割。</div>
     ${(() => {
-      const idxP = dataB ? calcShukuyo(dataB.moonLon) : -1;
+      const idxP = dataB ? calcShukuyo(dataB) : -1;
       const ROWS = [
         {pair:"栄親", note:"最良。互いに引き上げ合う"},
         {pair:"友衰", note:"穏やか。気楽だが刺激は少なめ"},
@@ -6851,7 +6781,7 @@ function renderShukuyo(){
 
     <div class="section-title">相性について</div>
     ${dataB && currentMode !== "compat" ? (() => {
-      const idxB = calcShukuyo(dataB.moonLon);
+      const idxB = calcShukuyo(dataB);
       const shukuB = SHUKUYO_27[idxB];
       const compat = shukuyoCompat(idx, idxB);
       const compatReverse = shukuyoCompat(idxB, idx);
@@ -6892,7 +6822,7 @@ function renderShukuyo(){
     <div class="section-title">注意すべき点</div>
     <div class="card"><p>宿曜では月の位置が全てを決めるため、「感情」と「無意識の反応パターン」に最も強く影響します。ストレスを感じた時の反応パターンを自覚しておくと、人間関係のトラブルを未然に防げます。<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の裏面＝${shuku.element}の属性が行きすぎた時に出る傾向）</span></p></div>
 
-    <div class="note">※ 宿曜占星術の簡易版です。相性は三九の秘法（昴宿から順に数える並び）で判定し、近距離・中距離・遠距離も出しています。宿は精密天文暦による月の黄経を27等分して求めており、旧暦の日付から宿を引く伝統的な早見表とは1宿ずれる場合があります。安壊などの「どちらが揺さぶる側か」は流派で解釈が分かれます。</div>
+    <div class="note">※ 宿曜占星術の簡易版です。相性は三九の秘法（昴宿から順に数える並び）で判定し、近距離・中距離・遠距離も出しています。宿は旧暦の日付から引く伝統的な方式（旧暦の各月1日の宿から数える）で出しています。旧暦は天文暦から朔（新月）と中気を求めて作った日本時間の暦です。安壊などの「どちらが揺さぶる側か」は流派で解釈が分かれます。</div>
     `}
   `;
 }
@@ -7344,7 +7274,7 @@ function renderJyotish(){
           const planetsHere = allSiderealPlanets.filter(p => p.rashi === ri);
           const planetStr = planetsHere.map(p => '<div style="color:'+p.c+'; font-size:14px; line-height:1.4;">'+p.s+' '+(p.isNode ? p.n.replace("（北の交点）","").replace("（南の交点）","") : p.n)+'</div>').join("");
           html += '<div style="grid-column:'+gc+'; grid-row:'+gr+'; border:1px solid var(--border); padding:8px 10px; min-height:90px; background:'+(isLagna?'var(--hi)':'#fff')+'; position:relative; overflow:hidden;">';
-          html += '<img src="Zodiac/'+["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Ssorpio","Sagittarius","Capricorn","Aquarius","Pices"][ri]+'.svg" style="position:absolute; top:50%; right:-40px; transform:translateY(-50%); width:150px; height:150px; opacity:0.25; filter:brightness(0.4); pointer-events:none;"/>';
+          html += '<img src="Zodiac/'+["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Ssorpio","Sagittarius","Capricorn","Aquarius","Pices"][ri]+'.webp" alt="" loading="lazy" style="position:absolute; top:50%; right:-40px; transform:translateY(-50%); width:150px; height:150px; object-fit:contain; opacity:0.25; filter:brightness(0.4); pointer-events:none;"/>';
           html += '<div style="font-size:15px; color:var(--muted);">'+rashi.jp.replace("座","")+'</div>';
           if (isLagna) html += '<div style="position:absolute; top:0; right:0; width:0; height:0; border-top:16px solid var(--gold); border-left:16px solid transparent;"></div>';
           html += '<div style="margin-top:4px; line-height:1.6;">'+planetStr+'</div>';
@@ -7685,7 +7615,7 @@ function renderConsult(){
   const nu = calcNumerology(d.y, d.m, d.d);
   const nuMeaning = NUMEROLOGY_MEANINGS[nu.lifePath] || {};
   const py = nu.personalYear;
-  const shukuIdx = calcShukuyo(d.moonLon);
+  const shukuIdx = calcShukuyo(d);
   const shuku = SHUKUYO_27[shukuIdx];
   const dayunList = calcDayun(d);
   const age = getCurrentAge(d.y, d.m, d.d);
@@ -7905,7 +7835,7 @@ function renderConsult(){
     const nuB = calcNumerology(db.y, db.m, db.d);
 
     // 相手の宿曜
-    const shukuIdxB = calcShukuyo(db.moonLon);
+    const shukuIdxB = calcShukuyo(db);
     const shukuB = SHUKUYO_27[shukuIdxB];
 
     // ── 相性スコア計算（複数占術の加重平均） ──
@@ -8426,8 +8356,8 @@ function renderConsult(){
       const marsB = db.planets.find(p=>p.n==="火星");
 
       // 宿曜相性
-      const shukuIdxA = calcShukuyo(d.moonLon);
-      const shukuIdxB2 = calcShukuyo(db.moonLon);
+      const shukuIdxA = calcShukuyo(d);
+      const shukuIdxB2 = calcShukuyo(db);
       const shukuA = SHUKUYO_27[shukuIdxA];
       const shukuB2 = SHUKUYO_27[shukuIdxB2];
       const shukuComp = shukuyoCompat(shukuIdxA, shukuIdxB2);
@@ -8617,7 +8547,7 @@ function renderConsult(){
           const wsD=MAYA_SEALS[maD.ws]; if(wsD&&mayM[wsD.n]) av(mayM[wsD.n],"マヤWS");
 
           // 宿曜
-          const shI=calcShukuyo(pd.moonLon);
+          const shI=calcShukuyo(pd);
           const shVM=["action","leadership","think","social","creative","stable","intuition","nurture","action","leadership","social","creative","think","stable","intuition","nurture","action","leadership","think","social","creative","stable","intuition","nurture","action","think","social"];
           av(shVM[shI]||"stable","宿曜");
 
@@ -8866,7 +8796,7 @@ function renderConsult(){
       const nu2 = calcNumerology(d.y, d.m, d.d);
       const ky2 = calcKyusei(d.y, d.m, d);
       const ma2 = calcMaya(d.y, d.m, d.d);
-      const si2 = calcShukuyo(d.moonLon);
+      const si2 = calcShukuyo(d);
       let jy2 = null;
       if (typeof ayanamsha === 'function') {
         const ay = ayanamsha(d.jd);
@@ -8944,10 +8874,10 @@ function renderConsult(){
 
       // タイプ名→画像ファイル名のマッピング
       const typeImageMap = {
-        "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-        "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
-        "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
-        "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+        "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
+        "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
+        "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
+        "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
       };
       const typeImageSrc = typeImageMap[typeInfo.name] ? '16typecard/'+typeImageMap[typeInfo.name] : null;
 
@@ -8988,7 +8918,7 @@ function renderConsult(){
         // 全体構成: 個性像（全幅）→ [画像 | 右コンテンツ]
         return highlightHtml +
           '<div class="type-card-2col" style="display:grid; grid-template-columns:minmax(300px, 420px) 1fr; gap:24px; align-items:start;">' +
-            '<div style="flex-shrink:0;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;">' : '') + '</div>' +
+            '<div style="flex-shrink:0;">' + (typeImageSrc ? '<img src="'+typeImageSrc+'" loading="lazy" decoding="async" alt=""'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;">' : '') + '</div>' +
             '<div style="padding:16px 20px; background:rgba(255,255,255,0.4); border-radius:8px;">' + rightContent + '</div>' +
           '</div>';
       })();
@@ -9000,7 +8930,7 @@ function renderConsult(){
           '<div style="max-width:1040px; margin:0 auto 20px; text-align:left;">' + typeDetailCard + '</div>'
           :
           // 拡張情報なし: 画像のみ中央表示
-          (typeImageSrc ? '<div style="max-width:340px; margin:0 auto 20px;"><img src="'+typeImageSrc+'" alt="'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;"></div>' : '')
+          (typeImageSrc ? '<div style="max-width:340px; margin:0 auto 20px;"><img src="'+typeImageSrc+'" loading="lazy" decoding="async" alt=""'+typeInfo.name+'" style="width:100%; height:auto; border-radius:8px; display:block;"></div>' : '')
         ) +
         // 生き方の傾向
         '<div style="font-size:13px; color:var(--muted); margin-bottom:14px;">' +
@@ -9060,7 +8990,7 @@ function renderConsult(){
           const lifeStarName2 = ((d.ziweiDistrib||{})[d.lifeIdx]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
           const ky3 = calcKyusei(d.y, d.m, d);
           const ma3 = calcMaya(d.y, d.m, d.d);
-          const shukuIdx3 = calcShukuyo(d.moonLon);
+          const shukuIdx3 = calcShukuyo(d);
           const shuku3 = SHUKUYO_27[shukuIdx3] ? SHUKUYO_27[shukuIdx3].n : "";
           const officialIdx3 = (d.lifeIdx - 8 + 12) % 12;
           const officialStars3 = ((d.ziweiDistrib||{})[officialIdx3]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s));
@@ -9162,10 +9092,10 @@ function renderConsult(){
         const TYPES_ALL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
         const myParts = tj.key.split("_");
         const typeImageMap2 = {
-          "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-          "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
-          "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
-          "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+          "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
+          "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
+          "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
+          "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
         };
         const categories = [
           { label:"ベストパートナー", desc:"役割が違うだけ。自然な補完関係", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[2]!==myParts[2]; }},
@@ -9187,7 +9117,7 @@ function renderConsult(){
           out += '<div style="background:rgba(201,147,58,0.03); border:1px solid var(--border); border-radius:8px; overflow:hidden; display:flex; align-items:stretch;">';
           matches.forEach(m => {
             const img = typeImageMap2[m.type.name] ? '16typecard/'+typeImageMap2[m.type.name] : '';
-            out += (img ? '<img src="'+img+'" alt="'+m.type.name+'" style="width:110px; object-fit:contain; flex-shrink:0; display:block; background:#f5f0e4;">' : '') +
+            out += (img ? '<img src="'+img.replace('.webp','-S.webp')+'" loading="lazy" decoding="async" alt="'+m.type.name+'" style="width:110px; object-fit:contain; flex-shrink:0; display:block; background:#f5f0e4;">' : '') +
               '<div style="padding:14px 16px; display:flex; flex-direction:column; justify-content:center;">' +
                 '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:2px;">'+cat.label+'</div>' +
                 '<div style="font-size:12px; color:#8a7050; margin-bottom:10px;">'+cat.desc+'</div>' +
@@ -9237,7 +9167,7 @@ function renderConsult(){
           const isMe = item.dist === 0;
           const borderStyle = isMe ? '2px solid var(--gold)' : '1px solid var(--border)';
           return '<div style="padding:12px; background:'+(isMe?'rgba(201,147,58,0.10)':'#fff')+'; border:'+borderStyle+'; border-radius:8px; display:flex; gap:12px; align-items:flex-start;">' +
-            (img ? '<img src="'+img+'" alt="'+item.type.name+'" style="width:70px; height:105px; object-fit:cover; border-radius:4px; flex-shrink:0;">' : '') +
+            (img ? '<img src="'+img.replace('.webp','-S.webp')+'" loading="lazy" decoding="async" alt="'+item.type.name+'" style="width:70px; height:105px; object-fit:cover; border-radius:4px; flex-shrink:0;">' : '') +
             '<div style="flex:1; min-width:0;">' +
               '<div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+item.type.name+(isMe?' ★':'')+'</div>' +
               '<div style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:6px;">'+item.type.desc+'</div>' +
@@ -9448,7 +9378,7 @@ function renderConsult(){
         if (ws && mayaVote[ws.n]) addVote(mayaVote[ws.n],"マヤWS");
 
         // ── 宿曜 ──
-        const shukuIdx = calcShukuyo(d.moonLon);
+        const shukuIdx = calcShukuyo(d);
         const shuku = SHUKUYO_27[shukuIdx];
         // 宿の性質をより細かく分類（27宿を8軸に対応）
         const shukuVoteMap = [
@@ -10071,7 +10001,7 @@ function renderConsult(){
           </thead>
           <tbody>
             ${(() => {
-              const shukuIdx = calcShukuyo(d.moonLon);
+              const shukuIdx = calcShukuyo(d);
               const shuku = SHUKUYO_27[shukuIdx];
               const ma = calcMaya(d.y, d.m, d.d);
               const seal = MAYA_SEALS[ma.seal];
@@ -10594,7 +10524,7 @@ function renderCrossRef(){
   const kyName = KYUSEI_NAMES[ky.honmei];
   const ma = calcMaya(d.y, d.m, d.d);
   const seal = MAYA_SEALS[ma.seal];
-  const shukuIdx = calcShukuyo(d.moonLon);
+  const shukuIdx = calcShukuyo(d);
   const shuku = SHUKUYO_27[shukuIdx];
   const nuMeaning = NUMEROLOGY_MEANINGS[nu.lifePath] || {};
 
@@ -10982,7 +10912,7 @@ function goToTarot(){
   const mayaSeal = MAYA_SEALS[maya.seal];
 
   // 宿曜
-  const shukuyoIdx = calcShukuyo(d.moonLon);
+  const shukuyoIdx = calcShukuyo(d);
   const shuku = SHUKUYO_27[shukuyoIdx];
 
   // 人間にもAIにも読めるサマリー
@@ -11124,7 +11054,7 @@ function shareTypeResult() {
   const nu2 = calcNumerology(d.y, d.m, d.d);
   const ky2 = calcKyusei(d.y, d.m, d);
   const ma2 = calcMaya(d.y, d.m, d.d);
-  const si2 = calcShukuyo(d.moonLon);
+  const si2 = calcShukuyo(d);
   let jy2 = null;
   if (typeof ayanamsha === 'function') {
     const ay = ayanamsha(d.jd);
@@ -11148,7 +11078,7 @@ function shareTypeResult() {
 
   // Canvas画像を生成してからシェア
   generateShareImage(typeInfo, tj, highlight, (blob) => {
-    const file = new File([blob], `rasenban_${typeInfo.name}.png`, { type: 'image/png' });
+    const file = new File([blob], `rasenban_${typeInfo.name}.jpg`, { type: 'image/jpeg' });
 
     // スマホ: Web Share API（画像＋テキスト＋URL）
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -11176,7 +11106,7 @@ function shareTypeResult() {
 function triggerDownload2(blob, typeName) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.download = `rasenban_${typeName}.png`;
+  link.download = `rasenban_${typeName}.jpg`;
   link.href = url;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -11191,10 +11121,10 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   const ctx = canvas.getContext("2d");
 
   const typeImageMap = {
-    "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
-    "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
-    "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+    "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
+    "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
+    "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
+    "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
   };
   const imgFile = typeImageMap[typeInfo.name];
 
@@ -11350,7 +11280,7 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   };
 
   const finalize = () => {
-    canvas.toBlob((blob) => { callback(blob); }, 'image/png');
+    canvas.toBlob((blob) => { callback(blob); }, 'image/jpeg', 0.9);
   };
 
   // 画像読み込み（カード＋ロゴ＋装飾）
@@ -11362,10 +11292,10 @@ function generateShareImage(typeInfo, tj, highlight, callback) {
   });
 
   Promise.all([
-    imgFile ? loadImg("16typecard/" + imgFile) : Promise.resolve(null),
-    loadImg("icons/Logo01.png"),
-    loadImg("icons/yosumi01.png"),
-    loadImg("icons/yosumi02.png"),
+    imgFile ? loadImg("16typecard/" + imgFile.replace(".webp", "-L.webp")) : Promise.resolve(null),
+    loadImg("icons/Logo01.webp"),
+    loadImg("icons/yosumi01.webp"),
+    loadImg("icons/yosumi02.webp"),
   ]).then(([cardImg, logoImg, decoTop, decoBottom]) => {
     // 左半分: カード画像
     if (cardImg) {
@@ -11410,7 +11340,7 @@ function downloadTypeImage() {
   const nu2 = calcNumerology(d.y, d.m, d.d);
   const ky2 = calcKyusei(d.y, d.m, d);
   const ma2 = calcMaya(d.y, d.m, d.d);
-  const si2 = calcShukuyo(d.moonLon);
+  const si2 = calcShukuyo(d);
   let jy2 = null;
   if (typeof ayanamsha === 'function') {
     const ay = ayanamsha(d.jd);
@@ -11439,10 +11369,10 @@ function downloadTypeImage() {
   ctx.strokeRect(16, 16, S-32, S-32);
 
   const typeImageMap = {
-    "ヒーロー":"0Hero01.png","レボリューショナリー":"0Revolutionary01.png","トリックスター":"0Trickster01.png","ヴィジョナリー":"0Visionary01.png",
-    "パイオニア":"0Pioneer01.png","ローンウルフ":"0Lonewolf01.png","シーカー":"0Seeker01.png","マーベリック":"0Maverick01.png",
-    "ソブリン":"0Sovereign01.png","エンペラー":"0Emperor01.png","セージ":"0Sage01.png","オラクル":"0Oracle01.png",
-    "アルチザン":"0Artisan01.png","ガーディアン":"0Guardian01.png","ケアテイカー":"0Caretaker01.png","ハーミット":"0Hermit01.png"
+    "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
+    "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
+    "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
+    "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
   };
   const imgFile = typeImageMap[typeInfo.name];
 
@@ -11544,7 +11474,7 @@ function downloadTypeImage() {
       triggerDownload(canvas, typeInfo.name);
     };
     img.onerror = () => { drawOverlay(); triggerDownload(canvas, typeInfo.name); };
-    img.src = "16typecard/" + imgFile;
+    img.src = "16typecard/" + imgFile.replace(".webp", "-L.webp");
   } else {
     drawOverlay();
     triggerDownload(canvas, typeInfo.name);

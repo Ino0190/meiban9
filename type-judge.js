@@ -907,7 +907,7 @@ function runFromHTML() {
   const nu = (typeof calcNumerology === 'function') ? calcNumerology(d.y, d.m, d.d) : null;
   const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m, d) : null;
   const ma = (typeof calcMaya === 'function') ? calcMaya(d.y, d.m, d.d) : null;
-  const si = (typeof calcShukuyo === 'function') ? calcShukuyo(d.moonLon) : null;
+  const si = (typeof calcShukuyo === 'function') ? calcShukuyo(d) : null;
   let jy = null;
   if (typeof ayanamsha === 'function') {
     const aya = ayanamsha(d.jd);
