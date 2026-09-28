@@ -706,7 +706,7 @@
 706	    // 補助データを既存関数で計算
 707	    const sm = (typeof calcJintai === 'function') ? calcJintai(d) : null;
 708	    const nu = (typeof calcNumerology === 'function') ? calcNumerology(d.y, d.m, d.d) : null;
-709	    const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m) : null;
+709	    const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m, d) : null;
 710	    const ma = (typeof calcMaya === 'function') ? calcMaya(d.y, d.m, d.d) : null;
 711	    const shukuIdx = (typeof calcShukuyo === 'function') ? calcShukuyo(d.moonLon) : null;
 712	

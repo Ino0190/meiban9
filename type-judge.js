@@ -905,7 +905,7 @@ function runFromHTML() {
   const d = currentData;
   const sm = (typeof calcJintai === 'function') ? calcJintai(d) : null;
   const nu = (typeof calcNumerology === 'function') ? calcNumerology(d.y, d.m, d.d) : null;
-  const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m) : null;
+  const ky = (typeof calcKyusei === 'function') ? calcKyusei(d.y, d.m, d) : null;
   const ma = (typeof calcMaya === 'function') ? calcMaya(d.y, d.m, d.d) : null;
   const si = (typeof calcShukuyo === 'function') ? calcShukuyo(d.moonLon) : null;
   let jy = null;
