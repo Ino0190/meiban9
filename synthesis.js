@@ -248,12 +248,20 @@
     const base = new Date();
     const days = [0, 1].map(i => { const x = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i); return { x, t: buildToday(d, x) }; });
     const label = (i, x) => (i ? "明日" : "今日") + " " + (x.getMonth() + 1) + "/" + x.getDate() + "（" + WEEK[x.getDay()] + "）";
-    return '<section class="rs-sec rs-today"><h3>今日の羅占盤</h3>' +
-      '<p class="rs-lead">日ごとの運を持つ5つの占術で、今日がどんな日かを見る。占術が同じ側にそろうほど、その日の色ははっきりしている。</p>' +
+    const t0 = days[0].t, k0 = DAYKIND[t0.top];
+    const head = t0.clear ? k0.label : "割れた日";
+    const cls = t0.clear ? k0.cls : "keep";
+    const sub = t0.clear ? k0.tip : "迷ったら、いつもどおりに過ごすのがよい。";
+    return '<details class="rs-today rs-strip rs-' + cls + '"><summary>' +
+      '<span class="rs-strip-date">' + label(0, days[0].x) + '</span>' +
+      '<span class="rs-verdict">' + head + '</span>' +
+      '<span class="rs-strip-tip">' + sub + '</span>' +
+      '<span class="rs-strip-more">' + (t0.clear ? t0.rows.length + "つの占術のうち" + t0.cnt[t0.top] + "つ" : "占術ごとに割れた") + "・内訳と明日を見る</span>" +
+      "</summary><div class=\"rs-strip-body\">" +
       '<div class="rs-today-tabs">' + days.map((o, i) => '<button type="button" class="' + (i ? "" : "on") + '" onclick="RSynth.showDay(' + i + ',this)">' + label(i, o.x) + "</button>").join("") + "</div>" +
       days.map((o, i) => '<div class="rs-day"' + (i ? " hidden" : "") + ">" + todayPanelHtml(o.t) + "</div>").join("") +
-      '<p class="rs-small">四柱推命＝その日の干支を日主から見た関係、九星気学＝日盤で本命星が入る宮、宿曜＝その日の宿との関係（三九の秘法）、マヤ暦＝その日のKINの音、数秘術＝パーソナルデイ。</p>' +
-      "</section>";
+      '<p class="rs-small">日ごとの運を持つ5つの占術で見ている。四柱推命＝その日の干支を日主から見た関係、九星気学＝日盤で本命星が入る宮、宿曜＝その日の宿との関係、マヤ暦＝その日のKINの音、数秘術＝パーソナルデイ。</p>' +
+      "</div></details>";
   }
   function showDay(i, btn) {
     const sec = btn.closest(".rs-today");
@@ -276,34 +284,70 @@
   // 占術名は押すとその占術のタブの「根拠」へ飛ぶ
   const names = sys => sys.map(s => '<a class="rs-go" onclick="RSynth.goTab(' + SYS.indexOf(s) + ')">' + SHORT[s] + "</a>").join("・");
 
+  // 僅差の軸があれば、その軸を反対にしたときのタイプ（「〇〇寄り」として一緒に見せる）
+  const AXIS_Q = ["価値観", "興味の向き", "役割", "気質"];
+  function neighborType(tj) {
+    const ax = [tj.a1, tj.a2, tj.a3, tj.a4];
+    let best = -1, bestR = 2;
+    ax.forEach((a, i) => {
+      const tot = a.plus + a.minus, r = tot ? Math.abs(a.plus - a.minus) / tot : 0;
+      if (a.ambiguous && r < bestR) { bestR = r; best = i; }
+    });
+    if (best < 0) return null;
+    const parts = tj.key.split("_"), a = ax[best];
+    parts[best] = parts[best] === a.pn ? a.mn : a.pn;
+    const t = ((global.TypeJudge || {}).TYPES || {})[parts.join("_")];
+    return t ? { name: t.name, desc: t.desc, axis: AXIS_Q[best] } : null;
+  }
+
   function buildSynthesisHtml(d) {
     const r = buildSynthesis(d);
     const t = r.type;
     const img = IMG[t.name] ? "16typecard/" + IMG[t.name] : "";
     const LEVEL = { clear: "はっきり一致", lean: "やや一致", split: "意見が割れた" };
+    const nb = neighborType(r.tj);
+    const selfMode = typeof currentMode === "undefined" || currentMode !== "compat";
+    viewerTj = r.tj;
     let h = '<div id="type-result-section" class="rs">';
 
-    // ── 1. 答え（タイプ＋一言） ──
+    // ── 1. 答え（絵・タイプ名・寄り・一言・あなたらしさ3つ・シェア） ──
     h += '<div class="rs-hero">' +
-      (img ? '<img src="' + img + '" alt="' + esc(t.name) + '" class="rs-img">' : "") +
+      (img ? '<button type="button" class="rs-img-btn" onclick="RSynth.openType(\'' + r.tj.key + '\')" aria-label="' + esc(t.name) + 'をくわしく見る"><img src="' + img + '" alt="' + esc(t.name) + '" class="rs-img"></button>' : "") +
       '<div class="rs-hero-txt">' +
-      '<div class="rs-kicker">9つの占術をまとめると、あなたは</div>' +
+      '<div class="rs-kicker">あなたは</div>' +
       '<div class="rs-type">' + esc(t.name) + "</div>" +
+      (nb ? '<div class="rs-near" title="' + esc(nb.axis) + 'の軸が僅差">' + esc(nb.name) + "寄り</div>" : "") +
       '<div class="rs-desc">' + esc(t.desc) + "</div>" +
-      (r.paradox.length ? '<ul class="rs-paradox">' + r.paradox.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
+      (r.paradox.length && !/undefined/.test(r.paradox[0]) ? '<p class="rs-para1">' + esc(r.paradox[0]) + "</p>" : "") +
+      '<div class="rs-self"><div class="rs-self-h">あなたらしさ 3つ</div><ol>' +
+      r.top.map(x => "<li><b>" + x.label + "</b>　" + x.desc + "<small>" + x.n + "つの占術がそろって示す</small></li>").join("") +
+      "</ol></div>" +
+      (nb ? '<p class="rs-small">' + esc(nb.axis) + "の軸が僅差なので、" + esc(nb.name) + "（" + esc(nb.desc) + "）の顔も持っている。</p>" : "") +
+      '<div class="rs-actions">' +
+      '<button type="button" class="rs-share" onclick="shareTypeResult()">結果をシェア</button>' +
+      (selfMode ? '<button type="button" class="rs-share rs-share-sub" onclick="RSynth.startCompat()">相性を見る</button>' : "") +
+      '</div><button type="button" class="rs-story-link" onclick="saveStoryImage()">ストーリー用の縦長画像を保存</button>' +
+      '<div id="share-status" class="rs-small"></div>' +
       "</div></div>";
 
-    // ── 今日の羅占盤（自分モードだけ） ──
-    if (typeof currentMode === "undefined" || currentMode !== "compat") {
+    // ── 2. 今日の羅占盤（1行の帯・自分モードだけ） ──
+    if (selfMode) {
       try { h += todayHtml(d); } catch (e) { console.warn("今日の羅占盤の描画エラー:", e); }
     }
 
-    // ── 2. 占術が一致したところ（4つの軸） ──
+    // ── 2.5 実はこれも近い／このタイプと相性がいいタイプ（自分モードだけ） ──
+    if (selfMode) {
+      try { h += otherTypesHtml(r.tj); } catch (e) { console.warn("近いタイプの描画エラー:", e); }
+    }
+
+    // ── 3. なぜこのタイプ？（4つの軸と占術の一致・強みの内訳）──畳む
+    const conf = r.tj.confidence;
+    const confNote = d.tm === "unknown" ? "出生時刻が不明なので、時刻が要る判定（アセンダント・命宮など）は使っていない。生まれた時刻を入れると確かさが上がる。" : "";
+    h += '<details class="rs-fold rs-why-fold"><summary>なぜ' + esc(t.name) + "？<span>9つの占術がそれぞれ何を見てそう判断したか（判定の確かさ: " + conf + "）</span></summary><div class=\"rs-fold-body\">";
     h += '<section class="rs-sec"><h3>9つの占術が一致したところ</h3>' +
-      '<p class="rs-lead">占術ごとに見方は違う。それでも同じ方向を指した占術が多いほど、その傾向は確かだと読める。<b>占術の名前を押すと、その占術が何を見てそう判断したかが分かる。</b></p>' +
+      '<p class="rs-lead">占術ごとに見方は違う。同じ方向を指した占術が多いほど、その傾向がはっきり出ている。<b>占術の名前を押すと、その占術が何を見てそう判断したかが分かる。</b></p>' +
       '<div class="rs-axes">' +
       r.axes.map(a => {
-        // 割れたときは片方に言い切らず、両方の顔があると言う
         const main = a.level === "split"
           ? "両方の顔がある：「" + esc(a.text) + "」と「" + esc(a.otherText) + "」"
           : esc(a.text);
@@ -317,36 +361,208 @@
           "</div>";
       }).join("") +
       "</div></section>";
-
-    // ── 3. そろって示す強み ──
-    h += '<section class="rs-sec"><h3>複数の占術がそろって示す強み</h3><ol class="rs-traits">' +
+    h += '<section class="rs-sec"><h3>あなたらしさ3つの内訳</h3><ol class="rs-traits">' +
       r.top.map(x => '<li><div class="rs-trait-head"><b>' + x.label + '</b><span class="rs-n"><b>' + x.n + "</b>/9の占術</span></div>" +
         '<div class="rs-trait-desc">' + x.desc + "</div>" +
         '<div class="rs-axis-sys">' + dots(x.sys, "on") + '<span class="rs-names">' + names(x.sys) + "</span></div></li>").join("") +
       "</ol></section>";
+    h += '<p class="rs-small">判定の確かさ: <b>' + conf + "</b>。" + confNote + "</p>";
+    h += "</div></details>";
 
-    // ── 4. 今の時期 ──
+    // ── 4. これからの流れ（今の時期と次の変わり目）──畳む
     const tm = r.timing;
     const vcls = tm.verdict === "動く時期" ? "go" : tm.verdict === "待つ時期" ? "wait" : "care";
     let turn = "";
     if (tm.nowSpan) turn = "<b>今はちょうど変わり目</b>（" + tm.nowSpan.start + "〜" + (tm.nowSpan.end - 1) + "歳・" + names(tm.nowSpan.sys) + "がそろって示す）。";
     else if (tm.nextSpan) turn = "次の大きな変わり目は <b>" + tm.nextSpan.start + "〜" + (tm.nextSpan.end - 1) + "歳</b>（" + names(tm.nextSpan.sys) + "がそろって示す）。";
     else turn = "この先、複数の占術が同時に大きな変わり目を示す時期は見当たらない。";
-    h += '<section class="rs-sec"><h3>今の時期</h3>' +
+    h += '<details class="rs-fold"><summary>これからの流れ<span>今は「' + tm.verdict + "」。" + (tm.nowSpan ? "ちょうど変わり目" : tm.nextSpan ? "次の変わり目は" + tm.nextSpan.start + "歳ごろ" : "") + "</span></summary><div class=\"rs-fold-body\">" +
       '<div class="rs-time rs-' + vcls + '"><div class="rs-verdict">' + tm.verdict + "</div>" +
       '<ul class="rs-why">' + tm.now.map(x => "<li><b>" + SHORT[x.sys] + "</b> " + esc(x.why) + (x.say ? "（" + x.say + "）" : "") + "</li>").join("") + "</ul>" +
       '<p class="rs-turn">' + turn + "</p></div>" +
       '<p class="rs-small">変わり目は、10年ごとの運を持つ3つの占術（四柱推命・紫微斗数・インド占星術）のうち2つ以上が同時に「変化」を示す年齢。</p>' +
-      "</section>";
-
-    // ── 5. 信頼度とシェア ──
-    const conf = r.tj.confidence;
-    const confNote = d.tm === "unknown" ? "出生時刻が不明なので、時刻が要る判定（アセンダント・命宮など）は使っていない。" : "";
-    h += '<div class="rs-foot"><span class="rs-conf">判定の確かさ: <b>' + conf + "</b></span>" + (confNote ? '<span class="rs-small">' + confNote + "</span>" : "") +
-      '<button class="rs-share" onclick="shareTypeResult()">結果をシェア</button><div id="share-status" class="rs-small"></div></div>';
+      "</div></details>";
 
     h += "</div>";
     return h;
+  }
+
+  // 16タイプそれぞれとの近さ。軸ごとの票の割合（例: 役割でリーダー6点・参謀3点ならリーダー側0.67）を
+  // そのタイプの側で拾って4軸で平均する。自分のタイプがいちばん高く、票が割れた軸を反対にしたタイプが次に来る
+  function typeCloseness(tj) {
+    const ax = [tj.a1, tj.a2, tj.a3, tj.a4];
+    const share = ax.map(a => { const tot = a.plus + a.minus; return tot ? a.plus / tot : 0.5; });
+    const TYPES = (global.TypeJudge || {}).TYPES || {};
+    const mine = tj.key.split("_");
+    return Object.keys(TYPES).map(k => {
+      const parts = k.split("_");
+      const sh = parts.map((p, i) => p === ax[i].pn ? share[i] : 1 - share[i]);
+      return { key: k, type: TYPES[k], score: sh.reduce((a, b) => a + b, 0) / 4, sh, diff: parts.map((p, i) => p !== mine[i] ? i : -1).filter(i => i >= 0), parts };
+    }).sort((a, b) => b.score - a.score);
+  }
+
+  // 自分のタイプから見た相性のいいタイプ（1つの軸だけ違う3タイプと、全部違う1タイプ）
+  const PAIRS = [
+    { axis: 2, label: "ベストパートナー", desc: "役割だけが違う。自然に補い合える" },
+    { axis: 1, label: "新しい発見をくれる", desc: "興味の向きだけが違う。見えない景色を見せてくれる" },
+    { axis: 3, label: "アクセルとブレーキ", desc: "気質だけが違う。勢いと慎重さを分け合える" },
+    { axis: -1, label: "惹かれ合う対極", desc: "4つとも逆。強く惹かれ、強くぶつかる" },
+  ];
+  const thumb = name => IMG[name] ? "16typecard/" + IMG[name].replace(".webp", "-S.webp") : "";
+
+  function otherTypesHtml(tj) {
+    const all = typeCloseness(tj);
+    const me = all.find(x => x.key === tj.key);
+    const others = all.filter(x => x.key !== tj.key).slice(0, 3);
+    const pct = x => Math.round(x.score * 100);
+    const why = x => x.diff.map(i => {
+      const other = x.parts[i];
+      return AXES[i].q + "では「" + AXES[i].short[other] + "」の票も" + Math.round(x.sh[i] * 10) + "割";
+    }).join("、");
+    // 押すと図鑑でそのタイプを開く
+    const card = (x, top, sub, extra) => '<button type="button" class="rs-tcard" onclick="RSynth.openType(\'' + x.key + '\')">' +
+      (thumb(x.type.name) ? '<img src="' + thumb(x.type.name) + '" alt="" loading="lazy" decoding="async">' : "") +
+      '<span class="rs-tcard-txt">' + (top ? '<span class="rs-tcard-top">' + top + "</span>" : "") +
+      '<span class="rs-tcard-name">' + esc(x.type.name) + (extra || "") + "</span>" +
+      '<span class="rs-tcard-desc">' + esc(x.type.desc) + "</span>" +
+      (sub ? '<span class="rs-tcard-sub">' + sub + "</span>" : "") +
+      '<span class="rs-tcard-go">くわしく見る ›</span></span></button>';
+
+    let h = '<section class="rs-sec"><h3>実はこのタイプも近い</h3>' +
+      '<p class="rs-lead">あなたの票は、ほかのタイプにも少しずつ入っている。' + esc(tj.type.name) + "との近さを100としたときの数字。</p>" +
+      '<div class="rs-tgrid rs-tgrid3">' +
+      others.map(x => card(x, "", why(x), '<span class="rs-tcard-pct">' + Math.round(pct(x) / pct(me) * 100) + "</span>")).join("") +
+      "</div></section>";
+
+    const mine = tj.key.split("_");
+    const byKey = {};
+    all.forEach(x => { byKey[x.key] = x; });
+    const flip = (parts, i) => { const a = [tj.a1, tj.a2, tj.a3, tj.a4][i]; return parts[i] === a.pn ? a.mn : a.pn; };
+    h += '<section class="rs-sec"><h3>' + esc(tj.type.name) + "と相性がいいタイプ</h3>" +
+      '<p class="rs-lead">16タイプの組み合わせで見た相性。気になる人がいたら、生年月日を入れて実際の相性を確かめられる。</p>' +
+      '<div class="rs-tgrid">' +
+      PAIRS.map(pr => {
+        const parts = mine.slice();
+        if (pr.axis >= 0) parts[pr.axis] = flip(parts, pr.axis);
+        else for (let i = 0; i < 4; i++) parts[i] = flip(parts, i);
+        const x = byKey[parts.join("_")];
+        return x ? card(x, pr.label, pr.desc) : "";
+      }).join("") +
+      '</div><div class="rs-actions">' +
+      '<button type="button" class="rs-share rs-share-sub" onclick="RSynth.startCompat()">気になる人との相性を見る</button>' +
+      '<button type="button" class="rs-share rs-share-sub" onclick="RSynth.openType(\'' + tj.key + '\')">16タイプを全部見る</button>' +
+      "</div></section>";
+    return h;
+  }
+
+  // ===== 16タイプ図鑑（ほかのキャラを見る） =====
+  // 入口: 近いタイプ・相性がいいタイプのカード、「16タイプを全部見る」、トップの「16タイプ図鑑」、URL の #type=hero
+  const slugOf = name => (IMG[name] || "").replace(/^web\/0|01\.webp$/g, "").toLowerCase();
+  const typeKeys = () => Object.keys(((global.TypeJudge || {}).TYPES) || {});
+  let viewerTj = null;   // 結果を出した人の判定（あなたとの関係を出すため）
+
+  function relationTo(key) {
+    if (!viewerTj) return null;
+    const mine = viewerTj.key.split("_"), parts = key.split("_");
+    const diff = parts.map((p, i) => p !== mine[i] ? i : -1).filter(i => i >= 0);
+    const c = typeCloseness(viewerTj);
+    const me = c.find(x => x.key === viewerTj.key), it = c.find(x => x.key === key);
+    const near = me && it ? Math.round(it.score / me.score * 100) : null;
+    let label;
+    if (!diff.length) label = "あなたのタイプ";
+    else if (diff.length === 4) label = PAIRS[3].label + "（" + PAIRS[3].desc + "）";
+    else if (diff.length === 1) {
+      const pr = PAIRS.find(p => p.axis === diff[0]);
+      label = pr ? pr.label + "（" + pr.desc + "）" : AXES[diff[0]].q + "だけが違う、いちばん近いタイプの一つ";
+    } else label = diff.map(i => AXES[i].q).join("・") + "の" + diff.length + "つの軸が違う";
+    return { label, near, same: !diff.length };
+  }
+
+  function typeViewHtml(key) {
+    const T = global.TypeJudge.TYPES, t = T[key];
+    const keys = typeKeys(), i = keys.indexOf(key);
+    const prev = keys[(i + keys.length - 1) % keys.length], next = keys[(i + 1) % keys.length];
+    const img = IMG[t.name] ? "16typecard/" + IMG[t.name] : "";
+    const rel = relationTo(key);
+    const list = a => "<ul>" + (a || []).map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>";
+    const sec = (h, body) => body ? '<div class="tv-sec"><h4>' + h + "</h4>" + body + "</div>" : "";
+    return '<div class="tv-head"><button type="button" class="tv-nav" onclick="RSynth.openType(\'' + prev + '\')" aria-label="前のタイプ">‹</button>' +
+      '<div class="tv-count">' + (i + 1) + " / " + keys.length + '</div>' +
+      '<button type="button" class="tv-nav" onclick="RSynth.openType(\'' + next + '\')" aria-label="次のタイプ">›</button>' +
+      '<button type="button" class="tv-close" onclick="RSynth.closeType()" aria-label="閉じる">×</button></div>' +
+      '<div class="tv-main">' + (img ? '<img src="' + img + '" alt="' + esc(t.name) + '" class="tv-img">' : "") +
+      '<div class="tv-txt"><div class="tv-name" id="tv-title">' + esc(t.name) + "</div>" +
+      '<div class="tv-desc">' + esc(t.desc) + "</div>" +
+      (t.paradox ? '<p class="tv-para">' + esc(t.paradox) + "</p>" : "") +
+      (rel ? '<div class="tv-rel' + (rel.same ? " tv-rel-me" : "") + '"><b>あなたとの関係</b>' + esc(rel.label) + (rel.near !== null && !rel.same ? "<span>あなたとの近さ " + rel.near + "</span>" : "") + "</div>"
+        : '<button type="button" class="rs-share tv-cta" onclick="RSynth.closeType(); var b = document.getElementById(\'birthdate\'); if (b) { b.scrollIntoView({block:\'center\'}); b.focus(); }">あなたは何タイプ？ 生年月日で占う</button>') +
+      (t.personality ? "<p>" + esc(t.personality) + "</p>" : "") +
+      "</div></div>" +
+      '<div class="tv-grid2">' + sec("強み", list(t.strengths)) + sec("気をつけたいこと", list(t.challenges)) + "</div>" +
+      sec("向いている仕事", t.careerFit ? "<p>" + esc(t.careerFit) + "</p>" : "") +
+      sec("このタイプの人との付き合い方", t.howToRelate ? "<p>" + esc(t.howToRelate) + "</p>" : "") +
+      (t.etymology ? '<details class="tv-more"><summary>名前の由来</summary><p>' + esc(t.etymology) + "</p></details>" : "") +
+      '<div class="tv-all"><div class="tv-all-h">16タイプ</div><div class="tv-thumbs">' +
+      keys.map(k => { const n = T[k].name; return '<button type="button" class="tv-th' + (k === key ? " on" : "") + '" onclick="RSynth.openType(\'' + k + '\')" title="' + esc(n) + '">' +
+        (thumb(n) ? '<img src="' + thumb(n) + '" alt="" loading="lazy" decoding="async">' : "") + "<span>" + esc(n) + "</span></button>"; }).join("") +
+      "</div></div>";
+  }
+
+  let lastFocus = null;
+  function openType(key) {
+    const T = ((global.TypeJudge || {}).TYPES) || {};
+    if (!T[key]) {   // 名前・英名でも開ける
+      key = Object.keys(T).find(k => T[k].name === key || slugOf(T[k].name) === String(key).toLowerCase()) || Object.keys(T)[0];
+    }
+    let box = document.getElementById("type-viewer");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "type-viewer";
+      box.className = "tv-back";
+      box.innerHTML = '<div class="tv-box" role="dialog" aria-modal="true" aria-labelledby="tv-title" tabindex="-1"></div>';
+      box.addEventListener("click", e => { if (e.target === box) closeType(); });
+      document.addEventListener("keydown", e => {
+        if (!document.getElementById("type-viewer") || document.getElementById("type-viewer").hidden) return;
+        if (e.key === "Escape") closeType();
+        const ks = typeKeys(), cur = box.dataset.key, i = ks.indexOf(cur);
+        if (e.key === "ArrowRight") openType(ks[(i + 1) % ks.length]);
+        if (e.key === "ArrowLeft") openType(ks[(i + ks.length - 1) % ks.length]);
+      });
+      document.body.appendChild(box);
+      lastFocus = document.activeElement;
+    }
+    if (box.hidden) lastFocus = document.activeElement;
+    box.hidden = false;
+    box.dataset.key = key;
+    const inner = box.querySelector(".tv-box");
+    inner.innerHTML = typeViewHtml(key);
+    inner.scrollTop = 0;
+    inner.focus();
+    document.body.classList.add("tv-open");
+    try { history.replaceState(null, "", "#type=" + slugOf(T[key].name)); } catch (e) { }
+  }
+  function closeType() {
+    const box = document.getElementById("type-viewer");
+    if (box) box.hidden = true;
+    document.body.classList.remove("tv-open");
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { }
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  // URL の #type=hero で図鑑を開く（SNSから来た人用）
+  function openFromHash() {
+    const m = /#type=([a-z]+)/.exec(location.hash);
+    if (m) openType(m[1]);
+  }
+  if (typeof document !== "undefined") document.addEventListener("DOMContentLoaded", () => setTimeout(openFromHash, 0));
+
+  // 「相性を見る」: 入力欄を相性モードにして、お相手の生年月日へ
+  function startCompat() {
+    const r = document.getElementById("mode-compat");
+    if (!r) return;
+    r.checked = true;
+    if (typeof toggleMode === "function") toggleMode();
+    const el = document.getElementById("birthdate-b");
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 400); }
   }
 
   // ===== 各占術のタブの冒頭：「総合鑑定の中でのこの占術」 =====
@@ -533,6 +749,8 @@
   }
   function goSummary() {
     if (typeof setTab === "function") setTab(10);
+    const fold = document.querySelector(".rs-why-fold");
+    if (fold) fold.open = true;
     const el = document.querySelector(".rs-axes");
     if (el) {
       const tabs = document.querySelector(".tabs");
@@ -540,6 +758,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, buildToday, showDay };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);

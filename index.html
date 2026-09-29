@@ -437,6 +437,101 @@ window.EPH_READY = new Promise(function (resolve, reject) {
 .rs-type{font-size:36px;color:var(--gold);font-weight:900;font-family:'Noto Serif JP',serif;letter-spacing:4px;line-height:1.3}
 .rs-desc{font-size:18px;color:var(--text);line-height:1.7;margin:6px 0 14px;font-weight:700}
 .rs-paradox{margin:0;padding:12px 0 0 20px;border-top:1px solid rgba(139,105,20,.25);font-size:16px;line-height:1.8;color:var(--text)}
+/* A向け 1画面目 */
+.rs-hero{grid-template-columns:240px 1fr}
+.rs-near{display:inline-block;margin:6px 0 2px;padding:3px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;font-size:14px;color:var(--muted)}
+.rs-para1{font-size:16px;line-height:1.7;color:var(--text);margin:0 0 12px;padding-top:10px;border-top:1px solid rgba(139,105,20,.25)}
+.rs-self{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:4px 0 8px}
+.rs-self-h{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.rs-self ol{margin:0;padding-left:22px;font-size:16px;line-height:1.7;color:var(--text)}
+.rs-self li{margin-bottom:6px}
+.rs-self li small{display:block;font-size:14px;color:var(--muted)}
+.rs-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.rs-actions .rs-share{margin:0;flex:1;min-width:150px}
+.rs-share-sub{background:#fff !important;color:var(--gold) !important;border:1px solid var(--gold) !important}
+.rs-strip{border:1px solid var(--border);border-radius:10px;background:var(--surface);margin:0 0 16px}
+.rs-strip>summary{list-style:none;cursor:pointer;padding:14px 18px;display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:baseline}
+.rs-strip>summary::-webkit-details-marker{display:none}
+.rs-strip-date{grid-column:1 / -1;font-size:14px;color:var(--muted)}
+.rs-strip .rs-verdict{font-size:22px;margin:0}
+.rs-strip-tip{font-size:16px;color:var(--text)}
+.rs-strip-more{grid-column:1 / -1;font-size:14px;color:var(--gold);margin-top:4px}
+.rs-strip-more::before{content:"▸ "}
+.rs-strip[open] .rs-strip-more::before{content:"▾ "}
+.rs-strip-body{padding:0 18px 16px}
+.rs-strip.rs-go{border-color:#a8c8ab}.rs-strip.rs-keep{border-color:#b4c4dc}.rs-strip.rs-care{border-color:#dcc89c}
+/* 実はこのタイプも近い／相性がいいタイプ */
+.rs-tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rs-tcard{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px}
+.rs-tcard img{width:64px !important;height:96px !important;object-fit:cover;border-radius:4px;flex-shrink:0}
+.rs-tcard-top{font-size:14px;color:var(--gold);font-weight:700}
+.rs-tcard-name{font-size:17px;color:var(--text);font-weight:700;margin:2px 0}
+.rs-tcard-pct{margin-left:8px;font-size:14px;color:var(--gold);font-weight:700}
+.rs-tcard-desc{font-size:14px;color:var(--text);line-height:1.6}
+.rs-tcard-sub{font-size:14px;color:var(--muted);line-height:1.5;margin-top:4px}
+.rs-compat-cta{display:block;width:100%;margin:12px 0 0 !important}
+.rs-tgrid3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:768px){.rs-tgrid,.rs-tgrid3{grid-template-columns:1fr}}
+/* カードは押すと図鑑が開く */
+.rs-tcard{font-family:inherit;text-align:left;cursor:pointer;width:100%}
+.rs-tcard:hover{border-color:var(--gold)}
+.rs-tcard-txt{display:block;min-width:0}
+.rs-tcard-txt>span{display:block}
+.rs-tcard-name{display:block}
+.rs-tcard-go{font-size:14px;color:var(--gold);margin-top:4px}
+.rs-img-btn{border:none;background:none;padding:0;cursor:zoom-in;display:block}
+/* 16タイプ図鑑 */
+body.tv-open{overflow:hidden}
+.tv-back{position:fixed;inset:0;background:rgba(44,36,24,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}
+.tv-back[hidden]{display:none}
+.tv-box{background:var(--dark);width:100%;max-width:900px;max-height:92vh;overflow-y:auto;border-radius:12px;border:1px solid var(--gold);padding:0 24px 24px;outline:none}
+.tv-head{position:sticky;top:0;background:var(--dark);display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:16px;z-index:1}
+.tv-nav,.tv-close{font-family:inherit;font-size:22px;line-height:1;width:44px;height:44px;border:1px solid var(--border);background:var(--surface);color:var(--gold);border-radius:22px;cursor:pointer}
+.tv-close{margin-left:auto}
+.tv-count{font-size:14px;color:var(--muted)}
+.tv-main{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+.tv-img{width:100%;border-radius:8px;display:block}
+.tv-name{font-size:32px;color:var(--gold);font-weight:900;font-family:'Noto Serif JP',serif;letter-spacing:3px}
+.tv-desc{font-size:18px;font-weight:700;color:var(--text);margin:4px 0 10px}
+.tv-para{font-size:16px;color:var(--text);padding-top:10px;border-top:1px solid rgba(139,105,20,.25)}
+.tv-txt p,.tv-sec p,.tv-more p{font-size:16px;line-height:1.8;color:var(--text);margin:8px 0}
+.tv-rel{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:16px;line-height:1.6;margin:10px 0}
+.tv-rel b{display:block;font-size:14px;color:var(--gold)}
+.tv-rel span{display:block;font-size:14px;color:var(--muted)}
+.tv-rel-me{border-color:var(--gold);background:var(--hi)}
+.tv-cta{display:block;width:100%;margin:12px 0}
+.tv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.tv-sec{margin-top:18px}
+.tv-sec h4{font-size:18px;color:var(--text);margin:0 0 6px;padding-left:10px;border-left:4px solid var(--gold)}
+.tv-sec ul{margin:0;padding-left:20px;font-size:16px;line-height:1.8;color:var(--text)}
+.tv-more{margin-top:18px;border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:#fff}
+.tv-more summary{cursor:pointer;font-size:16px;color:var(--gold)}
+.tv-all{margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+.tv-all-h{font-size:16px;font-weight:700;margin-bottom:10px}
+.tv-thumbs{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.tv-th{font-family:inherit;border:1px solid var(--border);background:#fff;border-radius:6px;padding:4px;cursor:pointer;text-align:center}
+.tv-th img{width:100% !important;aspect-ratio:2/3;object-fit:cover;border-radius:4px;display:block}
+.tv-th span{display:block;font-size:14px;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-th.on{border-color:var(--gold);background:var(--hi)}
+@media (max-width:768px){
+  .tv-back{padding:0}
+  .tv-box{max-height:100vh;height:100%;border-radius:0;padding:0 16px 20px}
+  .tv-main{grid-template-columns:1fr}
+  .tv-img{width:200px !important;margin:0 auto}
+  .tv-name{text-align:center;font-size:28px}
+  .tv-desc{text-align:center}
+  .tv-grid2{grid-template-columns:1fr}
+  .tv-thumbs{grid-template-columns:repeat(4,1fr)}
+}
+.rs-story-link{display:block;margin:10px 0 0;padding:0;border:none;background:none;font-family:inherit;font-size:14px;color:var(--gold);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* 入力：生年月日だけで始め、時刻・性別は後から */
+.more-input{margin:14px 0 4px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,.6)}
+.more-input>summary{cursor:pointer;list-style:none;padding:10px 12px;font-size:14px;color:var(--gold)}
+.more-input>summary::-webkit-details-marker{display:none}
+.more-input>summary::before{content:"＋ "}
+.more-input[open]>summary::before{content:"− "}
+.more-input-body{padding:0 12px 12px}
+.more-input-note{font-size:14px;color:var(--muted);line-height:1.6;margin-top:8px}
 .rs-sec{margin:0 0 28px}
 .rs-sec h3{font-size:20px;color:var(--text);margin:0 0 6px;padding-left:10px;border-left:4px solid var(--gold)}
 .rs-lead{font-size:15px;color:var(--muted);line-height:1.7;margin:0 0 14px}
@@ -529,6 +624,11 @@ a.rs-go:hover{color:#6a4e10}
   .rs-paradox{text-align:left}
   .rs-axes,.rs-traits{grid-template-columns:1fr}
   .rs-type{font-size:30px}
+  .rs-hero{grid-template-columns:1fr}
+  .rs-img{width:200px !important}
+  .rs-self{text-align:left}
+  .brand-sphere{width:180px !important;height:180px !important}
+  .brand-sphere img{width:140px !important}
 }
 /* 今日の羅占盤 */
 .rs-keep .rs-verdict{color:#3060a0}
@@ -577,7 +677,7 @@ a.rs-go:hover{color:#6a4e10}
 <div class="shell">
 
   <aside>
-    <div style="text-align:center; margin-bottom:8px; cursor:pointer; position:relative; width:280px; height:280px; margin-left:auto; margin-right:auto;" onclick="goHome()">
+    <div class="brand-sphere" style="text-align:center; margin-bottom:8px; cursor:pointer; position:relative; width:280px; height:280px; margin-left:auto; margin-right:auto;" onclick="goHome()">
       <div id="celestial-sphere-container" style="position:absolute; inset:0;"></div>
       <img src="icons/Logo01.webp" alt="羅占盤" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:220px; height:auto; object-fit:contain; pointer-events:none; z-index:2;">
     </div>
@@ -602,24 +702,30 @@ a.rs-go:hover{color:#6a4e10}
     </div>
     <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19990707）で入力すると自動設定</div>
 
-    <div class="label">出生時刻</div>
-    <div class="row">
-      <input type="time" id="birthtime">
-      <select id="timemode">
-        <option value="known">時刻あり</option>
-        <option value="unknown" selected>不明</option>
-      </select>
-    </div>
+    <details class="more-input" id="more-input">
+      <summary>生まれた時刻・性別も入れる（もっと当たる）</summary>
+      <div class="more-input-body">
+        <div class="label">出生時刻</div>
+        <div class="row">
+          <input type="time" id="birthtime" onchange="document.getElementById('timemode').value = this.value ? 'known' : 'unknown'">
+          <select id="timemode">
+            <option value="known">時刻あり</option>
+            <option value="unknown" selected>不明</option>
+          </select>
+        </div>
 
-    <div class="label">性別</div>
-    <div class="gender">
-      <label><input type="radio" name="sex" value="M" checked><span>男性</span></label>
-      <label><input type="radio" name="sex" value="F"><span>女性</span></label>
-      <label><input type="radio" name="sex" value="X"><span>言わない</span></label>
-    </div>
+        <div class="label">性別</div>
+        <div class="gender">
+          <label><input type="radio" name="sex" value="M"><span>男性</span></label>
+          <label><input type="radio" name="sex" value="F"><span>女性</span></label>
+          <label><input type="radio" name="sex" value="X" checked><span>言わない</span></label>
+        </div>
 
-    <div class="label">出生地</div>
-    <input type="text" id="birthplace" placeholder="例：東京都">
+        <div class="label">出生地</div>
+        <input type="text" id="birthplace" placeholder="例：東京都">
+        <div class="more-input-note">時刻があると、上昇点（西洋・インド）と命宮（紫微斗数）まで読める。性別は四柱推命・紫微斗数の10年ごとの運の向きに使う。</div>
+      </div>
+    </details>
 
     <!-- 相手の入力フォーム（相性モード時のみ表示） -->
     <div id="partner-form" style="display:none; margin-top:16px; padding-top:16px; border-top:2px solid var(--gold);">
@@ -671,7 +777,8 @@ a.rs-go:hover{color:#6a4e10}
       </div>
       <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%;">
       <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">リーダーなのに孤独。楽観的なのに慎重。社交的なのに一人が好き。<br>ひとつの占術では説明できない「矛盾」こそが、あなたの本質です。</div>
-      <div style="font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.8;">9つの占術が交差する点に、あなたがいる。<br>性格診断では見えない「なぜそう動くのか」「なぜそこで迷うのか」を、星の配置から読み解きます。</div>
+      <div style="font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.8;">9つの占術が交差する点に、あなたがいる。<br>性格診断では見えない「なぜそう動くのか」「なぜそこで迷うのか」を、星の配置から読み解きます。</div>
+      <button type="button" onclick="RSynth.openType('革新_広い_リーダー_楽天')" style="margin-bottom:28px; padding:12px 28px; background:var(--surface); border:1px solid var(--gold); color:var(--gold); border-radius:6px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">16タイプ図鑑を見る</button>
 
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
@@ -796,7 +903,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=1"></script>
 <script src="type-judge.js?v=13"></script>
-<script src="synthesis.js?v=4"></script>
+<script src="synthesis.js?v=8"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1576,6 +1683,11 @@ function restoreForm() {
         if (sexRadio) sexRadio.checked = true;
       }
       if (bp) document.getElementById("birthplace").value = bp;
+      if ((tm === "known" && bt) || (sex && sex !== "X") || bp) document.getElementById("more-input").open = true;
+      // 2回目以降: 保存済みの生年月日で、読み込み演出なしに結果を開く（?new を付けると入力画面から）
+      if (bd && !/[?&]new\b/.test(location.search)) {
+        window.EPH_READY.then(() => autoOpen({ bd, bt, tm, sex, bp })).catch(() => {});
+      }
     }
     const savedB = localStorage.getItem("sanmeiban_form_b");
     if (savedB) {
@@ -1593,6 +1705,27 @@ function restoreForm() {
 }
 // DOM読み込み完了後に復元
 document.addEventListener("DOMContentLoaded", restoreForm);
+
+// 再訪時に保存済みの生年月日で結果を開く（入力データの送信はしない。種類だけの再訪ログを送る）
+function autoOpen(f){
+  try {
+    if (currentData || currentMode === "compat") return;
+    currentData = calcPersonData(f.bd, f.bt, f.tm || "unknown", f.sex || "X", f.bp || "");
+    dataB = null;
+    window._quietRender = true;
+    renderAll();
+    window._quietRender = false;
+    if (window.innerWidth <= 768) {
+      const sec = document.getElementById('type-result-section');
+      if (sec) sec.scrollIntoView({ block: 'start' });
+    }
+    try {
+      const tj = RSynth.buildSynthesis(currentData).tj;
+      const lp = new URLSearchParams({ action: 'revisit', type: tj.type.name, typeCode: tj.key.replace("狭い","深い"), userAgent: navigator.userAgent.slice(0, 80) });
+      fetch('https://script.google.com/macros/s/AKfycbxLSqZds8AnBUl3MJe6WQuQr1_Q4D1mhf_ik7UHwgWmKEzWaaNdzAqdBuzFfzrMRx0_fg/exec?' + lp.toString(), { mode: 'no-cors' }).catch(() => {});
+    } catch (e) { /* ログ失敗は無視 */ }
+  } catch (e) { window._quietRender = false; console.warn("再訪時の表示エラー:", e); }
+}
 
 function introCard(key){
   const info = DIVINATION_INTRO[key];
@@ -1662,7 +1795,7 @@ function renderAll(){
   try { if (window.RSynth) RSynth.decorateTabs(currentData); } catch(e) { console.warn("占術タブの根拠表示エラー:", e); }
   loadReading();
   document.getElementById("btn-export").style.display = "block";
-  submitToSheet();
+  if (!window._quietRender) submitToSheet();
 
   // ヘッダーの高さに合わせてタブバーのstickyオフセットを設定
   const header = document.querySelector('.header');
@@ -7473,7 +7606,9 @@ function buildParadoxLines(d, tj, typeInfo){
   const parts = (tj && tj.key ? tj.key : "").split("_"); // [革新/継承, 広い/狭い, リーダー/参謀, 楽天/慎重]
   // 1) 表層(太陽元素) vs 素の自分(月元素/日主元素) の食い違い ← 個人差が出る主軸
   const facade = {火:"情熱的で勢いがあるように見えるのに", 土:"どっしり落ち着いて見えるのに", 風:"知的で誰とでも打ち解けるように見えるのに", 水:"穏やかで優しげに見えるのに"};
-  const core   = {火:"本当は人に見せない激しさを内に抱えている", 土:"本当は変化が怖くて、安定にしがみつきたい", 風:"心のどこかで常に一歩引いて自分を眺めている", 水:"素顔はひどく繊細で、人の感情に飲み込まれやすい"};
+  // 月は西洋の4元素、日主は五行（木・金もある）で引くので両方の言い方を持つ
+  const core   = {火:"本当は人に見せない激しさを内に抱えている", 土:"本当は変化が怖くて、安定にしがみつきたい", 風:"心のどこかで常に一歩引いて自分を眺めている", 水:"素顔はひどく繊細で、人の感情に飲み込まれやすい",
+                  木:"本当は誰にも曲げられずに、自分の方向へまっすぐ伸びていきたい", 金:"本当は白黒をはっきりさせたい潔癖さを内に抱えている"};
   try {
     const sunEl = SIGNS[signOf(d.sunLon)].e;
     const moonEl = SIGNS[signOf(d.moonLon)].e;
@@ -9088,48 +9223,7 @@ function renderConsult(){
           return "";
         }
       })() +
-      (() => {
-        const TYPES_ALL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
-        const myParts = tj.key.split("_");
-        const typeImageMap2 = {
-          "ヒーロー":"web/0Hero01.webp","レボリューショナリー":"web/0Revolutionary01.webp","トリックスター":"web/0Trickster01.webp","ヴィジョナリー":"web/0Visionary01.webp",
-          "パイオニア":"web/0Pioneer01.webp","ローンウルフ":"web/0Lonewolf01.webp","シーカー":"web/0Seeker01.webp","マーベリック":"web/0Maverick01.webp",
-          "ソブリン":"web/0Sovereign01.webp","エンペラー":"web/0Emperor01.webp","セージ":"web/0Sage01.webp","オラクル":"web/0Oracle01.webp",
-          "アルチザン":"web/0Artisan01.webp","ガーディアン":"web/0Guardian01.webp","ケアテイカー":"web/0Caretaker01.webp","ハーミット":"web/0Hermit01.webp"
-        };
-        const categories = [
-          { label:"ベストパートナー", desc:"役割が違うだけ。自然な補完関係", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[2]!==myParts[2]; }},
-          { label:"刺激的な補完", desc:"視野が違う。新しい発見をくれる相手", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[1]!==myParts[1]; }},
-          { label:"ブレーキとアクセル", desc:"気質が違う。暴走を止めてくれる相手", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===1 && parts[3]!==myParts[3]; }},
-          { label:"惹かれる対極", desc:"全て真逆。強烈な引力と摩擦", check:(parts) => { let d=0; parts.forEach((p,i)=>{if(p!==myParts[i])d++;}); return d===4; }},
-        ];
-        let out = '<div style="max-width:100%; margin:0 auto 24px; text-align:left;">' +
-          '<div style="font-size:13px; color:var(--gold); letter-spacing:2px; margin-bottom:14px; font-weight:700; text-align:center;">'+typeInfo.name+'と相性の良いタイプ</div>' +
-          '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(400px, 1fr)); gap:16px;">';
-        categories.forEach(cat => {
-          const matches = [];
-          Object.keys(TYPES_ALL).forEach(key => {
-            if (key === tj.key) return;
-            const parts = key.split("_");
-            if (cat.check(parts)) matches.push({ key, type: TYPES_ALL[key] });
-          });
-          if (matches.length === 0) return;
-          out += '<div style="background:rgba(201,147,58,0.03); border:1px solid var(--border); border-radius:8px; overflow:hidden; display:flex; align-items:stretch;">';
-          matches.forEach(m => {
-            const img = typeImageMap2[m.type.name] ? '16typecard/'+typeImageMap2[m.type.name] : '';
-            out += (img ? '<img src="'+img.replace('.webp','-S.webp')+'" loading="lazy" decoding="async" alt="'+m.type.name+'" style="width:110px; object-fit:contain; flex-shrink:0; display:block; background:#f5f0e4;">' : '') +
-              '<div style="padding:14px 16px; display:flex; flex-direction:column; justify-content:center;">' +
-                '<div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:2px;">'+cat.label+'</div>' +
-                '<div style="font-size:12px; color:#8a7050; margin-bottom:10px;">'+cat.desc+'</div>' +
-                '<div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">'+m.type.name+'</div>' +
-                '<div style="font-size:13px; color:var(--text); line-height:1.5;">'+m.type.desc+'</div>' +
-              '</div>';
-          });
-          out += '</div>';
-        });
-        out += '</div></div>';
-        return out;
-      })() +
+      // 相性の良いタイプは総合鑑定の冒頭（synthesis.js の otherTypesHtml）に移した
       // 16タイプ一覧（自分に近い順）
       (() => {
         const TYPES_FULL = (typeof TypeJudge !== 'undefined' && TypeJudge.TYPES) ? TypeJudge.TYPES : {};
@@ -11068,7 +11162,9 @@ function shareTypeResult() {
   const paradoxLines = buildParadoxLines(d, tj, typeInfo);
   const paradoxLine = paradoxLines.length ? `\n${paradoxLines[0]}` : '';
   const shareText = `羅占盤で占った結果、私は【${typeInfo.name}】でした！${paradoxLine}\n「${typeInfo.desc}」${tagLine}`;
-  const shareUrl = 'https://rasenban.com/';
+  const slug = (window.RSynth && RSynth.slugOf) ? RSynth.slugOf(typeInfo.name) : "";
+  const shareUrl = slug ? 'https://rasenban.com/type/' + slug + '.html' : 'https://rasenban.com/';
+  const useStory = window.matchMedia && window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
 
   // ログ送信
   try {
@@ -11076,8 +11172,8 @@ function shareTypeResult() {
     fetch('https://script.google.com/macros/s/AKfycbxLSqZds8AnBUl3MJe6WQuQr1_Q4D1mhf_ik7UHwgWmKEzWaaNdzAqdBuzFfzrMRx0_fg/exec?'+lp.toString(),{mode:'no-cors'}).catch(()=>{});
   } catch(e){}
 
-  // Canvas画像を生成してからシェア
-  generateShareImage(typeInfo, tj, highlight, (blob) => {
+  // Canvas画像を生成してからシェア（スマホ＝縦長 1080×1920、PC＝横長）
+  (useStory ? generateStoryImage : generateShareImage)(typeInfo, tj, highlight, (blob) => {
     const file = new File([blob], `rasenban_${typeInfo.name}.jpg`, { type: 'image/jpeg' });
 
     // スマホ: Web Share API（画像＋テキスト＋URL）
@@ -11101,6 +11197,75 @@ function shareTypeResult() {
       }).catch(() => {});
     }
   });
+}
+
+// ストーリー用の縦長画像（1080×1920）を保存する
+function saveStoryImage() {
+  if (!currentData || !window.RSynth) return;
+  const r = RSynth.buildSynthesis(currentData);
+  const sm2 = calcJintai(currentData), nu2 = calcNumerology(currentData.y, currentData.m, currentData.d);
+  const highlight = personalityHighlight(calcPersonalityRadar(currentData, sm2, nu2), r.type.name, r.tj.a3.winner);
+  generateStoryImage(r.type, r.tj, highlight, blob => {
+    triggerDownload2(blob, r.type.name + "_story");
+    const st = document.getElementById("share-status");
+    if (st) { st.textContent = "✓ 縦長の画像を保存しました"; setTimeout(() => { st.textContent = ""; }, 3000); }
+  });
+}
+
+// 縦長 1080×1920（インスタのストーリー・TikTok 用）: ロゴ・カード・タイプ名・一言・あなたの〇〇像・近いタイプ・URL
+function generateStoryImage(typeInfo, tj, highlight, callback) {
+  const W = 1080, H = 1920;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  const slug = (window.RSynth && RSynth.slugOf) ? RSynth.slugOf(typeInfo.name) : "";
+  const file = slug ? "16typecard/web/0" + slug.charAt(0).toUpperCase() + slug.slice(1) + "01-L.webp" : null;
+  const near = (window.RSynth && RSynth.neighborType) ? RSynth.neighborType(tj) : null;
+  const loadImg = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+  const wrapText = (text, maxW, y, lh) => {
+    let line = "";
+    for (const ch of text) {
+      if (ctx.measureText(line + ch).width > maxW) { ctx.fillText(line, W / 2, y); line = ch; y += lh; }
+      else line += ch;
+    }
+    if (line) ctx.fillText(line, W / 2, y);
+    return y + lh;
+  };
+  Promise.all([file ? loadImg(file) : Promise.resolve(null), loadImg("icons/Logo01.webp"), loadImg("icons/yosumi01.webp"), loadImg("icons/yosumi02.webp")])
+    .then(([card, logo, decoTop, decoBottom]) => {
+      ctx.fillStyle = "#1a1208"; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "#c9933a"; ctx.lineWidth = 12; ctx.strokeRect(6, 6, W - 12, H - 12);
+      ctx.strokeStyle = "rgba(201,147,58,0.6)"; ctx.lineWidth = 2; ctx.strokeRect(30, 30, W - 60, H - 60);
+      if (decoTop) { const dh = (W - 60) * decoTop.height / decoTop.width; ctx.globalAlpha = 0.35; ctx.drawImage(decoTop, 30, 30, W - 60, dh); ctx.globalAlpha = 1; }
+      if (decoBottom) { const dh = (W - 60) * decoBottom.height / decoBottom.width; ctx.globalAlpha = 0.35; ctx.drawImage(decoBottom, 30, H - 30 - dh, W - 60, dh); ctx.globalAlpha = 1; }
+      if (logo) { const lw = 340, lh = lw * logo.height / logo.width; ctx.drawImage(logo, (W - lw) / 2, 70, lw, lh); }
+      const cw = 620, chh = 930, cx0 = (W - cw) / 2, cy0 = 330;
+      if (card) ctx.drawImage(card, cx0, cy0, cw, chh);
+      ctx.strokeStyle = "#c9933a"; ctx.lineWidth = 6; ctx.strokeRect(cx0 - 3, cy0 - 3, cw + 6, chh + 6);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#c9933a"; ctx.font = "34px 'Noto Serif JP', serif";
+      ctx.fillText("私は", W / 2, 1340);
+      let size = 104;
+      ctx.font = "bold " + size + "px 'Noto Serif JP', serif";
+      while (ctx.measureText(typeInfo.name).width > W - 160 && size > 60) { size -= 4; ctx.font = "bold " + size + "px 'Noto Serif JP', serif"; }
+      ctx.fillText(typeInfo.name, W / 2, 1450);
+      ctx.fillStyle = "#e6dcc8"; ctx.font = "40px 'Noto Serif JP', serif";
+      let y = wrapText(typeInfo.desc, W - 180, 1530, 56);
+      if (highlight && highlight.tag) {
+        ctx.fillStyle = "#c9933a"; ctx.font = "30px 'Noto Serif JP', serif";
+        ctx.fillText("あなたの" + typeInfo.name + "像", W / 2, y + 30);
+        ctx.fillStyle = "#ffffff"; ctx.font = "bold 56px 'Noto Serif JP', serif";
+        ctx.fillText(highlight.tag, W / 2, y + 100);
+        y += 150;
+      }
+      if (near) {
+        ctx.fillStyle = "#d8ccb8"; ctx.font = "34px 'Noto Serif JP', serif";
+        ctx.fillText("実は「" + near.name + "」も近い", W / 2, y + 20);
+      }
+      ctx.fillStyle = "#c9933a"; ctx.font = "30px 'Noto Serif JP', serif";
+      ctx.fillText("あなたは何タイプ？｜rasenban.com", W / 2, H - 70);
+      canvas.toBlob(blob => callback(blob), "image/jpeg", 0.9);
+    });
 }
 
 function triggerDownload2(blob, typeName) {

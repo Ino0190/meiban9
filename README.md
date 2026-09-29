@@ -38,6 +38,14 @@ python3 _check.py           # 基準の12人で全項目（四柱・九星・マ
 python3 _check.py --sweep   # 1950〜2030年の毎日で一致率
 ```
 
+## タイプ別ページ（SNS用）
+
+`type/<英名>.html`（16枚）はSNSで共有されたときにそのタイプの絵と説明が出るページ。開いた人は `index.html#type=<英名>`（16タイプ図鑑）へ移る。タイプの文（type-judge.js の TYPES）を直したら作り直す。
+
+```bash
+python3 generate_type_pages.py   # type/*.html と type/og/*.jpg（1200×630）を作る
+```
+
 ## ローカル起動
 
 ```bash
