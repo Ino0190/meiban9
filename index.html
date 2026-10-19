@@ -55,6 +55,7 @@ window.EPH_READY = new Promise(function (resolve, reject) {
   .brand-title{ font-size:22px; color:var(--gold); letter-spacing:3px; margin-bottom:20px; font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif; font-weight:700; }
   .label{ font-size:12px; letter-spacing:2px; color:var(--muted); text-transform:uppercase;
           margin:14px 0 6px; }
+  label.label{ display:block; }
   input, select{
     width:100%; background:#ffffff; border:1px solid var(--border); color:var(--text);
     padding:9px 10px; border-radius:4px; font-family:inherit; font-size:13px;
@@ -618,6 +619,59 @@ a.rs-go:hover{color:#6a4e10}
 .rs-fold>summary span{display:block;font-size:14px;font-weight:400;color:var(--muted);margin:2px 0 0 18px}
 .rs-fold[open]>summary{border-bottom:1px solid var(--border)}
 .rs-fold-body{padding:20px 16px}
+/* 総合鑑定：知りたいこと別に9つの占術をまとめる */
+.rs-topic{max-width:960px;margin:0 auto 24px;padding:20px 22px;background:linear-gradient(135deg,#fdf6e8 0%,#f5f0e4 100%);border:1px solid var(--gold);border-radius:12px;text-align:left}
+.rs-topic-h{font-size:20px;font-weight:700;color:var(--gold);font-family:'Noto Serif JP',serif;letter-spacing:1px;margin-bottom:10px}
+.rs-topic-lead{font-size:17px;line-height:1.9;color:var(--text);margin:0 0 10px}
+.rs-topic-n{display:block;font-size:14px;color:var(--muted)}
+.rs-topic-ex{font-size:16px;line-height:1.8;margin:6px 0 14px}
+.rs-topic-ex span{display:inline-block;font-size:14px;color:var(--gold);font-weight:700;margin-right:10px}
+.rs-topic .rs-topic-why{margin:0;background:#fff}
+.rs-topic-rows{list-style:none;padding:0;margin:0}
+.rs-topic-rows li{padding:10px 0;border-bottom:1px solid var(--border);font-size:16px;line-height:1.8}
+.rs-topic-rows li:last-child{border-bottom:none}
+.rs-topic-rows .rs-bt{margin:4px 6px 0 0}
+.rs-topic-note{display:block;font-size:14px;color:var(--muted)}
+/* 総合鑑定：知りたいことから見る */
+.rs-ti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rs-ti{display:block;text-align:left;font-family:inherit;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;color:var(--text)}
+.rs-ti:hover{border-color:var(--gold)}
+.rs-ti-k{display:block;font-size:14px;color:var(--gold);font-weight:700}
+.rs-ti-v{display:block;font-size:17px;font-weight:700;line-height:1.6;margin:2px 0}
+.rs-ti-n{display:block;font-size:14px;color:var(--muted)}
+@media (max-width:768px){.rs-ti-grid{grid-template-columns:1fr}}
+/* 各占術タブ：知りたいことに、この占術で答えると */
+.rs-qa{max-width:960px;margin:0 auto 28px;padding:18px 20px;background:var(--surface);border:1px solid var(--gold);border-radius:12px;text-align:left}
+.rs-qa-h{font-size:19px;font-weight:700;color:var(--gold);font-family:'Noto Serif JP',serif;letter-spacing:1px;margin-bottom:4px}
+.rs-qa-lead{font-size:14px;color:var(--muted);margin:0 0 10px}
+.rs-qa-row{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:12px 0;border-top:1px solid var(--border)}
+.rs-qa-k{font-size:16px;font-weight:700;color:var(--text)}
+.rs-qa-m{display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:2px}
+.rs-qa-good .rs-qa-m{color:var(--gold);font-weight:700}
+.rs-qa-v{font-size:16px;line-height:1.8;color:var(--text)}
+.rs-qa-dim{color:var(--muted)}
+.rs-qa-note{display:block;font-size:14px;color:var(--muted)}
+@media (max-width:768px){.rs-qa-row{grid-template-columns:1fr;gap:4px}}
+/* 各占術タブの終わり：この占いでAIに相談する */
+.rs-bridge-links{display:flex;gap:16px;flex-wrap:wrap}
+.rs-to-consult{font-size:14px}
+.rs-consult{max-width:960px;margin:28px auto 20px;padding:22px 22px 18px;background:var(--surface);border:1px solid var(--gold);border-radius:12px;text-align:left}
+.rs-consult-h{font-size:20px;font-weight:700;color:var(--gold);font-family:'Noto Serif JP',serif;letter-spacing:1px;margin-bottom:8px}
+.rs-consult-lead{font-size:16px;line-height:1.8;color:var(--text);margin:0 0 14px}
+.rs-consult-l{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
+.rs-chips{display:flex;flex-wrap:wrap;gap:8px}
+.rs-chip{font-family:inherit;font-size:15px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);cursor:pointer}
+.rs-chip[aria-pressed="true"]{border-color:var(--gold);background:#fdf6e8;color:#6a4e10;font-weight:700}
+.rs-q{display:block;width:100%;box-sizing:border-box;font-family:inherit;font-size:16px;line-height:1.7;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);resize:vertical}
+.rs-consult-copy{margin:16px auto 0}
+.rs-consult-msg{min-height:22px;font-size:15px;color:var(--gold);margin:8px 0 4px;text-align:center}
+.rs-consult .rs-answer{margin:12px 0 0}
+.rs-ans-view p{font-size:16px;line-height:1.9;margin:0 0 10px}
+.rs-ans-view ul{margin:0 0 10px;padding-left:22px;font-size:16px;line-height:1.8}
+.rs-ans-h{font-size:17px;font-weight:700;color:var(--gold);margin:18px 0 8px}
+.rs-ans-btns{display:flex;gap:10px;margin-top:10px}
+.rs-ans-save{font-family:inherit;font-size:15px;padding:9px 20px;border:none;border-radius:6px;background:var(--gold);color:#fff;cursor:pointer}
+.rs-ans-clear{font-family:inherit;font-size:15px;padding:9px 16px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--muted);cursor:pointer}
 @media (max-width:768px){
   .rs-hero{grid-template-columns:1fr;gap:14px;padding:18px;text-align:center}
   .rs-img{max-width:200px;margin:0 auto}
@@ -703,7 +757,7 @@ a.rs-go:hover{color:#6a4e10}
     <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19990707）で入力すると自動設定</div>
 
     <details class="more-input" id="more-input">
-      <summary>生まれた時刻・性別も入れる（もっと当たる）</summary>
+      <summary>生まれた時刻・性別・出生地も入れる（もっと当たる）</summary>
       <div class="more-input-body">
         <div class="label">出生時刻</div>
         <div class="row">
@@ -721,9 +775,9 @@ a.rs-go:hover{color:#6a4e10}
           <label><input type="radio" name="sex" value="X" checked><span>言わない</span></label>
         </div>
 
-        <div class="label">出生地</div>
-        <input type="text" id="birthplace" placeholder="例：東京都">
-        <div class="more-input-note">時刻があると、上昇点（西洋・インド）と命宮（紫微斗数）まで読める。性別は四柱推命・紫微斗数の10年ごとの運の向きに使う。</div>
+        <label class="label" for="birthplace">出生地</label>
+        <select id="birthplace" class="bp-select"><option value="">選ばない</option></select>
+        <div class="more-input-note">時刻があると、上昇点（西洋・インド）と命宮（紫微斗数）まで読める。出生地は時刻と合わせて上昇点を出すのに使う。海外で生まれた方は、時刻を日本時間に直して入れてください（上昇点は出しません）。性別は四柱推命・紫微斗数の10年ごとの運の向きに使う。</div>
       </div>
     </details>
 
@@ -756,8 +810,8 @@ a.rs-go:hover{color:#6a4e10}
         <label><input type="radio" name="sex-b" value="X" checked><span>言わない</span></label>
       </div>
 
-      <div class="label">出生地</div>
-      <input type="text" id="birthplace-b" placeholder="例：東京都">
+      <label class="label" for="birthplace-b">出生地</label>
+      <select id="birthplace-b" class="bp-select"><option value="">選ばない</option></select>
     </div>
 
     <button class="cast" onclick="cast()">占 う</button>
@@ -875,26 +929,7 @@ a.rs-go:hover{color:#6a4e10}
       <div class="panel hide" id="tab6"></div>
       <div class="panel hide" id="tab7"></div>
       <div class="panel hide" id="tab8"></div>
-      <div class="panel hide" id="tab9">
-        <div class="section-title">✦ 総合鑑定</div>
-
-        <div id="crossref-table"></div>
-
-        <div id="reading-empty" style="text-align:center; padding:40px 20px; color:var(--muted);">
-          <div style="font-size:32px; margin-bottom:16px;">✦</div>
-          <div style="font-size:16px; margin-bottom:12px;">まだ鑑定結果がありません</div>
-          <div style="font-size:14px; color:var(--muted); margin-bottom:20px;">「AIに渡すスクリプトをコピー」→ お好きなAI（ChatGPT、Claude、Gemini等）に貼る → 鑑定結果をコピー → ここに貼り付け</div>
-          <button onclick="pasteReading()" style="background:var(--gold); color:#fff; border:none; border-radius:4px; padding:10px 18px; font-family:inherit; font-size:14px; cursor:pointer;">📋 鑑定テキストを貼り付け</button>
-        </div>
-
-        <div id="reading-content" style="display:none;">
-          <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
-            <button onclick="pasteReading()" style="background:var(--gold); color:#fff; border:none; border-radius:4px; padding:8px 14px; font-family:inherit; font-size:13px; cursor:pointer;">📋 再貼り付け</button>
-            <button onclick="clearReading()" style="background:none; border:1px solid var(--border); color:var(--muted); border-radius:4px; padding:8px 14px; font-family:inherit; font-size:13px; cursor:pointer;">クリア</button>
-          </div>
-          <div id="reading-body"></div>
-        </div>
-      </div>
+      <!-- 旧 tab9（総合鑑定の答えを貼る欄）はタブのボタンが無く開けなかったので、総合鑑定タブの「AIで深く読む」に移した（2026-10-19）。答えの置き場所（sanmeiban_reading_年_月_日）は同じ -->
       <div class="panel hide" id="tab10"></div>
     </div>
   </main>
@@ -903,7 +938,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=1"></script>
 <script src="type-judge.js?v=13"></script>
-<script src="synthesis.js?v=8"></script>
+<script src="synthesis.js?v=17"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1025,23 +1060,23 @@ function planetLongitude(name, jd){
   return norm360(e.L + e.n*T);
 }
 
-// 地方恒星時（度）。出生地は東経135°固定
-function localSiderealDeg(jd){
+// 地方恒星時（度）。lon＝出生地の東経（2026-10-19 出生地を都道府県で選べるようにした。無ければ135°＝日本標準時の子午線）
+function localSiderealDeg(jd, lon){
   const T = (jd - 2451545.0)/36525;
-  return norm360(280.46061837 + 360.98564736629*(jd - 2451545.0) + 0.000387933*T*T + 135);
+  return norm360(280.46061837 + 360.98564736629*(jd - 2451545.0) + 0.000387933*T*T + (lon == null ? 135 : lon));
 }
-// ASC（上昇点）。北緯35°固定
-function ascendant(jd, lat){
-  const R = Math.PI/180, eps = 23.4393*R, th = localSiderealDeg(jd)*R, phi = (lat||35)*R;
+// ASC（上昇点）。lat＝北緯（無ければ35°）
+function ascendant(jd, lat, lon){
+  const R = Math.PI/180, eps = 23.4393*R, th = localSiderealDeg(jd, lon)*R, phi = (lat||35)*R;
   return norm360(Math.atan2(Math.cos(th), -(Math.sin(th)*Math.cos(eps) + Math.tan(phi)*Math.sin(eps))) / R);
 }
 
 // MC（天頂、Medium Coeli）
-function midheaven(jd) {
+function midheaven(jd, lon) {
   const T = (jd - 2451545.0) / 36525;
   let GMST = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T;
   GMST = norm360(GMST);
-  const LST = norm360(GMST + 135);
+  const LST = norm360(GMST + (lon == null ? 135 : lon));
   const eps = 23.4393 * Math.PI / 180;
   const lstR = LST * Math.PI / 180;
   let mc = Math.atan2(Math.sin(lstR), Math.cos(lstR) * Math.cos(eps)) * 180 / Math.PI;
@@ -1049,10 +1084,10 @@ function midheaven(jd) {
 }
 
 // プラシーダス（半弧の3等分を反復計算）
-function placidusHouses(jd, lat) {
+function placidusHouses(jd, lat, lon) {
   const R = Math.PI/180, eps = 23.4393*R, phi = (lat||35)*R;
-  const ramc = localSiderealDeg(jd);
-  const asc = ascendant(jd, lat), mc = midheaven(jd);
+  const ramc = localSiderealDeg(jd, lon);
+  const asc = ascendant(jd, lat, lon), mc = midheaven(jd, lon);
   const eclOfRA = ra => norm360(Math.atan2(Math.sin(ra*R), Math.cos(ra*R)*Math.cos(eps)) / R);
   // f＝半弧の割合。above＝MC〜ASC（11・12室）、それ以外＝ASC〜IC（2・3室）
   const cusp = (f, above) => {
@@ -1393,16 +1428,66 @@ function toggleMode(){
   }
 }
 
+// 出生地（都道府県＝県庁所在地のおおよその緯度経度・小数2桁）。プルダウンの選択肢もここから作る。
+//   同じ県の中のずれ（北海道で最大約5°）は上昇点で数度。市町村まで要るほどの精度はこの占いの使い方では求めない
+const BIRTHPLACES = {
+  "北海道":{lat:43.06,lon:141.35},"青森県":{lat:40.82,lon:140.74},"岩手県":{lat:39.70,lon:141.15},"宮城県":{lat:38.27,lon:140.87},
+  "秋田県":{lat:39.72,lon:140.10},"山形県":{lat:38.24,lon:140.36},"福島県":{lat:37.75,lon:140.47},"茨城県":{lat:36.34,lon:140.45},
+  "栃木県":{lat:36.57,lon:139.88},"群馬県":{lat:36.39,lon:139.06},"埼玉県":{lat:35.86,lon:139.65},"千葉県":{lat:35.61,lon:140.12},
+  "東京都":{lat:35.69,lon:139.69},"神奈川県":{lat:35.45,lon:139.64},"新潟県":{lat:37.90,lon:139.02},"富山県":{lat:36.70,lon:137.21},
+  "石川県":{lat:36.59,lon:136.63},"福井県":{lat:36.07,lon:136.22},"山梨県":{lat:35.66,lon:138.57},"長野県":{lat:36.65,lon:138.18},
+  "岐阜県":{lat:35.39,lon:136.72},"静岡県":{lat:34.98,lon:138.38},"愛知県":{lat:35.18,lon:136.91},"三重県":{lat:34.73,lon:136.51},
+  "滋賀県":{lat:35.00,lon:135.87},"京都府":{lat:35.02,lon:135.76},"大阪府":{lat:34.69,lon:135.52},"兵庫県":{lat:34.69,lon:135.18},
+  "奈良県":{lat:34.69,lon:135.83},"和歌山県":{lat:34.23,lon:135.17},"鳥取県":{lat:35.50,lon:134.24},"島根県":{lat:35.47,lon:133.05},
+  "岡山県":{lat:34.66,lon:133.93},"広島県":{lat:34.40,lon:132.46},"山口県":{lat:34.19,lon:131.47},"徳島県":{lat:34.07,lon:134.56},
+  "香川県":{lat:34.34,lon:134.04},"愛媛県":{lat:33.84,lon:132.77},"高知県":{lat:33.56,lon:133.53},"福岡県":{lat:33.61,lon:130.42},
+  "佐賀県":{lat:33.25,lon:130.30},"長崎県":{lat:32.74,lon:129.87},"熊本県":{lat:32.79,lon:130.74},"大分県":{lat:33.24,lon:131.61},
+  "宮崎県":{lat:31.91,lon:131.42},"鹿児島県":{lat:31.56,lon:130.56},"沖縄県":{lat:26.21,lon:127.68},
+};
+// 前に自由入力で保存した出生地（「東京」「大阪市」など）を、プルダウンの値に読み替える
+function normBirthplace(s){
+  s = String(s || "").trim();
+  if (!s) return "";
+  if (BIRTHPLACES[s] || s === "海外") return s;
+  const hit = Object.keys(BIRTHPLACES).find(k => s.indexOf(k.replace(/[都道府県]$/, "")) === 0);
+  return hit || "";
+}
+function fillBirthplaceOptions(){
+  ["birthplace", "birthplace-b"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel || sel.options.length > 1) return;
+    Object.keys(BIRTHPLACES).forEach(k => sel.add(new Option(k, k)));
+    sel.add(new Option("海外", "海外"));
+  });
+}
+document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
+
 function calcPersonData(bd, bt, tm, sex, bp) {
+  bp = normBirthplace(bp);
   const [y,m,d] = bd.split("-").map(Number);
-  let h=5, mi=0;
-  if (tm==="known" && bt) { [h,mi] = bt.split(":").map(Number); }
+  // 時刻が分からないときは正午で計算する（2026-10-19。以前は05:00で、月の星座が本当の時刻と違う人が14.7%→正午で10.9%）。
+  //   時刻で決まるもの（時柱・紫微の命宮・上昇点）は、時刻が分からないと決まらないので判定に使わず、画面でも仮と書く
+  let h=12, mi=0;
+  const hourKnown = tm==="known" && !!bt;
+  if (hourKnown) { [h,mi] = bt.split(":").map(Number); }
+  else tm = "unknown";   // 「時刻あり」で時刻が空のときも不明として扱う（上昇点・命宮の判定に正午を使わない）
   const jd = julianDay(y,m,d,h,mi);
   const sunLon = getSunLon(jd);
   const moonLon = getMoonLon(jd);
-  const ascLon = tm==="known" ? ascendant(jd, 35) : null;
-  const mcLon = tm==="known" ? midheaven(jd) : null;
-  const houses = tm==="known" ? placidusHouses(jd, 35) : null;
+  // 時刻が分からないとき、その日のうちに月の星座・ナクシャトラが変わるか（0:00と23:59で比べる）
+  let moonDay = null;
+  if (!hourKnown) {
+    const m0 = getMoonLon(julianDay(y,m,d,0,0)), m1 = getMoonLon(julianDay(y,m,d,23,59));
+    moonDay = { start: m0, end: m1, signChanges: signOf(m0) !== signOf(m1) };
+  }
+  // 上昇点・MC・ハウスは出生地の緯度経度で出す（都道府県＝県庁所在地）。海外・未選択は東経135°・北緯35°。
+  //   海外は時刻を日本時間に直して入れてもらう前提で、天体の位置は出すが上昇点・ハウスは出さない
+  const place = BIRTHPLACES[bp] || null;
+  const abroad = bp === "海外";
+  const geo = place || { lat: 35, lon: 135 };
+  const ascLon = tm==="known" && !abroad ? ascendant(jd, geo.lat, geo.lon) : null;
+  const mcLon = tm==="known" && !abroad ? midheaven(jd, geo.lon) : null;
+  const houses = tm==="known" && !abroad ? placidusHouses(jd, geo.lat, geo.lon) : null;
   const rahuLon = getRahuLon(jd);
   const ketuLon = getKetuLon(jd);
   const planets = PLANET_DEFS.map(p=>{
@@ -1418,12 +1503,13 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   const month = ym.month;
   const day = getDayPillar(y,m,d);
   const hour = getHourPillar(day.stem, h);
+  // 時柱は時刻が分かるときだけ入れる（五行バランス・十神・16タイプの判定にも入らない）
   const pillars = [
     {label:"年柱",...year, ten: tenGod(day.stem, year.stem)},
     {label:"月柱",...month, ten: tenGod(day.stem, month.stem)},
     {label:"日柱",...day, ten:"日主", main:true},
-    {label:"時柱",...hour, ten: tenGod(day.stem, hour.stem)},
   ];
+  if (hourKnown) pillars.push({label:"時柱",...hour, ten: tenGod(day.stem, hour.stem)});
   const wx = {木:0,火:0,土:0,金:0,水:0};
   const wxSurface = {木:0,火:0,土:0,金:0,水:0};
   pillars.forEach(p=>{
@@ -1462,7 +1548,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
   const sihua = calcSihua(ziweiYear.stem, fuxingPos);
   return {
-    y,m,d,h,mi,sex,bp,tm,
+    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay,
     jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
     pillars, wx, lifeIdx, year, month, day, hour,
     ziweiDistrib: fullDistrib,
@@ -1682,7 +1768,8 @@ function restoreForm() {
         const sexRadio = document.querySelector(`input[name="sex"][value="${sex}"]`);
         if (sexRadio) sexRadio.checked = true;
       }
-      if (bp) document.getElementById("birthplace").value = bp;
+      fillBirthplaceOptions();
+      if (bp) document.getElementById("birthplace").value = normBirthplace(bp);
       if ((tm === "known" && bt) || (sex && sex !== "X") || bp) document.getElementById("more-input").open = true;
       // 2回目以降: 保存済みの生年月日で、読み込み演出なしに結果を開く（?new を付けると入力画面から）
       if (bd && !/[?&]new\b/.test(location.search)) {
@@ -1699,7 +1786,8 @@ function restoreForm() {
         const sexRadioB = document.querySelector(`input[name="sex-b"][value="${sexB}"]`);
         if (sexRadioB) sexRadioB.checked = true;
       }
-      if (bpB) document.getElementById("birthplace-b").value = bpB;
+      fillBirthplaceOptions();
+      if (bpB) document.getElementById("birthplace-b").value = normBirthplace(bpB);
     }
   } catch(e) { /* 復元失敗は無視 */ }
 }
@@ -1790,10 +1878,8 @@ function renderAll(){
   try { renderShukuyo(); } catch(e) { document.getElementById("tab7").innerHTML = `<div class="note">宿曜の描画でエラー: ${e.message}</div>`; }
   try { renderJyotish(); } catch(e) { document.getElementById("tab8").innerHTML = `<div class="note">印度占星術の描画でエラー: ${e.message}</div>`; }
   try { renderConsult(); } catch(e) { document.getElementById("tab10").innerHTML = `<div class="note">総合鑑定タブの描画でエラー: ${e.message}</div>`; }
-  try { renderCrossRef(); } catch(e) { console.warn("クロスリファレンス表エラー:", e); }
   // 9つの占術タブの先頭に「総合鑑定の中でのこの占術」（どの軸にどちらで入れたか・根拠）を差し込む
   try { if (window.RSynth) RSynth.decorateTabs(currentData); } catch(e) { console.warn("占術タブの根拠表示エラー:", e); }
-  loadReading();
   document.getElementById("btn-export").style.display = "block";
   if (!window._quietRender) submitToSheet();
 
@@ -1997,7 +2083,7 @@ ${neighborText}
 ◆ 3つの核
   太陽: ${sunSign.n} ${degIn(d.sunLon)}°
   月:   ${moonSign.n} ${degIn(d.moonLon)}°
-  ASC:  ${ascSign ? `${ascSign.n} ${degIn(d.ascLon)}°` : "時刻不明のため算出なし"}
+  ASC:  ${ascSign ? `${ascSign.n} ${degIn(d.ascLon)}°` : (d.tm === "known" ? "海外生まれのため算出なし" : "時刻不明のため算出なし")}
 
 ◆ 10天体の配置
 ${planetLines}
@@ -2012,7 +2098,7 @@ ${aspectLines}
 【3】四柱推命
 ━━━━━━━━━━━━━━━━━━━━
 ◆ 四柱八字
-${pillarLines}
+${pillarLines}${d.hourKnown ? "" : "\n  時柱: 出生時刻不明のため算出なし（五行バランスにも入れていない）"}
 
 ◆ 日主: ${d.day.stem}（${STEM_EL[STEMS.indexOf(d.day.stem)]}）
 
@@ -2025,7 +2111,7 @@ ${shichuDayunLines}
 ━━━━━━━━━━━━━━━━━━━━
 【4】紫微斗数
 ━━━━━━━━━━━━━━━━━━━━
-◆ 命宮: ${BRANCHES[lifeIdx]}宮
+◆ 命宮: ${BRANCHES[lifeIdx]}宮${d.hourKnown ? "" : "（出生時刻不明のため正午で出した仮の命宮。十二宮・大限も仮。命宮を根拠にした断定はしない）"}
 ◆ 十二宮の主星配置
 ${palaceLines.join("\n")}
 
@@ -2155,7 +2241,7 @@ ${(() => {
   return `◆ アヤナムシャ: ${aya.toFixed(1)}°
 ◆ 太陽ラーシ: ${sunR.n}（${sunR.jp}）— 西洋では${SIGNS[signOf(d.sunLon)].n}
 ◆ 月ラーシ: ${moonR.n}（${moonR.jp}）— 西洋では${SIGNS[signOf(d.moonLon)].n}
-${ascR ? `◆ ラグナ: ${ascR.n}（${ascR.jp}）— 西洋では${SIGNS[signOf(d.ascLon)].n}` : "◆ ラグナ: 時刻不明のため算出なし"}
+${ascR ? `◆ ラグナ: ${ascR.n}（${ascR.jp}）— 西洋では${SIGNS[signOf(d.ascLon)].n}` : (d.tm === "known" ? "◆ ラグナ: 海外生まれのため算出なし" : "◆ ラグナ: 時刻不明のため算出なし")}
 ${(() => {
   const moonSidExport = norm360(d.moonLon - aya);
   const dashaExport = calcDasha(moonSidExport, d.y);
@@ -2173,7 +2259,7 @@ ${(() => {
   return dashaText;
 })()}`;
 })()}
-
+${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exportDigest(d) + "\n" : ""; } catch (e) { return ""; } })()}
 ━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
 ━━━━━━━━━━━━━━━━━━━━
@@ -2182,6 +2268,8 @@ ${(() => {
 【共通指示】
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
+- 【11】の「何個の占術がそろったか」を使い、多くの占術がそろう点ははっきり、そろった数が2つ以下の点は控えめに書く。
+- 【12】は羅占盤が画面に出している読み。これと食い違う読みをするときは、そう読む根拠を示す。
 - 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込む。読み手が「結局、自分はどう生きればいいのか」がわかること。
 - 健康に関する記述は生活習慣の目安であり、医学的助言ではないことを前提とした書き方にする。
@@ -2310,6 +2398,7 @@ ${typeInfoText}
 生年月日: ${d.y}年${d.m}月${d.d}日
 出生時刻: ${d.tm==="known" ? d.h+":"+String(d.mi).padStart(2,"0") : "不明"}
 性別: ${{M:"男性",F:"女性",X:"回答なし"}[d.sex]}
+出生地: ${d.bp || "不明"}
 
 ◆ 西洋占星術: 太陽${sunA} / 月${moonA}${d.ascLon!==null ? " / ASC"+SIGNS[signOf(d.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemA}（${dayElA}）
@@ -2327,6 +2416,7 @@ ${typeInfoText}
 生年月日: ${db.y}年${db.m}月${db.d}日
 出生時刻: ${db.tm==="known" ? db.h+":"+String(db.mi).padStart(2,"0") : "不明"}
 性別: ${{M:"男性",F:"女性",X:"回答なし"}[db.sex]}
+出生地: ${db.bp || "不明"}
 
 ◆ 西洋占星術: 太陽${sunB} / 月${moonB}${db.ascLon!==null ? " / ASC"+SIGNS[signOf(db.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemB}（${dayElB}）
@@ -2374,7 +2464,7 @@ ${typeInfoText}
 
 ◆ インド占星術
   月ラーシ: ${moonRashiA.jp} × ${moonRashiB.jp}
-
+${(() => { try { return window.RSynth && RSynth.compatDigest ? "\n" + RSynth.compatDigest(d, db) + "\n" : ""; } catch (e) { return ""; } })()}
 ━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
 ━━━━━━━━━━━━━━━━━━━━
@@ -2383,6 +2473,9 @@ ${typeInfoText}
 【共通指示】
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
+- 【相性の画面の読み】は羅占盤が画面に出している読み。これと食い違う読みをするときは、そう読む根拠を示す。
+- 【2人それぞれの知りたいこと別のまとめ】で、2人の人間関係・恋愛・迷ったとき・好き嫌いの傾向を比べ、合うところと、すれ違いやすいところを具体的に書く。
+- 生まれた時刻が「不明」の人は、時刻で決まる材料（ASC・紫微斗数の命宮など）を根拠にした断定をしない。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の付き合い方」「距離感」「具体的な行動」に落とし込む。
 - 分量: 各セクション400〜600字、全体3000字以内に収める。
 
@@ -2755,7 +2848,7 @@ function compatHeader(tabKey) {
       const sA = SHUKUYO_27[idxA], sB = SHUKUYO_27[idxB];
       const comp = shukuyoCompat(idxA, idxB);
       return [
-        {label:"宿", a:sA?.name||"", b:sB?.name||"", note:`${comp.name}。${comp.desc}`},
+        {label:"宿", a:sA?.n||"", b:sB?.n||"", note:`${comp.name}。${comp.desc}`},
         {label:"相性", a:comp.name, b:"", span:true},
       ];
     }
@@ -3260,7 +3353,7 @@ function renderWest(){
 
     <div class="section-title">3つの核</div>
     <div class="card hi" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('太陽',true);this.style.boxShadow='0 0 12px rgba(201,147,58,0.3)'" onmouseleave="highlightPlanet('太陽',false);this.style.boxShadow=''"><h3>☉ 太陽星座：あなたの本質 — ${sunSign.n}</h3><p>${sunCore(sunSign.n)}。</p></div>
-    <div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('月',true);this.style.boxShadow='0 0 12px rgba(176,200,224,0.4)'" onmouseleave="highlightPlanet('月',false);this.style.boxShadow=''"><h3 style="color:#b0c8e0">☽ 月星座：家での自分 — ${SIGNS[signOf(d.moonLon)].n}</h3><p>${moonCore(SIGNS[signOf(d.moonLon)].n)}。</p></div>
+    <div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('月',true);this.style.boxShadow='0 0 12px rgba(176,200,224,0.4)'" onmouseleave="highlightPlanet('月',false);this.style.boxShadow=''"><h3 style="color:#b0c8e0">☽ 月星座：家での自分 — ${SIGNS[signOf(d.moonLon)].n}</h3><p>${moonCore(SIGNS[signOf(d.moonLon)].n)}。</p>${d.moonDay && d.moonDay.signChanges ? `<p style="font-size:14px; color:var(--muted); margin-top:8px;">※ この日は月が${SIGNS[signOf(d.moonDay.start)].n}から${SIGNS[signOf(d.moonDay.end)].n}へ移る日です。生まれた時刻が分からないので正午の位置（${SIGNS[signOf(d.moonLon)].n}）で読んでいます。時刻を入れると、どちらの月か決まります。</p>` : ""}</div>
     ${ascTheme ? `<div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('ASC',true);this.style.boxShadow='0 0 12px rgba(144,112,160,0.4)'" onmouseleave="highlightPlanet('ASC',false);this.style.boxShadow=''"><h3 style="color:#9070a0">↑ 上昇点：第一印象 — ${SIGNS[signOf(d.ascLon)].n}</h3><p>${ascCore(SIGNS[signOf(d.ascLon)].n)}。</p></div>` : `<div class="card"><h3 style="color:#808080">↑ 上昇点：第一印象 — 出生時刻未入力</h3><p>出生時刻を入れると上昇点（アセンダント）を算出します。</p></div>`}
 
     <div class="section-title">10天体の個別解釈</div>
@@ -3413,7 +3506,7 @@ function sunCore(s){
 }
 function moonCore(s){
   const m = {
-    "牡羊座":"整理と役割で安心感を得る傾向があるということ。何かに挑戦している時、競争している時に一番イキイキしていませんか？ じっとしているとソワソワする。「とりあえずやってみよう」が口癖かもしれません",
+    "牡羊座":"動いて挑むことで気持ちが晴れる傾向があるということ。何かに挑戦している時、競争している時に一番イキイキしていませんか？ じっとしているとソワソワする。「とりあえずやってみよう」が口癖かもしれません",
     "牡牛座":"五感の安心と物理的な安定を求める傾向があるということ。お気に入りのブランケットや、いつもの席、慣れた味のコーヒーがないと落ち着かなかったりしませんか？ 急な予定変更が苦手かもしれません",
     "双子座":"情報と会話で心を落ち着ける傾向があるということ。モヤモヤした時、誰かに話を聞いてもらうとスッキリしませんか？ 一人で黙っているより、LINEやSNSで誰かと繋がっている方が安心するタイプかもしれません",
     "蟹座":"家庭と親密さで深く癒される傾向があるということ。家に帰った瞬間にホッとする感覚が人一倍強くないですか？ 信頼できる少人数の仲間といる時が一番リラックスできるかもしれません",
@@ -3603,7 +3696,10 @@ function renderShichu(){
       ${pillarReading(p.label, p.ten)}
       <div class="ten">${p.ten}</div>
     </div>`;
-  }).join("");
+  }).join("") + (d.hourKnown ? "" : `<div class="pillar" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
+      <div class="plabel">時柱</div>
+      <div style="font-size:15px; color:var(--muted); line-height:1.8; margin:12px 0;">生まれた時刻を入れると出ます。<br>時柱は2時間ごとに変わるので、時刻が分からないと決まりません。五行バランスにも入れていません。</div>
+    </div>`);
 
   const total = Object.values(d.wx).reduce((a,b)=>a+b,0);
   const wxHtml = ["木","火","土","金","水"].map(el=>{
@@ -4305,9 +4401,13 @@ function renderZiwei(){
   const lifeStarText = lifeStars.length
     ? lifeStars.map(s=>`<strong style="color:${starColor(s)}">${s}</strong>`).join("・")
     : "無主星";
+  // 主星があれば星の説明＋命宮での読み（ZW_LIFE）。無主星なら向かいの遷移宮の主星を借りて読む（借星）
+  const lifeRead = s => `<div style="margin-top:6px"><strong style="color:${starColor(s)}">${s}</strong> — ${zwStarExpl(s)}${ZW_LIFE[s] ? `<br>${ZW_LIFE[s]}` : ""}</div>`;
+  const borrowStars = lifeStars.length ? [] : (starDistrib[(lifeIdx + 6) % 12] || []).filter(s => ZW_LIFE[s]);
   const lifeStarExpl = lifeStars.length
-    ? lifeStars.map(s=>`<div style="margin-top:6px"><strong style="color:${starColor(s)}">${s}</strong> — ${zwStarExpl(s)}</div>`).join("")
-    : "命宮に主星がない場合、対宮（遷移宮）の星を借りて読む「借星」で判断します。";
+    ? lifeStars.map(lifeRead).join("")
+    : "命宮に主星がないので、向かいの遷移宮（" + BRANCHES[(lifeIdx + 6) % 12] + "宮）の星を借りて読む「借星」で判断します。" +
+      (borrowStars.length ? "借りた星は少し弱めに表れ、周りの人や環境に合わせて顔を変えやすいとされます。" + borrowStars.map(lifeRead).join("") : "遷移宮にも主星がないので、四化と大限の流れを重く見ます。");
 
   const center = `<div class="zwcenter">
     <div style="font-size:13px; color:#999; margin-bottom:6px;">命宮</div>
@@ -4414,6 +4514,9 @@ function renderZiwei(){
   document.getElementById("tab2").innerHTML = `
     ${introCard("ziwei")}
     ${compatHeader("ziwei")}
+    ${d.hourKnown ? "" : `<div class="card" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;">
+      <p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">この命盤は仮のものです。</strong>紫微斗数の命宮は、生まれた時刻（2時間ごと）で決まります。時刻が分からないので、正午（午の刻）に生まれたとして並べています。命宮・十二宮の星・大限（10年ごとの運）は、生まれた時刻を入れると正しい形になります。羅占盤タイプの判定には、命宮は使っていません。</p>
+    </div>`}
     ${currentMode === "compat" && dataB ? ziweiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>✦ あなたの紫微斗数 — ひとことで言うと</h3>
       <p>${(() => {
@@ -4464,7 +4567,7 @@ function renderZiwei(){
     <div style="font-size:15px; color:#6a6050; margin-bottom:12px; line-height:1.7;">紫微斗数は、人生を<strong>12の領域（宮）</strong>に分けて、それぞれにどんな星が入っているかで運勢を読みます。</div>
     <div class="zwgrid">${cells}${center}</div>
 
-    <div class="section-title">命宮 ／ ${BRANCHES[lifeIdx]}宮 ${lifeStarText}</div>
+    <div class="section-title">命宮 ／ ${BRANCHES[lifeIdx]}宮 ${lifeStarText}${d.hourKnown ? "" : "（仮・正午で計算）"}</div>
     <div class="card hi">
       <p>命宮は人生全体の基調を示す最重要宮。性格・才能・人生観の核が映ります。<br>
       ${lifeStarExpl}</p>
@@ -4573,6 +4676,23 @@ function starColor(star){
              "七殺":"#d04030", "破軍":"#804060"};
   return c[star] || "#6888a0";
 }
+// 命宮に入ったときの読み（性格・仕事・気をつけること・2026-10-19 井内さん「その人だけの文にする」）。zwStarExpl は星そのものの説明
+const ZW_LIFE = {
+  "紫微":"自分が中心になって物事を決めたい気持ちが強い。人をまとめ、方向を示す役で力が出る一方、人の下で細かく指示されると誇りが傷つく。支えてくれる人がいるほど伸びる星なので、助けてくれる人を大切にし、一人で全部を背負わない。",
+  "天府":"落ち着きと安定感があり、任された財産や組織を守り育てる力がある。勝てる見込みが立ってから動く慎重さが持ち味。仕組みの整った職場で長く信頼される。守りに入りすぎると機会を逃すので、年に一度は新しいことに挑む。",
+  "太陽":"明るく、人のために動くことで輝く。表に立ち、公の場で役目を果たすほど運が開く。人に尽くして見返りを求めないぶん、疲れやすく、損な役回りも引き受けがち。頼まれごとを断る日も、意識して持つ。",
+  "太陰":"穏やかで繊細、細やかな気配りができる。表に出るより、内側から支える役や、美しいもの・暮らしに関わる仕事で力を出す。お金を少しずつ蓄える力もある。気持ちが揺れやすいので、感情を言葉にして外に出す習慣を持つ。",
+  "武曲":"決めたら迷わず実行する、強い意志の人。お金や数字の感覚にすぐれ、財務・技術・専門職で頼られる。言い方がまっすぐで、冷たく見られることがある。結果を出す力があるぶん、人の気持ちを置き去りにしないよう、一言の気づかいを添える。",
+  "廉貞":"まじめで規律を重んじる面と、情熱的で人を惹きつける面をあわせ持つ。組織の改革や、ルールを作り直す仕事で力を出す。好き嫌いがはっきりしていて、対立すると引かない。感情が高ぶったときは、一度その場を離れてから話す。",
+  "天機":"頭の回転が速く、計画や工夫を考えるのが得意な参謀タイプ。企画・分析・技術・相談役で評価される。考えすぎて迷いやすく、気が変わりやすい面もある。選択肢を増やしすぎず、決めたことは一定の期間続けてから見直す。",
+  "天同":"穏やかで人当たりがよく、周りを和ませる福のある星。楽しみや趣味から縁が広がり、サービス業や人を癒やす仕事に向く。若いうちに苦労があっても、後半ほど穏やかになるとされる。楽なほうへ流れやすいので、目標と期限を自分で決める。",
+  "貪狼":"多才で好奇心が強く、人を惹きつける魅力がある。営業・芸能・飲食・企画など、人と楽しさが集まる場で力を出す。興味が次々に移り、欲が強く出ることもある。手を広げたら、どれか一つは極めると決めると、才能が形になる。",
+  "巨門":"言葉と分析の力があり、話す・教える・論じる仕事で強い。疑問を放っておけない鋭さがあり、専門家として頼られる。一方で言葉が鋭くなり、誤解や口論を招きやすい。指摘するときは、先に相手のよい点を一つ伝える。",
+  "天相":"公平で品があり、人と人の間を取り持つのが上手。補佐役・調整役・組織の要として信頼される。人に頼まれると断れず、周りの意見に流されやすい。自分の判断の基準を一つ持っておくと、迷いが減る。",
+  "天梁":"面倒見がよく、困っている人を助ける知恵者。相談役・教育・医療・福祉など、人を守る仕事で慕われる。年長者や目上の人との縁にも恵まれる。正しさを語りすぎると説教くさくなるので、聞かれるまで助言を控える場面も持つ。",
+  "七殺":"独立心と決断力が強く、困難な状況ほど力を出す開拓者。新規事業・現場の指揮・危機対応で頼られる。人生に浮き沈みが出やすく、衝動的な決断もしがち。大きく動く前に、信頼できる人に一度話す。",
+  "破軍":"古いものを壊し、新しく作り直す力がある冒険者。変化の多い仕事や、ゼロからの立ち上げで力を出す。飽きっぽく、環境や人間関係を急に変えたくなる。壊す前に、残したほうがよいものを書き出してから動く。",
+};
 function zwStarExpl(star){
   const m = {
     "紫微":"帝王の星。統率力・品格・権威を司る。物事を俯瞰して采配する能力に優れる。",
@@ -5272,6 +5392,62 @@ const NUMEROLOGY_MEANINGS = {
   33:{title:"マスターナンバー・大奉仕者",desc:"33は「6」の上位版。無条件の愛と奉仕の数。人類全体を癒す使命を持つ。極めて稀で、その重さに耐えられず6として生きる人も多い。",keyword:"無条件の愛・癒し・マスターヒーラー",career:"医療・教育・宗教・カウンセリング。人を癒し導く仕事。",relationship:"全ての人を愛そうとする。特定のパートナーとの関係より、人類愛に向かいがち。",caution:"自己犠牲に陥りやすい。自分を満たすことが、人を満たす前提条件。6の課題も同時に持つ。"},
 };
 
+// ライフパスごとの書き足し（仕事・人間関係・注意すべき点の2段落目・2026-10-19 井内さん「その人だけの文にする」）。
+//   1段落目（NUMEROLOGY_MEANINGS の career / relationship / caution）は性質、2段落目は日々の場面と、その時どうするか
+const NUM_MORE = {
+  1: { work: "立ち上げや改革など「最初の一人」になる場面で評価が跳ね上がる。会議では結論を先に言い、反対が出ても自分で責任を取ると示すと、人がついてくる。決まった手順を守る役が長く続くなら、社外の活動や副業で、自分で決められる場をつくる。",
+       people: "相手のペースに合わせるより、自分から誘い、自分で決めることが多い。頼られるのは好きでも、もたれかかられると距離を取りたくなる。親しい人ほど、ひとりの時間がほしい理由を先に伝えておくと誤解が減る。",
+       care: "「自分でやったほうが早い」と思うと、周りの出番を奪ってしまう。任せた仕事は途中で口を出さず、終わってから感想を言う。負けを認めるのが遅れるほど損が大きくなるので、やめる基準を始める前に決めておく。" },
+  2: { work: "人と人の間に立つ場面で、誰よりも信頼される。相手の言葉にならない不満に気づけるので、顧客対応や調整役で重宝される。ただ評価が見えにくい役回りになりやすいので、自分がした調整や支えを記録し、言葉にして伝える。",
+       people: "相手の気持ちを先回りして読み、居心地のよい関係をつくる。そのぶん相手の機嫌に気持ちが引っぱられやすい。嫌なことを我慢し続けるより、小さいうちに「ここは困る」と伝えるほうが、関係は長続きする。",
+       care: "決められない時間が長くなると、周りに決めてもらう形になり、後で不満が残る。二択まで絞ったら、期限を決めて自分で選ぶ。人の悩みを聞いた日は、気持ちを切り替える時間をとる。" },
+  3: { work: "話す・書く・見せるで人を動かせる。企画は資料より、口で伝えたほうが通りやすい。アイデアを出す力に比べて仕上げる力が追いつかないことがあるので、締め切りと、最後まで見てくれる相棒を最初に決めておく。",
+       people: "明るく、初対面でも場を和ませる。冗談の多さが、本気で悩んでいる相手には軽く映ることがある。相手が深刻な顔をしているときは、笑わずに最後まで聞く。それができると信頼が一段深まる。",
+       care: "気分が乗らないと手が止まり、楽しいことから先に手を付けがち。やることを一日三つまでに絞る。人前では明るくても、一人になると落ち込む面があるので、気持ちを話せる相手を持っておく。" },
+  4: { work: "計画を立て、決めたとおりに積み上げる仕事で一番信頼される。数字・手順・品質など、ごまかしのきかない部分を任されると強い。急な方針転換が多い職場では消耗するので、変更の理由を確かめ、自分の中で筋を通してから動く。",
+       people: "約束を守り、言ったことは必ずやる人として信頼される。気持ちを言葉にするのが苦手で、行動で示すことが多い。相手が言葉を求めているときは、「ありがとう」「助かった」を口に出すと、関係がぐっとやわらぐ。",
+       care: "決めた手順から外れることに不安を感じ、柔軟さを失いやすい。予定どおりにいかない日を、年に何度か意識してつくる。疲れていても休まない癖があるので、休む日も予定表に入れる。" },
+  5: { work: "変化の多い現場、移動の多い仕事、初めての相手と会う仕事で生き生きする。複数の案件を同時に回せるが、どれも途中で飽きやすい。一つの仕事は「ここまでやったら次へ」という区切りを先に決めておくと、成果が残る。",
+       people: "話題が豊富で、どんな相手ともすぐ打ち解ける。束縛を感じると、相手が悪くなくても離れたくなる。大事な人には、自由にしたい気持ちと、大切に思っている気持ちを両方伝えておく。",
+       care: "刺激を求めて、お金・お酒・夜ふかしなどが度を越しやすい。気分で大きな決断をしないよう、一晩おいてから決める。飽きたと感じたときは、やめる前に一度、別のやり方を試す。" },
+  6: { work: "人を育て、守り、整える仕事で力を出す。後輩の面倒やチームの雰囲気づくりを自然に引き受ける。頼まれると断れないので、仕事が増えすぎたら、新しく引き受ける前に今持っている仕事を一つ手放す。",
+       people: "家族や仲間を何より大切にし、相手の世話を焼くことで愛情を示す。よかれと思ってした助言が、相手には干渉に感じられることがある。相手が自分で決めたことは、反対でも一度見守る。",
+       care: "人の問題を自分のことのように背負い、疲れをため込む。自分の時間とお金を、人のためにすべて使わない。「ありがとう」を期待して動くと、返ってこないときに苛立ちが出るので、見返りを求めないと決めて動く。" },
+  7: { work: "一人で深く考え、調べ、確かめる仕事で一流になれる。人が見落とす点に気づけるので、分析や専門家の役で評価される。説明が難しくなりがちなので、結論を一行で言う練習をすると、周りの理解と評価が上がる。",
+       people: "本当に心を開く相手はごく少ない。一人の時間がないと疲れきってしまう。距離を置くのは嫌いになったからではない、と親しい人に伝えておくと、関係が誤解で壊れずにすむ。",
+       care: "考えがまとまるまで動かず、機会を逃しやすい。七割の確信で一度試す。人を信じきれず、疑いから距離を置いてしまうこともある。理屈で説明できない不安は、紙に書いて一晩おく。" },
+  8: { work: "目標を数字で立て、達成までの道筋を引く力が強い。予算や人を動かす立場に早く就くほど伸びる。成果を急ぐあまり周りへの説明を省くと反発を招くので、決めた理由を短く共有してから動かす。",
+       people: "頼りがいがあり、困った人を力で守ろうとする。相手にも高い基準を求め、無意識に評価する目で見てしまうことがある。身近な人には、結果より気持ちや努力を言葉にしてほめる。",
+       care: "仕事とお金に集中しすぎて、家族や体を後回しにしやすい。稼ぐ目標と同じように、休む目標とお金の使い道も決める。勝ち負けにこだわる場面では、相手の面子を残す一手を考える。" },
+  9: { work: "人や社会のためになると思えると、驚くほどの力を出す。理想が高いぶん、現実の泥臭い作業に疲れやすい。小さな成果を一つずつ数えて、手応えを確かめながら進む。",
+       people: "誰にでも優しく、相手の事情を思いやれる。広く浅い付き合いが増え、特定の人と深まるのに時間がかかることがある。別れや終わりを受け入れる力もあり、過去の関係にこだわりすぎない。",
+       care: "全員を助けようとして、自分が倒れそうになる。手伝う範囲を先に決める。手放すのが得意なぶん、続けたほうがよいものまで終わらせてしまうことがあるので、終わらせる前に一度、人に相談する。" },
+  11: { work: "ひらめきと言葉で、人の気持ちを動かせる。人前で話す、教える、作品で伝えるなど、直感を形にする仕事で力を出す。ひらめきは浮かんだときに書き留め、実務は得意な人と組むと、構想が現実になりやすい。",
+        people: "相手の気持ちを敏感に感じ取り、言葉にされない思いにも気づく。そのぶん人混みや争いの場で疲れやすい。分かり合える相手には深く尽くすが、自分の理想を相手に重ねすぎないように。",
+        care: "神経が張りつめやすく、眠りが浅くなったり、気持ちが急に沈んだりする。散歩や料理など、体を使う習慣で気持ちを落ち着かせる。11として動ける時期と2として休む時期が交互に来ると考え、うまくいかない日は穏やかに過ごす。" },
+  22: { work: "大きな構想を、仕組みと人を動かして形にする力がある。長い期間がかかる事業や、多くの人が関わる仕事でこそ力を出す。全部を一人で見ようとすると潰れるので、任せる相手と順番を早めに決める。",
+        people: "頼れる人として周りに人が集まる。ただ目標に集中すると、身近な人の気持ちを後回しにしがち。忙しい時期ほど、家族や大切な人との時間を先に予定に入れる。",
+        care: "期待の大きさに押しつぶされそうになることがある。そういうときは4として、目の前の一つを確実に仕上げる。理想どおりに進まない自分を責めすぎない。" },
+  33: { work: "人を癒やし、励まし、包み込む仕事で、周りが驚くほどの力を出す。看護・介護・教育・相談の仕事や、人の心に届く表現に縁がある。疲れきる前に交代できる体制を、仕事の最初につくっておく。",
+        people: "相手を丸ごと受け入れる優しさがあり、悩みを打ち明けられやすい。誰にでも同じように尽くすので、特別な相手は寂しく感じることがある。大切な人には、その人のための時間を別に取る。",
+        care: "人の痛みを自分のことのように感じ、自分をすり減らしやすい。自分が満たされていないと、人を満たせないと考える。うまくいかない時期は6として、身近な人と家庭を大事にする。" },
+};
+
+// バースデーナンバー（誕生日の日にちを還元した数）が示す才能の出方（2026-10-19）。日にちは1〜31なので 1〜9・11・22
+const BD_MORE = {
+  1: "自分から始める力が、隠れた才能として出る。人が迷っている場面で最初に手を挙げると、周りが動き出す。小さくても、自分の名前で責任を持てる役を一つ持つと、この才能が育つ。",
+  2: "人の気持ちを察し、間に立つ才能がある。言葉にされない不満や疲れに気づけるので、相談や調整の場で自然と頼られる。気づいたことを「どうしたの？」と一言かけるところから、才能が形になる。",
+  3: "話す・書く・作るで人を楽しませる才能がある。場を明るくしたり、難しいことをわかりやすく伝えたりするのが得意。思いついたことをメモや発信で外に出すほど、才能が磨かれる。",
+  4: "段取りを組み、決めたことを積み上げる才能がある。散らかった物事を整理し、手順にするのが得意。毎日続けられる小さな習慣を一つ持つと、それが大きな信用に育つ。",
+  5: "変化に強く、新しい場にすぐなじむ才能がある。初めての人とも打ち解け、情報を集めるのが速い。いつもと違う道を通る、行ったことのない場所に行くなど、変化を自分で取り入れると力が出る。",
+  6: "人を育て、場を整える才能がある。困っている人を放っておけず、居心地のよい空間をつくるのが上手。身近な人の世話を通して、教える力や美しく整える力が伸びていく。",
+  7: "一人で深く考え、本質を見抜く才能がある。気になったことを調べ尽くすのが得意で、人が見落とす点に気づける。一人で集中できる時間を毎日少しでも持つと、この才能が生きる。",
+  8: "目標を立て、結果まで持っていく才能がある。お金や人を動かす感覚があり、任されると力が出る。数字で目標を決めて、達成までの道筋を書き出すと、才能が形になる。",
+  9: "相手の立場を思いやり、広く受け入れる才能がある。違う考えの人ともつながれるので、人と人、場と場をつなぐ役で力を出す。人のためにした小さなことが、巡り巡って自分に返ってくる。",
+  11: "ひらめきと感受性の才能がある。人の気持ちや場の空気を言葉にする前に感じ取り、ふと浮かんだ考えが当たることが多い。浮かんだことを書き留めておくと、後で大事な手がかりになる。",
+  22: "大きな構想を、現実の形にする才能がある。一人では無理に見えることも、人と仕組みを動かして実現まで持っていける。長い期間のかかる目標を、一つ持っておくとよい。",
+};
+
 const PERSONAL_YEAR_MEANINGS = {
   1:"新しい始まりの年。種を蒔く時期。自分から動くと吉。",
   2:"待つ年。人間関係を育てる時期。焦らず信頼を積む。",
@@ -5365,6 +5541,10 @@ function renderNumerology(){
     <div style="font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.7;">${d.d}日生まれ → ${String(d.d).split("").join(" + ")} = ${String(d.d).split("").reduce((a,b)=>a+Number(b),0)}${String(d.d).split("").reduce((a,b)=>a+Number(b),0) !== n.birthday ? " → "+n.birthday : ""}。誕生日の日にちだけを還元した数で、ライフパスを補助する「隠れた才能」を示します。</div>
     <div class="card">
       <p><strong style="color:var(--gold); font-size:24px;">${n.birthday}</strong>　${(NUMEROLOGY_MEANINGS[n.birthday]||{}).title||""}。${(NUMEROLOGY_MEANINGS[n.birthday]||{desc:""}).desc.split("。")[0]}。</p>
+      ${BD_MORE[n.birthday] ? `<p style="margin-top:10px;">${BD_MORE[n.birthday]}</p>` : ""}
+      <p style="margin-top:10px; color:var(--muted); font-size:14px;">${n.birthday === n.lifePath
+        ? `ライフパスも${n.lifePath}。生まれ持った才能と人生の道が同じ向きなので、この力をまっすぐ伸ばすほど迷いが減る。`
+        : `ライフパス${n.lifePath}（${lp.title}）の道を歩くときの、手持ちの道具がこの${n.birthday}の才能。道に迷ったときは、この才能を使える場面を探すと進みやすい。`}</p>
     </div>
 
     <div class="section-title">パーソナルイヤー ${n.currentYear}年 — 今年のテーマ</div>
@@ -5402,10 +5582,10 @@ function renderNumerology(){
     })()}
 
     <div class="section-title">仕事・キャリアの方向性</div>
-    <div class="card"><p>${lp.career || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}「${lp.title}」の性質から。${n.lifePath===3?"表現力と社交性が武器になる職種":""}${n.lifePath===1?"開拓力とリーダーシップが活きる職種":""}${n.lifePath===2?"協調性と繊細さが活きる職種":""}${n.lifePath===4?"堅実さと実務力が活きる職種":""}${n.lifePath===5?"変化と自由を求める性質が活きる職種":""}${n.lifePath===6?"責任感と奉仕の精神が活きる職種":""}${n.lifePath===7?"探究心と分析力が活きる職種":""}${n.lifePath===8?"統率力とビジネスセンスが活きる職種":""}${n.lifePath===9?"共感力と広い視野が活きる職種":""}${n.lifePath===11?"直感力と霊的感性が活きる職種":""}${n.lifePath===22?"大きなビジョンを形にする力が活きる職種":""}${n.lifePath===33?"奉仕と癒しの力が活きる職種":""}）</span></p></div>
+    <div class="card"><p>${lp.career || ""}${(NUM_MORE[n.lifePath] || {}).work ? "<br><br>" + NUM_MORE[n.lifePath].work : ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}「${lp.title}」の性質から。${n.lifePath===3?"表現力と社交性が武器になる職種":""}${n.lifePath===1?"開拓力とリーダーシップが活きる職種":""}${n.lifePath===2?"協調性と繊細さが活きる職種":""}${n.lifePath===4?"堅実さと実務力が活きる職種":""}${n.lifePath===5?"変化と自由を求める性質が活きる職種":""}${n.lifePath===6?"責任感と奉仕の精神が活きる職種":""}${n.lifePath===7?"探究心と分析力が活きる職種":""}${n.lifePath===8?"統率力とビジネスセンスが活きる職種":""}${n.lifePath===9?"共感力と広い視野が活きる職種":""}${n.lifePath===11?"直感力と霊的感性が活きる職種":""}${n.lifePath===22?"大きなビジョンを形にする力が活きる職種":""}${n.lifePath===33?"奉仕と癒しの力が活きる職種":""}）</span></p></div>
 
     <div class="section-title">人間関係の傾向</div>
-    <div class="card"><p>${lp.relationship || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}「${lp.title}」の対人パターンから）</span></p></div>
+    <div class="card"><p>${lp.relationship || ""}${(NUM_MORE[n.lifePath] || {}).people ? "<br><br>" + NUM_MORE[n.lifePath].people : ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}「${lp.title}」の対人パターンから）</span></p></div>
 
     ${dataB && currentMode !== "compat" ? (() => {
       const nB = calcNumerology(dataB.y, dataB.m, dataB.d);
@@ -5511,7 +5691,7 @@ function renderNumerology(){
     })() : ""}
 
     <div class="section-title">注意すべき点</div>
-    <div class="card"><p>${lp.caution || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}の裏面＝強みが行きすぎた時に出る傾向）</span></p></div>
+    <div class="card"><p>${lp.caution || ""}${(NUM_MORE[n.lifePath] || {}).care ? "<br><br>" + NUM_MORE[n.lifePath].care : ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：ライフパス${n.lifePath}の裏面＝強みが行きすぎた時に出る傾向）</span></p></div>
 
     <div class="section-title">9年周期の全体像</div>
     <div class="note" style="margin-bottom:12px;">数秘術では人生が9年周期で巡ります。今年（${n.currentYear}年＝PY${n.personalYear}）を中心に、前後の流れが見えます。</div>
@@ -5538,7 +5718,7 @@ function renderNumerology(){
 
 /* ============ 九星気学 ============ */
 
-// 性格レーダー8軸の投票計算（タイプ詳細カード・相性モード・renderCrossRefで共用）
+// 性格レーダー8軸の投票計算（タイプ詳細カード・相性モードで共用）
 function calcPersonalityRadar(pd, smData, nuData) {
   const AXES = ["action","think","social","creative","stable","intuition","leadership","nurture"];
   const v = {}; AXES.forEach(a => v[a] = 0);
@@ -5755,6 +5935,28 @@ function kyuseiDirections(honmei, year){
   return { year, yearStar: Y, best, good, bad: badList };
 }
 
+// 本命星ごとの書き足し（人間関係・今後の流れの2段落目・2026-10-19 井内さん「その人だけの文にする」）
+const KYUSEI_MORE = {
+  1: { people: "相手に合わせるのが上手で、どんな集まりにもなじめる。ただ本音を言わずにやり過ごす癖があり、親しい人ほど「何を考えているか分からない」と感じやすい。月に一度は、自分の希望を一つ口にする。",
+       future: "若いうちの苦労や回り道は、後で必ず生きる。知識や人脈を水のように少しずつ蓄えておくと、40代以降に流れが大きく変わる。冬（12〜1月）は、次の一年の計画を練る時期として使う。" },
+  2: { people: "頼まれると嫌と言えず、つい世話役を引き受ける。感謝の言葉がないと、不満が静かにたまる。手伝う前に「どこまでやるか」を相手と決めておくと、尽くしすぎを防げる。",
+       future: "目立たない努力が、少しずつ信用として積もっていく。転職や引っ越しを重ねるより、同じ場所で根を張るほうが実りが大きい。50代以降、まとめ役や相談役として頼られる場面が増える。" },
+  3: { people: "明るく元気で、人を巻きこむ力がある。思ったことをすぐ口にするので、悪気のない一言が誤解を生むこともある。言いすぎたと思ったら、その日のうちに謝ると関係が戻りやすい。",
+       future: "始める力が強い早熟型。若いうちに多くを試し、30代で一つに絞ると大きく伸びる。40代以降は、勢いに経験が加わって、人から任される立場になる。" },
+  4: { people: "人当たりがよく、紹介やつながりで縁が広がる。誰にでも感じよく接するぶん、大事な相手を決めるのに時間がかかる。大事な場面では、自分はどうしたいかを先に言う。",
+       future: "人脈と信用が、そのまま財産になる。30代でつくった人間関係が、40代以降の仕事を運んでくる。遠方や海外との縁で、思わぬ道が開けることもある。" },
+  5: { people: "存在感が強く、自然と人の中心になる。面倒見はよいが、自分のやり方を通そうとして、相手を従わせる形になりやすい。相手の意見を最後まで聞いてから話すと、敵が減る。",
+       future: "浮き沈みの大きい人生だが、困難を越えるたびに器が大きくなる。人の上に立つ役が回ってきたら、逃げずに引き受けると運が開く。50代以降に本当の影響力が出てくる。" },
+  6: { people: "責任感が強く、頼りにされる。相手にも同じ水準を求めて、厳しく見えることがある。目下の人には、指摘より先に、できていることを一つ言葉にする。",
+       future: "目上の人の引き立てで道が開ける。40代までに専門と立場を固めると、その後は安定する。晩年は、後に続く人を育てる役で運がさらに良くなる。" },
+  7: { people: "話がうまく、一緒にいると楽しい人。人づきあいの場が多いぶん、お金や時間を使いすぎやすい。本当に大事な人との時間を、付き合いの予定より先に押さえる。",
+       future: "人を楽しませる力と社交が、後の豊かさにつながる。若いうちの交友関係が、中年以降の仕事と人脈を支える。晩年は穏やかで、好きなことを楽しめる。" },
+  8: { people: "口数は少なくても、家族や仲間を強く守る。一度決めたことを曲げないので、相手には頑固に映ることがある。話し合いでは、変えてもよい部分を先に一つ示す。",
+       future: "人生に何度か大きな転機が来て、そのたびに一段上がる。30代と50代前後が変わり目になりやすい。変化を怖がらずに受け入れた人ほど、後半の実りが大きい。" },
+  9: { people: "華やかで、人を惹きつける。熱しやすく冷めやすいので、出会いと別れが多くなりがち。長く続く関係には尊敬が欠かせないので、相手のよい点を口に出して伝える。",
+       future: "前半は華やかに動き、後半は知識や経験を伝える側に回る。40代以降、表に立つより、教える・まとめる役で評価される。名誉や評判に関わる場面で運が動く。" },
+};
+
 const KYUSEI_NAMES = {
   1:{name:"一白水星",element:"水",color:"白",direction:"北",desc:"知性と柔軟性の星。水のように形を変えながら浸透する力がある。人付き合いが上手く、交際範囲が広い。内面は繊細で、孤独を感じやすい面も。中年以降に運が開ける晩成型。",career:"企画・コンサルティング・水商売・IT・研究職",health:"腎臓・泌尿器・冷え性に注意",relationship:"交際範囲は広いが、本当に心を開く相手は少ない。表面的には社交的でも、内面は孤独を感じやすい。パートナーには安心感を与えてくれる人を求める。",caution:"人に合わせすぎて自分を見失いがち。「NO」と言う練習を。冷え性や腎臓系のトラブルに注意。冬場は特に体を温める。",future:"中年以降に運が開ける晩成型。若い頃の苦労が40代以降に実る。焦らず種を蒔き続けることが大事。"},
   2:{name:"二黒土星",element:"土",color:"黒",direction:"南西",desc:"大地の母のような包容力。コツコツ努力を積み重ねる堅実さが最大の武器。派手さはないが、信頼と実績で周囲を支える。補佐役として力を発揮し、晩年に大きく実る。",career:"農業・不動産・教育・介護・事務・管理職",health:"胃腸・消化器系に注意",relationship:"面倒見がよく、相手に尽くすタイプ。ただし尽くしすぎて自分が疲弊するパターンに注意。感謝されないと不満が溜まる。",caution:"自己主張が弱く、損な役回りを引き受けがち。「自分のために」動く時間を意識的に作る。胃腸の不調はストレスのサイン。",future:"晩年に大きく実る大器晩成型。若い頃は地味でも、積み重ねた信頼が50代以降に花開く。"},
@@ -5819,15 +6021,16 @@ function renderKyusei(){
   // 飛泊順: 5→6→7→8→9→1→2→3→4
   const KAIZA_ORDER = [5,6,7,8,9,1,2,3,4]; // 中宮から飛ぶ順
   const KAIZA_NAMES = {
-    1:{n:"坎宮（北）",desc:"低迷・忍耐の年。物事が停滞しやすく、孤独を感じやすい。しかし内面を見つめ直す絶好の機会。ここで蒔いた種が数年後に大きく実る。焦らず、自分を磨く時期。"},
-    2:{n:"坤宮（南西）",desc:"準備・基盤固めの年。派手な動きより、地道な努力が報われる。人間関係の土台を作る時期。母性的な優しさが力になる。"},
-    3:{n:"震宮（東）",desc:"発展・スタートの年。新しいことを始めるのに最適。行動力が増し、周囲からの注目も集まる。ただし勢いに任せすぎると空回りする。"},
-    4:{n:"巽宮（南東）",desc:"整備・信用の年。人間関係や仕事の基盤が整う。遠方との縁が生まれやすい。コミュニケーションが鍵。信用を積み重ねる時期。"},
-    5:{n:"中宮",desc:"最も運気が強い年。9年に一度の転換期。大きな決断に向いている。ただし良くも悪くも極端に出やすいので、慎重さも必要。自分が中心になる年。"},
-    6:{n:"乾宮（北西）",desc:"充実・完成の年。これまでの努力が実を結ぶ。目上の人からの引き立てがある。リーダーシップを発揮する場面が増える。"},
-    7:{n:"兌宮（西）",desc:"収穫・喜びの年。楽しいことが多く、人間関係も華やぐ。金運も良い。ただし浪費や遊びすぎに注意。実りを味わう時期。"},
-    8:{n:"艮宮（北東）",desc:"変化・転換の年。環境や人間関係に変化が起きやすい。過去の清算が求められる。変化を恐れず受け入れると、次のステージに進める。"},
-    9:{n:"離宮（南）",desc:"注目・表舞台の年。才能や実力が周囲に認められる。人前に出る機会が増える。ただし目立つ分、批判も受けやすい。実力が試される時期。"},
+    // desc の1文目は「ひとことで言うと」と9年周期の一覧に出る。2文目以降は「今年の運勢」で全部出る（2026-10-19 書き足し）
+    1:{n:"坎宮（北）",desc:"低迷・忍耐の年。9年の周期でいちばん運気が沈む、冬の年。物事が思うように進まず、人の助けも得にくい。ただここは種まきの年で、無理に動くより、学び直し・資格・体づくり・人間関係の整理に向いている。転職・独立・大きな買い物などは、できれば来年以降に回す。夜ふかしや冷えで体調を崩しやすいので、睡眠を優先する。"},
+    2:{n:"坤宮（南西）",desc:"準備・基盤固めの年。冬を越え、土を耕す年。目立つ成果はまだ出ないが、ここで続けた地道な努力が、数年後の実りを決める。仕事は補佐や準備の役に回ると評価され、家族や身近な人との時間も深まる。新しいことは小さく始めて、育てる気持ちで続ける。焦って結果を求めるほど空回りする。"},
+    3:{n:"震宮（東）",desc:"発展・スタートの年。芽が出て、物事が動き出す。新しい仕事・企画・習い事を始めるのに向き、発言や発信が注目されやすい。考えるより先に一歩出すと流れに乗れる。ただ勢いで口がすべりやすく、計画倒れも起きやすいので、始めたことは三か月続けてから広げる。"},
+    4:{n:"巽宮（南東）",desc:"整備・信用の年。物事が整い、信用が広がる。人の紹介や遠方からの話で、仕事や縁がつながりやすい。約束を守り、連絡をこまめにすると、それがそのまま評価になる。結婚や契約など、人との結びつきを決めるのにも向く。迷っている話は、信頼できる人に相談してから決める。"},
+    5:{n:"中宮",desc:"9年に一度の節目の年。九星の真ん中に入り、良くも悪くも自分が目立ち、結果が極端に出やすい。「八方塞がり」とも呼ばれ、新しいことを大きく始めるより、今あるものを整え、続けるかやめるかを見極めるのに向く。引っ越しや大きな投資は慎重に。体調の変化にも、早めに気づくようにする。"},
+    6:{n:"乾宮（北西）",desc:"充実・完成の年。努力が形になり、責任ある役が回ってくる。目上の人の引き立てがあり、昇進や大きな仕事を任されやすい。引き受けると忙しくなるが、ここで力を見せると評価が一段上がる。働きすぎて体を壊しやすいので、休む日を先に決めておく。"},
+    7:{n:"兌宮（西）",desc:"収穫・喜びの年。実りを受け取り、楽しむ年。人との交流や食事の機会が増え、恋愛や人間関係が華やぐ。お金の巡りもよいが、出ていくのも速いので、使う前に一度考える。口が軽くなりやすいので、うわさ話や約束のしすぎに気をつける。"},
+    8:{n:"艮宮（北東）",desc:"変化・転換の年。仕事・住まい・人間関係に変化が起きやすく、止まっていたことが動き出す。続けるか、やめるかの決断を迫られる場面もある。変化を怖がらずに受け入れると次の段階に進めるが、焦って全部を変えなくてよい。親族や相続、不動産の話が出ることもある。"},
+    9:{n:"離宮（南）",desc:"注目・表舞台の年。9年でいちばん表に立つ、頂点の年。これまでの努力や才能が人に知られ、発表・昇進・表彰など、名前が出る場面に縁がある。一方で隠していたことも表に出やすく、批判も受けやすい。感情的な言葉や、勢いの決断に気をつける。"},
   };
   // 中宮の星から本命星の回座位置を算出
   const kaizaIdx = ((k.honmei - thisYearStar + 9) % 9); // 0=中宮, 1=乾, ...
@@ -5952,7 +6155,7 @@ function renderKyusei(){
     <div style="font-size:14px; color:var(--muted); margin:4px 0 16px; line-height:1.7;">生気＝相手の星があなたの星を生む。比和＝同じ五行。退気＝あなたの星が相手を生む（力を使うが吉）。五黄殺・暗剣殺・本命殺・本命的殺・歳破に当たる方位は、相性がよくても外している。本式は月盤・日盤も重ねるので、ここは年単位の目安。</div>
 
     <div class="section-title">人間関係の傾向</div>
-    <div class="card"><p>${honmei.relationship || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の対人パターンから）</span></p></div>
+    <div class="card"><p>${honmei.relationship || ""}${(KYUSEI_MORE[k.honmei] || {}).people ? "<br><br>" + KYUSEI_MORE[k.honmei].people : ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の対人パターンから）</span></p></div>
 
     ${dataB && currentMode !== "compat" ? (() => {
       const kB = calcKyusei(dataB.y, dataB.m, dataB);
@@ -5989,7 +6192,7 @@ function renderKyusei(){
     <div class="card hi"><p>${kaiza.desc}<br><span style="color:var(--muted); font-size:14px;">（根拠：${thisYear}年は${KYUSEI_NAMES[thisYearStar].name}が中宮。${honmei.name}は${kaiza.n}に移動するため）</span></p></div>
 
     <div class="section-title">今後の流れ</div>
-    <div class="card"><p>${honmei.future || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：${thisYear}年の中宮${KYUSEI_NAMES[thisYearStar].name}と本命星${honmei.name}の位置関係から）</span></p></div>
+    <div class="card"><p>${honmei.future || ""}${(KYUSEI_MORE[k.honmei] || {}).future ? "<br><br>" + KYUSEI_MORE[k.honmei].future : ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の一生の流れ。今年の位置は上の「今年の運勢」＝${thisYear}年の中宮${KYUSEI_NAMES[thisYearStar].name}から見る）</span></p></div>
 
     <div class="section-title">注意すべき点</div>
     <div class="card"><p>${honmei.caution || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命星${honmei.name}の裏面＝${honmei.element}の気が行きすぎた時に出る傾向）</span></p></div>
@@ -6022,6 +6225,30 @@ const MAYA_SEALS = [
   {n:"白い鏡",k:"映し出す・秩序・永遠",desc:"真実と秩序の紋章。物事をありのままに映し出す力がある。自分自身と向き合う勇気。"},
   {n:"青い嵐",k:"変容・エネルギー・自己生成",desc:"変容のエネルギーの紋章。周囲を巻き込む強烈な力がある。嵐のように変化を起こし、新しい世界を作る。"},
   {n:"黄色い太陽",k:"生命・普遍的な火・悟り",desc:"悟りと生命力の紋章。太陽のように周囲を照らす存在。無条件の愛と、全てを包み込む力。"},
+];
+
+// 紋章ごとの「注意すべき点」（MAYA_SEALS と同じ並び・2026-10-19 井内さん「その人だけの文にする」）。旧版は紋章を5つずつ4組にまとめていた
+const MAYA_CARE = [
+  "面倒を見すぎて、相手が自分で育つ機会を奪ってしまうことがある。「助ける」と「任せる」を分ける。守りたい気持ちが強く出ると、口出しや心配が多くなる。自分の世話も、人の世話と同じくらい丁寧にする。",
+  "感受性が鋭いぶん、人の言葉や場の空気に振り回されやすい。気持ちが沈むと、言葉が鋭くなったり、黙りこんだりする。深呼吸と、一人で気持ちを整える時間を持つ。思ったことは、相手が受け取れる言い方に変えてから伝える。",
+  "頭の中の夢が大きく、現実の一歩が後回しになりやすい。思い描いたことは、今日できる小さな行動に分ける。自分の世界にこもると、周りに理解されにくくなる。お金の出入りに波が出やすいので、使い道を記録しておく。",
+  "知りたい気持ちが強く、学ぶことに時間をかけすぎて動けなくなることがある。納得するまで動かない頑固さも出やすい。種は、まいて育てないと実らない。学んだことは、早めに人に話す・試すなど、外に出す。",
+  "気持ちと体の反応が強く、好き嫌いで判断しやすい。のめりこむと周りが見えなくなり、急に冷めることもある。疲れや欲が体に出やすいので、睡眠と食事を整える。大事な決断は、熱が引いてからもう一度考える。",
+  "人と人、場と場をつなぐのが得意なぶん、自分の居場所が分からなくなることがある。手放す力が強く、続けたほうがよいものまで手放してしまうことも。終わらせる前に、一度だけ残す理由を考える。人のために動いた後は、自分を休ませる。",
+  "手を動かして何でもこなすので、引き受けすぎて抱えこみやすい。自分でやったほうが早いと思って、人に任せられない。癒やす力があるぶん、相手の不調まで背負いやすい。やり終えたことを数えて、自分をねぎらう。",
+  "美しさと完璧を求めて、自分にも人にも厳しくなりやすい。仕上がりに納得できず、出すのが遅れることがある。比べる相手を他人にせず、昨日の自分にする。きれいに整えるのと同じくらい、休むことを大事にする。",
+  "使命感が強く、正しいと思うと一人で突き進む。感情の波が大きく、気持ちを抑えこむと体に出やすい。泣く・話す・書くなど、気持ちを流す方法を持つ。新しい流れに乗るときは、周りに理由を伝えてから動く。",
+  "身内への愛情が深いぶん、内と外を分けすぎることがある。信じた相手に尽くしすぎて、裏切られると強く傷つく。「この人のために」が自分を苦しめていないかを見る。家族や仲間のほかにも、気楽に話せる相手を持つ。",
+  "楽しさを大事にするぶん、重い場面や地道な作業から逃げたくなる。冗談で本音をごまかして、相手に真剣さが伝わらないこともある。大事な話は、ふざけずに一度言葉にする。飽きたときこそ、区切りまでやりきる。",
+  "自分で決めたい気持ちが強く、人の助言を聞き入れにくい。正しさを語るうちに、相手を変えようとしてしまうことがある。自分の自由と同じように、相手の自由も尊重する。迷ったときは、信頼できる人の意見を一つ取り入れる。",
+  "人や社会のために動くうちに、身近な人や自分の生活が後回しになりやすい。新しい場所に心が向いて、今いる場所に落ち着けないこともある。遠くへ行く前に、足元の約束を果たす。好奇心のままに予定を詰めこみすぎない。",
+  "人を受け入れる力があるぶん、無理な頼みも抱えこみやすい。我慢を重ねて、ある日急に気持ちが切れることがある。許すことと、黙って耐えることは違う。嫌なことは嫌と、早めに伝える。",
+  "先を見通す力が強いぶん、目の前の人の気持ちを見落とすことがある。批評が鋭く、相手の欠点が先に目に入りやすい。高いところから見るのに加えて、相手の近くに降りて話を聞く。考えすぎて目や肩が疲れやすいので、画面から離れる時間をとる。",
+  "挑む気持ちが強く、いつも戦っている状態になりやすい。問いを立てるのが得意なぶん、人を問い詰める形になることがある。勝つことより、何のために戦うかを確かめる。張りつめた気持ちを、休みの日に意識してゆるめる。",
+  "流れやタイミングを大事にするぶん、偶然に頼りすぎて準備がおろそかになることがある。仲間との一体感を求めて、人に合わせすぎることも。自分の舵は自分で握る、と決めておく。気持ちが揺れたら、自然の中で体を動かす。",
+  "物事をありのままに見るぶん、白黒をはっきりさせすぎて、人を追いつめることがある。自分の欠点にも厳しく、必要以上に責めやすい。正しさより、相手がどう受け取るかを一度考える。身の回りを整えると、心も落ち着く。",
+  "周りを巻きこむ力が強く、気づくと人を振り回していることがある。気分の変化が激しく、怒りが一気に出やすい。大きな変化を起こす前に、巻きこむ人に先に話す。疲れがたまると爆発しやすいので、こまめに休む。",
+  "周りを照らそうとするぶん、自分の弱さを見せられない。期待に応えようとして、無理を重ねやすい。いつも明るくいなくてよいと、自分に許す。自分を照らしてくれる人を、近くに持っておく。",
 ];
 
 // 紋章の色グループ: 赤=始動/白=洗練/青=変容/黄=熟成
@@ -6287,6 +6514,23 @@ const MAYA_TONES = [
   "協力する力。人と繋がり、共に創る。",
   "超越する力。サイクルを完成させ、次の次元に進む。",
 ];
+// 音は「どのように」、紋章は「何を」（2026-10-19）。紋章のキーワードとつなげて、KINごとの1文にする
+const TONE_HOW = [
+  "",
+  "一つの目的に人と物を集めるやり方で発揮する。始める人、旗を立てる人として動くと力が出る。",
+  "二つの間で比べ、見極めるやり方で発揮する。迷いや対立は、選ぶ力を磨く材料になる。",
+  "人のために動き、場を活気づけるやり方で発揮する。誰かの役に立つ場面で一番力が出る。",
+  "形や仕組みを決めるやり方で発揮する。ルールや基準をつくると、才能が安定して出る。",
+  "中心に立って人に広げるやり方で発揮する。人をまとめ、方針を示す立場で力が出る。",
+  "バランスを取り、整えるやり方で発揮する。偏った場をならす役で、才能が自然に出る。",
+  "人の心に響かせるやり方で発揮する。直感で感じたことを言葉や形にすると、相手に届く。",
+  "全体の調和の中で役割を果たすやり方で発揮する。チームの一員として動くほど、才能が生きる。",
+  "目的に向かって粘り強く貫くやり方で発揮する。長い時間をかけて一つをやり遂げると、才能が花開く。",
+  "思い描いたものを、現実の形にするやり方で発揮する。作品・成果物・数字として残すと評価される。",
+  "古いものを手放し、身軽になるやり方で発揮する。やめる・整理することで、新しい流れを呼ぶ。",
+  "人と協力し、知恵を持ち寄るやり方で発揮する。一人で抱えず、相談の場をつくると力が出る。",
+  "一つの流れを最後まで仕上げ、次へ渡すやり方で発揮する。終わらせる・まとめる役で、才能が形になる。",
+];
 
 function renderMaya(){
   const d = currentData;
@@ -6488,6 +6732,7 @@ function renderMaya(){
     </div>
     <div class="card">
       <p><strong style="color:var(--gold);">音${m.tone}のあなた:</strong> ${tone}</p>
+      <p style="margin-top:10px;"><strong style="color:var(--gold);">紋章と音を合わせると:</strong> 太陽の紋章「${seal.n}」の「${seal.k.split("・")[0]}」の力を、${TONE_HOW[m.tone] || ""}（KIN${m.kin}）</p>
       <p style="margin-top:10px; color:var(--muted); font-size:14px;">${m.tone > 1 ? `音${m.tone-1}（${MAYA_TONES[m.tone-1].split("。")[0]}）が前段階、` : ""}${m.tone < 13 ? `音${m.tone+1}（${MAYA_TONES[m.tone+1].split("。")[0]}）が次の段階。` : ""}音${m.tone}は${
         m.tone <= 4 ? "サイクルの前半。まだ形になる前の「種を蒔く」段階にいる。" :
         m.tone <= 8 ? "サイクルの中盤。人と関わりながら「育てる」段階にいる。" :
@@ -6651,14 +6896,9 @@ function renderMaya(){
     銀河の音${m.tone}は${m.tone % 2 === 1 ? "奇数＝能動的。自分から関係を作りに行くタイプ。" : "偶数＝受動的。相手からのアプローチを待つタイプ。"}<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽の紋章とウェイブスペルの組み合わせ＋銀河の音の奇偶から）</span></p></div>
 
     <div class="section-title">注意すべき点</div>
-    <div class="card"><p>${seal.n}の人が陥りやすいパターン: ${
-      m.seal < 5 ? "エネルギーが強すぎて周囲を圧倒してしまうことがある。「引く」タイミングを意識する。" :
-      m.seal < 10 ? "変化を求めすぎて安定を手放してしまうことがある。「続ける」ことの価値を忘れない。" :
-      m.seal < 15 ? "理想が高すぎて現実とのギャップに苦しむことがある。「今ここ」を大切にする。" :
-      "精神世界に傾きすぎて現実が疎かになることがある。地に足をつける時間を意識的に作る。"
-    }<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽の紋章「${seal.n}」の裏面＝強みが行きすぎた時に出る傾向）</span></p></div>
+    <div class="card"><p>${MAYA_CARE[m.seal] || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽の紋章「${seal.n}」（${seal.k}）の強みが行きすぎた時に出やすい形）</span></p></div>
 
-    <div class="note">※ マヤ暦（ツォルキン暦）の簡略版です。</div>
+    <div class="note">※ 日本で広く使われている「ドリームスペル（13の月の暦）」の数え方です（KIN・紋章・銀河の音・ウェイブスペル・ガイドなどはこの方式の言葉）。古代マヤで使われていた暦の数え方とは別のもので、同じ日でもKINが違います。うるう日（2月29日）は前の日と同じKINとして数えます。</div>
     `}
   `;
 }
@@ -6666,11 +6906,12 @@ function renderMaya(){
 /* ============ 宿曜占星術 ============ */
 
 const SHUKUYO_27 = [
-  {n:"昴宿",k:"すばるしゅく",desc:"華やかで社交的。人を惹きつける魅力がある。芸能・ファッションに縁。プライドが高い。",element:"金"},
-  {n:"畢宿",k:"ひつしゅく",desc:"堅実で忍耐強い。コツコツ努力して成果を出す。信頼される実務家。頑固な面も。",element:"金"},
-  {n:"觜宿",k:"ししゅく",desc:"知的で研究熱心。細部にこだわる完璧主義。言葉が鋭く、批評力がある。",element:"金"},
+  // element＝七曜（宿曜経の28宿の七曜から牛宿を除いた並び：昴日 畢月 觜火 参水 井木 鬼金 柳土 …）。2026-10-19 昴・畢・觜・井・女の5つを直した
+  {n:"昴宿",k:"すばるしゅく",desc:"華やかで社交的。人を惹きつける魅力がある。芸能・ファッションに縁。プライドが高い。",element:"日"},
+  {n:"畢宿",k:"ひつしゅく",desc:"堅実で忍耐強い。コツコツ努力して成果を出す。信頼される実務家。頑固な面も。",element:"月"},
+  {n:"觜宿",k:"ししゅく",desc:"知的で研究熱心。細部にこだわる完璧主義。言葉が鋭く、批評力がある。",element:"火"},
   {n:"参宿",k:"さんしゅく",desc:"行動力と決断力の星。リーダーシップがあり、困難に立ち向かう。短気な面も。",element:"水"},
-  {n:"井宿",k:"せいしゅく",desc:"計画性と実行力。頭脳明晰で戦略的。組織の中で力を発揮する。",element:"水"},
+  {n:"井宿",k:"せいしゅく",desc:"計画性と実行力。頭脳明晰で戦略的。組織の中で力を発揮する。",element:"木"},
   {n:"鬼宿",k:"きしゅく",desc:"最も吉とされる宿。創造性と霊感に優れる。独自の世界観を持つ天才肌。",element:"金"},
   {n:"柳宿",k:"りゅうしゅく",desc:"感受性が鋭く、芸術的才能がある。感情の起伏が激しい。執着心が強い。",element:"土"},
   {n:"星宿",k:"せいしゅく",desc:"華やかで目立つ存在。リーダーシップと表現力。自信家で野心的。",element:"日"},
@@ -6685,7 +6926,7 @@ const SHUKUYO_27 = [
   {n:"尾宿",k:"びしゅく",desc:"忍耐力と集中力。一つのことを極める力がある。職人気質。",element:"火"},
   {n:"箕宿",k:"きしゅく",desc:"自由奔放で型にはまらない。独自の道を行く。風のように動く。",element:"水"},
   {n:"斗宿",k:"としゅく",desc:"信念と意志の星。困難に負けない精神力。宗教・哲学に縁がある。",element:"木"},
-  {n:"女宿",k:"じょしゅく",desc:"努力家で勤勉。地道な積み重ねで成功する。サービス精神旺盛。",element:"金"},
+  {n:"女宿",k:"じょしゅく",desc:"努力家で勤勉。地道な積み重ねで成功する。サービス精神旺盛。",element:"土"},
   {n:"虚宿",k:"きょしゅく",desc:"学問と精神性の星。深い思索力がある。理想主義で現実離れすることも。",element:"日"},
   {n:"危宿",k:"きしゅく",desc:"冒険と変化の星。危険を恐れず挑戦する。波乱万丈だが、そこに成長がある。",element:"月"},
   {n:"室宿",k:"しつしゅく",desc:"建設と破壊の星。ゼロから何かを作る力がある。エネルギッシュ。",element:"火"},
@@ -6694,6 +6935,119 @@ const SHUKUYO_27 = [
   {n:"婁宿",k:"ろうしゅく",desc:"計画と実行の星。物事を始めるのに最適。仕切り上手で面倒見がいい。",element:"金"},
   {n:"胃宿",k:"いしゅく",desc:"開拓と冒険の星。新しいことを始める力がある。負けず嫌いで競争心が強い。",element:"土"},
 ];
+
+// 宿ごとの「仕事・人間関係・注意すべき点」（2026-10-19 井内さん「その人だけの文にする」）。
+//   旧版は七曜や6つの組でまとめて引いていて、27宿で仕事4通り・人間関係7通り・注意1通りだった
+const SHUKUYO_READ = {
+  "昴宿": {
+    work: "品のよさと美意識が、そのまま仕事の価値になる。ブランド・ファッション・美容・広報・文化事業など、「見せ方」で評価が決まる場で力を出す。雑な現場や数字に追われ続ける仕事では消耗しやすい。看板のある組織で、早いうちに専門と顔を持つと伸びが速い。",
+    people: "人当たりがよく、自然と人が集まる。ただ心を開く相手は選ぶので、近づいた人ほど「意外と距離がある」と感じることがある。礼儀や言葉づかいの雑な人は苦手。尊敬できる相手には、とても誠実に尽くす。",
+    care: "プライドが傷つくと、表には出さずに相手との縁をすっと切る。周りは理由が分からず、誤解が残りやすい。嫌だったことは、その場で小さく言葉にしておく。体面を気にして、助けを求めるのが遅れる点にも気をつける。" },
+  "畢宿": {
+    work: "決めたことを最後までやりきる粘りが一番の武器。経理・技術職・製造・不動産・公務など、積み上げが評価される仕事で長く信頼される。立ち上がりは遅いが、3年、5年と続けるほど差がつく。短期で結果を求められる職場や、方針がころころ変わる組織は合わない。",
+    people: "口数は多くないが、一度信頼した相手とは何十年も付き合う。約束を守らない人、調子のいいことを言う人には厳しい。自分のペースを乱されるのを嫌うので、急な誘いや予定変更が続く相手とは疲れやすい。",
+    care: "一度こうと決めると、周りが変わっても考えを変えにくい。正しかったやり方が古くなっていないか、年に一度は見直す。我慢強さが裏目に出て、限界まで不満をため込みやすい。爆発する前に、小出しに伝える習慣を持つ。" },
+  "觜宿": {
+    work: "言葉と分析の力で稼ぐ人。営業・交渉・編集・研究・品質管理・コンサルなど、話す・書く・見抜くが中心の仕事で評価される。細部のミスに気づけるので、最後の確認役を任されやすい。一から十まで指示される仕事より、自分の判断で詰められる仕事が向く。",
+    people: "話し上手で、場の空気を読んで言葉を選べる。損得の勘がよく、付き合う相手を自然に見極めている。一方で鋭いひと言が相手に深く刺さることがあり、本人が思うより怖がられている場合がある。",
+    care: "正しいことを、正しく言いすぎる。指摘が的確なほど、相手は反発して聞かなくなる。言う前に「これは相手の役に立つか」を一度考える。完璧を求めて仕上げに時間をかけすぎ、締め切りを逃すことにも気をつける。" },
+  "参宿": {
+    work: "壁があるほど燃える開拓者。新規事業・営業の立ち上げ・技術開発・現場の指揮など、前例のない仕事で力を出す。決めるのが速く、迷っている組織を動かせる。決まった手順を毎日なぞる仕事では、退屈して力が落ちる。",
+    people: "裏表がなく、思ったことをはっきり言う。そのまっすぐさに惹かれて人が集まる一方、ぶつかる相手も多い。議論は好きだが、言い負かすことが目的になると味方が減る。年下や後輩の面倒をよく見る。",
+    care: "腹が立つと、その場で言葉や態度に出る。勢いで書いたメールや辞表は、一晩おいてから出す。古いものを壊すのは得意だが、壊した後を整える人がいないと仕事が続かない。整える役の人を、近くに置いておく。" },
+  "井宿": {
+    work: "筋道を立てて考え、計画どおりに動かす力が強い。企画・経営企画・法務・エンジニア・研究など、理屈で組み立てる仕事が向く。データや根拠をもとに話すので、上の人に信頼されやすい。理屈の通らない指示が続く職場では疲れる。",
+    people: "公平で、誰に対しても同じ態度で接する。ただ議論になると理屈で相手を追い込みやすく、「冷たい」と受け取られることがある。気持ちを聞いてほしい相手には、正しい答えより先に相づちを打つ。",
+    care: "頭で納得しないと動けず、気持ちの問題を後回しにしがち。自分の疲れや寂しさにも気づくのが遅い。考えが正しくても、伝え方で損をしていないかを振り返る。理屈で勝って人間関係で負けないように。" },
+  "鬼宿": {
+    work: "ひらめきと純粋な好奇心で、人と違う答えを出せる。デザイン・音楽・企画・教育・福祉・医療など、感性と人を思う気持ちが活きる仕事で輝く。ルールで縛られるより、自由に試せる場のほうが成果が出る。損得より「面白いか」「誰かのためになるか」で選ぶと迷わない。",
+    people: "無邪気で裏表がなく、人に警戒されにくい。困っている人を放っておけず、頼まれると断れない。気持ちが移りやすく、熱中していた関係から急に離れることもある。",
+    care: "人を信じやすく、うまい話や寄りかかってくる相手に振り回されやすい。お金や時間を貸す前に、信頼できる人に一度相談する。気分で予定を変えると、周りの信用を少しずつ失う。決めたことを守る日を、意識して作る。" },
+  "柳宿": {
+    work: "好きになったことに、驚くほど深く集中できる。研究・職人・料理・芸術・専門職など、一つを掘り下げる仕事で頭角を現す。興味のない仕事は手が止まりやすいので、仕事の中に「好き」を一つでも見つけるのが大事。人の面倒をよく見るので、チームの世話役としても頼られる。",
+    people: "好き嫌いがはっきりしていて、好きな人にはとことん尽くす。情が深いぶん、相手の小さな変化にも敏感で、気持ちが揺れやすい。一度嫌いになった相手とは、なかなか元に戻れない。",
+    care: "思い入れが強いぶん、人にも物事にも執着しやすい。終わった関係や失敗をいつまでも考え続けて、次に進めないことがある。気持ちが荒れた日は大事な判断をしない。書き出すなど、感情を外に出す方法を持っておく。" },
+  "星宿": {
+    work: "人の上に立ち、自分の名前で勝負できる仕事が向く。独立・経営・管理職・講師・表現の仕事など、責任と裁量が大きいほど力が出る。若いうちは苦労が多いが、経験を重ねるほど評価が上がる晩成型。人の下で細かく管理されると、やる気を失う。",
+    people: "堂々としていて頼られやすい。面倒見もよいが、自分のやり方を通したい気持ちが強く、周りを従わせる形になりやすい。本当は寂しがりなのに、弱みを見せるのが苦手。",
+    care: "自信が強いぶん、人の意見を聞き流しやすい。耳の痛いことを言ってくれる人を、遠ざけないようにする。一人で背負いこんで限界まで頑張る癖もある。任せられる仕事は任せ、休む日を先に決めておく。" },
+  "張宿": {
+    work: "人前に立ち、場を明るくする力が仕事になる。接客・営業・イベント・広報・芸能・人事など、人と会う量が多い仕事で伸びる。人脈から仕事が生まれやすいので、紹介や付き合いを大切にするほど道が開ける。一人で黙々と続ける作業が長いと元気がなくなる。",
+    people: "華があって、人を楽しませるのが上手。集まりの中心にいることが多く、友人も多い。周りからどう見られるかを気にするので、無理に明るく振る舞って疲れることもある。",
+    care: "見栄や付き合いで、お金と時間を使いすぎやすい。誘いを全部受けず、本当に会いたい人を選ぶ。褒められると動けるぶん、評価されないと急にやる気を失う。自分で自分を認められる目標を持っておく。" },
+  "翼宿": {
+    work: "遠くへ行くこと、広く動くことが運を開く。貿易・旅行・航空・物流・語学・海外勤務など、移動や外とのやりとりが多い仕事が向く。向上心が強く、学び続けるほど力がつく。同じ場所に縛られる仕事が長く続くと、閉じこめられた感じが強くなる。",
+    people: "まじめで誠実、約束を守る人として信頼される。ただ自由を大事にするので、束縛の強い相手とは長続きしにくい。離れて暮らす人や遠くの友人とも、縁が切れない。",
+    care: "理想が高く、自分にも他人にも厳しくなりやすい。今いる場所の不満から、準備のないまま飛び出してしまうこともある。動く前に、行き先とお金の段取りを決める。一つのことを最後までやりきる経験も、意識して作る。" },
+  "軫宿": {
+    work: "人の気持ちを読み、相手に合わせて動ける。営業・接客・秘書・調整役・商売など、人と人の間に立つ仕事で重宝される。慎重に準備するので、大きなミスが少ない。即決を求められる場面が続くと、気疲れしやすい。",
+    people: "人当たりがやわらかく、どんな相手ともそつなく付き合える。相手の立場を考えすぎて、自分の本音を言えないことが多い。八方美人と見られないよう、大事な場面では立場をはっきりさせる。",
+    care: "迷っているうちに機会を逃しやすい。決める期限を先に決めて、その日に選ぶ。周りに合わせすぎて、自分が何をしたいのか分からなくなることもある。月に一度は、一人で自分のための時間をとる。" },
+  "角宿": {
+    work: "センスと社交性で、人と物をつなぐ仕事が向く。デザイン・ファッション・サービス業・企画・営業など、明るさと見た目の感覚が活きる場で評価される。対立する人の間を取り持つ調整役も得意。地味な作業が続くと飽きやすいので、変化のある仕事を選ぶ。",
+    people: "明るくおしゃれで、人を楽しませるのが上手。誰とでも仲よくなれる一方、深い話を避けて表面的な付き合いが増えることもある。楽しいことに誘われると、断るのが苦手。",
+    care: "楽しいほうへ流れやすく、大事な用事を後回しにしがち。遊びとお金の使い方に、自分で上限を決めておく。いろいろな人にいい顔をするうちに、本当の味方が分からなくなることもある。困ったときに頼れる人を、何人か決めておく。" },
+  "亢宿": {
+    work: "筋を通す強さが、そのまま信頼になる。法律・監査・報道・医療・研究・専門職など、正しさが問われる仕事で力を発揮する。上の人にも言うべきことを言えるので、改革の役を任されることがある。理不尽な命令に従うことを求められる職場は合わない。",
+    people: "誰にでも公平で、弱い立場の人をかばう。ただ相手の間違いを見過ごせず、ぶつかることが多い。少数の、本当に信頼できる人と深く付き合う。",
+    care: "自分の正しさを曲げないあまり、孤立しやすい。正しいかどうかと同じくらい、相手が受け取れる言い方かを考える。周りと違う意見を出すときは、一人で抱えず味方を作ってから動く。気を張り続けるので、心と体を休める時間を意識してとる。" },
+  "氐宿": {
+    work: "穏やかに見えて、粘り強く目標を追い続ける力がある。人の和を保ちながら、長い時間をかけて大きな成果を出す。総務・人事・不動産・家業・地域の仕事など、信頼と継続が実を結ぶ場が向く。結果を急がされるより、腰を据えて取り組める環境で伸びる。",
+    people: "人との和を大事にし、周りを安心させる存在。家族や身近な人をとても大切にする。一方で、自分の考えを内に持ったまま表に出さず、そのまま通そうとすることがある。",
+    care: "欲しいものへのこだわりが強いのに、それを口に出さないので、「何を考えているか分からない」と思われやすい。望んでいることは言葉で伝える。食べすぎ・働きすぎなど、ほどほどで止められない面にも気をつける。" },
+  "房宿": {
+    work: "人とお金に恵まれやすく、任されたものを大きく育てる力がある。経営・金融・営業・不動産・人を束ねる仕事で伸びる。周りの引き立てで道が開けることが多いので、目上の人との縁を大切にする。目立つ立場を任されるほど力が出る。",
+    people: "人を惹きつける魅力があり、自然と支持者が集まる。人づきあいのバランス感覚もよい。恵まれた立場に慣れて、周りの支えを当たり前と感じてしまわないように。",
+    care: "何でもうまくいきやすいぶん、苦労への備えが薄くなる。調子のいいときこそ、蓄えと次の手を用意しておく。人から頼られて抱えこみ、断れなくなることもある。引き受ける前に、自分の時間がどれだけ残るかを確かめる。" },
+  "心宿": {
+    work: "人の本音を見抜き、相手に合わせて言葉を選べる。営業・接客・カウンセリング・演劇・マーケティングなど、人の心を読む仕事で力を出す。相手によって顔を変えられるので、交渉の場で強い。人と関わらない単純作業より、人と向き合う仕事が向く。",
+    people: "愛嬌があり、初対面でも相手の懐に入るのがうまい。ただ本心は簡単に見せず、親しい人にも隠していることがある。相手の気持ちが分かりすぎて、気苦労が多い。",
+    care: "周りに合わせて顔を使い分けるうちに、自分の本音を見失いやすい。気を使いすぎた日は、一人になる時間をとる。人の裏を読みすぎて、疑い深くなることにも気をつける。信じると決めた相手は、細かく探らない。" },
+  "尾宿": {
+    work: "一つのことを、誰よりも深く長く続けられる。職人・技術者・研究者・医療・スポーツなど、極めるほど価値が上がる仕事で一流になれる。目標が決まると驚くほどの集中力を出す。あれこれ手を広げる仕事では、力が散ってしまう。",
+    people: "口数は少なくても、信頼した相手には一途で、裏切らない。仲間を大事にする親分肌の面もある。気に入らない相手には頑固になり、歩み寄らないことがある。",
+    care: "こだわりが強く、やり方を変えるのが苦手。続けることが目的になって、引き際を逃すことがある。「今もこれでよいか」を見直す時期を先に決めておく。根を詰めすぎて体を壊しやすいので、休む日を予定に入れる。" },
+  "箕宿": {
+    work: "大胆で、人がためらうことに踏み出せる。起業・営業・投資・企画・飲食など、勢いと度胸が活きる仕事で結果を出す。型にはめられると力が出ないので、裁量のある場を選ぶ。失敗しても立ち直りが早く、何度でも挑戦できる。",
+    people: "気前がよく、さっぱりしていて付き合いやすい。目上の人にもひるまず意見を言う。自由を大事にするので、干渉の多い相手とは衝突しやすい。",
+    care: "勢いで大きな決断をしやすく、お金の出入りが激しくなりがち。大きな買い物や契約は、一晩おいて決める。思ったことをすぐ口にして、相手を傷つけることもある。言い方を一段やわらげると、敵がぐっと減る。" },
+  "斗宿": {
+    work: "信念を持って人を導く力がある。経営・教育・宗教・政治・研究など、理想や志を形にする仕事で力を発揮する。困難な状況ほど粘り強く、人がやめた後も続けられる。目先の利益のための仕事には、気持ちが入りにくい。",
+    people: "筋が通っていて頼りにされ、慕ってくる人が多い。目上の人に対しても、納得できないことには従わない反骨心がある。理想を人にも求めて、厳しくなりすぎることもある。",
+    care: "信念が強いぶん、違う考えを受け入れにくい。「自分の正しさ」と「相手の正しさ」は両方あると考える。高い目標を掲げて休まず走り続けるので、燃え尽きないよう区切りを作る。一人で背負う前に、頼れる仲間に分ける。" },
+  "女宿": {
+    work: "まじめにコツコツ積み上げ、確かな実力をつける。事務・経理・教育・専門職・管理職など、正確さと継続が評価される仕事が向く。学ぶことが好きで、資格や専門知識が武器になる。いい加減な仕事をする人と組むと、強いストレスになる。",
+    people: "礼儀正しく、面倒見がよい。頼まれたことはきちんとやり遂げるので、信頼される。ただ自分にも他人にも厳しく、相手のだらしなさが許せないことがある。",
+    care: "プライドが高く、人に弱みを見せられない。困っても一人で抱えこみ、気づいたときには限界ということがある。小さなうちに相談する。完璧にやろうとして疲れきらないよう、「八割でよい」仕事を決めておく。" },
+  "虚宿": {
+    work: "深く考え、物事の本質をつかむ力がある。研究・執筆・哲学・宗教・芸術・システムの設計など、頭の中で世界を組み立てる仕事が向く。表に出るより、考えを形にする裏方で力を出す。決まりきった作業の繰り返しや、意味を感じられない仕事では消耗する。",
+    people: "繊細で優しく、相手の心の痛みが分かる。ただ気持ちの浮き沈みがあり、人と会いたい日と離れたい日の差が大きい。分かり合える少数の人と、深く付き合う。",
+    care: "理想と現実の差に悩み、考えこんで動けなくなることがある。考えるのは一日と決めて、小さく試してみる。不安が強いときは、一人で結論を出さない。寝る・食べるのリズムを崩さないことが、心を安定させる。" },
+  "危宿": {
+    work: "新しいもの好きで、変化の多い仕事ほど生き生きする。企画・マスコミ・IT・旅行・サービス業・営業など、人と会い、流行に触れる仕事が向く。同じことの繰り返しは苦手なので、数年ごとに役割や環境を変えると伸び続ける。人を楽しませる力があり、場を盛り上げる役で重宝される。",
+    people: "社交的で、誰とでもすぐ打ち解ける。遊び心があり、一緒にいて楽しい人と思われる。ただ気分の波があり、昨日と今日で態度が違うと受け取られることがある。",
+    care: "飽きっぽさと気分の波が、信用を落とす原因になりやすい。始めたことは、区切りまでやってから次に移る。刺激を求めて危ない橋を渡りやすいので、お金・健康・人間関係で取り返しのつかない賭けはしない。気分が沈んだ日は、予定を減らして整える。" },
+  "室宿": {
+    work: "強い行動力で、ゼロから物事を立ち上げる。起業・建設・スポーツ・営業・新規事業など、力強さと決断力が求められる仕事で結果を出す。先頭に立って引っ張る役が合う。細かい調整や根回しが続く仕事は、もどかしく感じやすい。",
+    people: "豪快で頼もしく、周りを巻きこむ力がある。困っている仲間を全力で助ける。一方で押しが強く、相手の気持ちを置き去りにして進めてしまうことがある。",
+    care: "勢いが強すぎて、周りがついてこられないことがある。決める前に、一言相手の考えを聞く。壊して作り直すのは得意だが、壊さなくてよいものまで壊していないかを確かめる。体力に自信があるぶん、無理をして体を壊しやすい。" },
+  "壁宿": {
+    work: "人を支え、表に立つ人を陰から成功させる力がある。秘書・参謀・編集・研究・文章や絵の仕事など、縁の下で力を出す仕事が向く。表現の才能もあり、文章や作品で評価されることがある。前に出て人を引っ張る役を長く続けると、疲れやすい。",
+    people: "穏やかで誠実、相手に安心感を与える。頼まれると嫌と言えず、つい引き受けてしまう。本心をあまり見せないので、何を考えているか分かりにくいと思われることもある。",
+    care: "人のために動くことに慣れて、自分の望みを後回しにしやすい。自分のための時間と目標を、意識して持つ。尽くしすぎて、相手に都合よく使われていないかを見る。たまった不満は、信頼できる人に話して外に出す。" },
+  "奎宿": {
+    work: "品格と教養が、そのまま信用になる。教育・研究・公務・出版・法律・医療など、まじめさと知識が求められる仕事で長く評価される。礼儀正しく、目上の人から引き立てられやすい。ルールのない職場や、品のない駆け引きが多い仕事は合わない。",
+    people: "温厚で誠実、多くの人から好かれる。人を区別せず丁寧に接する。ただ本音を出すのに時間がかかり、親しくなるまで距離があると思われることもある。",
+    care: "まじめすぎて、融通がきかないと見られることがある。決まりどおりにいかない場面では、少し肩の力を抜く。人に頼られると断れず、気苦労をため込みやすい。体面を気にして、本当の気持ちを我慢しすぎないように。" },
+  "婁宿": {
+    work: "段取りよく人と物を動かす、仕切りの名人。事務局・プロジェクト管理・営業・医療・介護・サービス業など、気配りと手際が求められる仕事で欠かせない人になる。器用で何でもこなせるので、まとめ役を任されやすい。人の世話をする中で、自分も成長していく。",
+    people: "面倒見がよく、気配りが細かい。困っている人にすぐ手を貸すので、頼りにされる。ただ世話を焼きすぎて、相手には「口出しが多い」と感じられることもある。",
+    care: "器用なぶん、何でも引き受けて忙しくなりすぎる。自分の手を離せる仕事は、人に任せる。人の世話に追われて、自分の休みと楽しみがなくなりやすい。尽くした分の見返りを期待すると、苛立ちのもとになる。" },
+  "胃宿": {
+    work: "強いエネルギーで、自分の道を切り開く。独立・営業・スポーツ・研究・新規開拓など、競争があり、成果がはっきり出る仕事で燃える。目標が高いほど力を出す。人に指図されるより、自分で決めて動ける立場が合う。",
+    people: "自分の考えをはっきり持ち、物おじしない。頼もしく、仲間を引っ張る。一方で負けず嫌いが強く出ると、身近な人まで競争相手に見えてしまう。",
+    care: "自分の思いどおりに進めたい気持ちが強く、周りと衝突しやすい。勝ち負けにこだわる場面と、譲る場面を分ける。一人で突き進むうちに、気づくと孤立していることがある。食べすぎ・飲みすぎなど、勢いで体に負担をかけやすい点にも気をつける。" },
+};
 
 // 宿曜の宿（旧暦方式）: 旧暦の各月1日の宿（月宿傍通暦 1月室・2月奎・3月胃・4月畢・5月参・6月鬼・7月張・8月角・9月氐・10月心・11月斗・12月虚）から日数を数える。閏月は同じ番号の月と同じ
 const SHUKUYO_MONTH_START = [0, 22, 24, 26, 1, 3, 5, 8, 11, 13, 15, 18, 20];
@@ -6856,7 +7210,7 @@ function renderShukuyo(){
     <div style="text-align:center; margin:30px 0;">
       <div style="font-size:64px; color:var(--gold); font-family:'Noto Serif JP',serif; font-weight:700;">${shuku.n}</div>
       <div style="font-size:18px; color:var(--muted); margin-top:8px;">${shuku.k}</div>
-      <div style="font-size:14px; color:var(--muted); margin-top:4px;">27宿の${idx+1}番目 ／ ${shuku.element}の属性</div>
+      <div style="font-size:14px; color:var(--muted); margin-top:4px;">27宿の${idx+1}番目 ／ 七曜は${shuku.element}曜</div>
     </div>
     <div class="card hi"><p>${shuku.desc}</p></div>
 
@@ -6894,23 +7248,10 @@ function renderShukuyo(){
     })()}
 
     <div class="section-title">仕事・キャリアの方向性</div>
-    <div class="card"><p>${
-      ["昴","畢","觜","亢","女","婁"].includes(shuku.n.charAt(0)) ? "堅実で信頼される仕事ぶりが評価される。専門性を磨くほど価値が上がるタイプ。組織の中で着実にポジションを築く。" :
-      ["参","井","星","房","室","胃"].includes(shuku.n.charAt(0)) ? "リーダーシップと行動力で道を切り拓く。組織の先頭に立つ仕事が合う。起業や新規事業にも縁がある。" :
-      ["鬼","柳","張","心","危","壁"].includes(shuku.n.charAt(0)) ? "創造性と感性を活かす仕事で輝く。芸術・表現・癒しの分野に縁がある。人の心に触れる仕事が天職。" :
-      "知性と分析力を活かす仕事が天職。研究・教育・コンサルティングに向く。深く考える力が武器。"
-    }<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の宿の属性「${shuku.element}」と性格傾向から）</span></p></div>
+    <div class="card"><p>${(SHUKUYO_READ[shuku.n] || {}).work || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命宿＝${shuku.n}の性質から）</span></p></div>
 
     <div class="section-title">人間関係の傾向</div>
-    <div class="card"><p>${
-      shuku.element === "金" ? "義理堅く、一度結んだ縁を大切にする。ただし期待が裏切られると深く傷つく。" :
-      shuku.element === "水" ? "柔軟で適応力が高い。誰とでもうまくやれるが、深い関係を築くのに時間がかかる。" :
-      shuku.element === "木" ? "成長志向で、一緒にいて刺激を与え合える関係を好む。停滞した関係は離れる傾向。" :
-      shuku.element === "火" ? "情熱的で、好き嫌いがはっきりしている。合う人とは深く、合わない人とは距離を置く。" :
-      shuku.element === "土" ? "安定した関係を好む。信頼を積み重ねるタイプで、長い付き合いほど絆が深まる。" :
-      shuku.element === "日" ? "華やかで人を惹きつける。注目されることで力を発揮するが、嫉妬を買いやすい面も。" :
-      "繊細で共感力が高い。相手の気持ちを察する力があるが、影響を受けやすい面も。"
-    }<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の属性「${shuku.element}」の対人パターンから）</span></p></div>
+    <div class="card"><p>${(SHUKUYO_READ[shuku.n] || {}).people || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：本命宿＝${shuku.n}の人との関わり方から。特定の相手との相性は下の「相性について」と上の三九の秘法で見る）</span></p></div>
 
     <div class="section-title">相性について</div>
     ${dataB && currentMode !== "compat" ? (() => {
@@ -6953,7 +7294,7 @@ function renderShukuyo(){
     </div>`}
 
     <div class="section-title">注意すべき点</div>
-    <div class="card"><p>宿曜では月の位置が全てを決めるため、「感情」と「無意識の反応パターン」に最も強く影響します。ストレスを感じた時の反応パターンを自覚しておくと、人間関係のトラブルを未然に防げます。<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の裏面＝${shuku.element}の属性が行きすぎた時に出る傾向）</span></p></div>
+    <div class="card"><p>${(SHUKUYO_READ[shuku.n] || {}).care || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：${shuku.n}の強みが行きすぎた時に出やすい形。宿曜は生まれた日の月の位置で宿を決めるので、気持ちの動き方や、とっさの反応に表れやすい）</span></p></div>
 
     <div class="note">※ 宿曜占星術の簡易版です。相性は三九の秘法（昴宿から順に数える並び）で判定し、近距離・中距離・遠距離も出しています。宿は旧暦の日付から引く伝統的な方式（旧暦の各月1日の宿から数える）で出しています。旧暦は天文暦から朔（新月）と中気を求めて作った日本時間の暦です。安壊などの「どちらが揺さぶる側か」は流派で解釈が分かれます。</div>
     `}
@@ -6983,6 +7324,59 @@ const JYOTISH_RASHIS = [
   {n:"クンバ",en:"Kumbha",jp:"水瓶座",lord:"土星",desc:"革新と人道。集合意識。"},
   {n:"ミーナ",en:"Meena",jp:"魚座",lord:"木星",desc:"霊性と慈悲。境界の溶解。"},
 ];
+
+// ラーシごとの「仕事（太陽のラーシで読む）・人間関係・注意すべき点（月のラーシで読む）」（2026-10-19 井内さん「その人だけの文にする」）
+//   旧版は支配星（7つ）で引いていて、仕事7通り・注意7通りだった。高揚・減衰（太陽＝牡羊で高揚・天秤で減衰、月＝牡牛で高揚・蠍で減衰）も文に入れた
+const JYOTISH_READ = {
+  "メーシャ": {
+    work: "太陽が高揚する位置。自分の判断で先頭に立つ仕事で最も力が出る。経営・独立・警察・消防・スポーツ・外科など、決断と勇気が問われる場が向く。上の人の顔色をうかがう働き方では力が半分になる。若いうちから責任ある役を引き受けるほど伸びる。",
+    people: "気持ちがすぐ顔と言葉に出る、裏表のない人。好きな人には自分から近づき、関係を引っ張る。待つのが苦手で、相手の返事が遅いといら立ちやすい。けんかしても引きずらず、すぐ元に戻れる。",
+    care: "気が短く、思い立つとすぐ動く。勢いで決めたことを後悔しやすいので、大きな決断は一晩おく。頭痛や発熱など、無理が急に体に出やすい。怒りは運動や手を動かす作業で外に出す。" },
+  "ヴリシャバ": {
+    work: "着実に価値を積み上げる仕事が向く。金融・不動産・食・農業・美容・音楽・工芸など、形あるもの、五感で味わえるものを扱う分野と相性がよい。急な方向転換より、同じ分野で長く信用を育てるほうが成果が大きい。収入の安定が、そのまま仕事の質を支える。",
+    people: "月が高揚する位置で、気持ちが安定しやすい。穏やかで、そばにいる人を落ち着かせる。食事や居心地のよい場所を共にすることで絆を深める。一度決めた相手を大事にするが、独占欲が出ることもある。",
+    care: "変化を嫌い、居心地のよい場所から動けなくなりやすい。食べすぎ・買いすぎなど、楽しみが度を越しやすい。のどや首を冷やさないように。新しいことを年に一つ始めると、停滞を防げる。" },
+  "ミトゥナ": {
+    work: "言葉と情報を扱う仕事で評価される。営業・広報・出版・メディア・IT・教育・通訳など、伝える・つなぐ・調べるが中心の場が向く。複数の仕事を並行するほうが気持ちが乗る。一つの作業を黙々と続ける環境では退屈しやすい。",
+    people: "会話で心が通う人。話題が豊富で、誰とでもすぐ打ち解ける。気持ちを言葉で整理するので、話を聞いてくれる相手を求める。気持ちが移りやすく、一人に絞るまで時間がかかることがある。",
+    care: "考えすぎて眠れなくなることがある。情報を集めすぎて決められない時は、期限を決めて選ぶ。手を広げすぎて、どれも中途半端になりやすい。肩や腕のこわばり、呼吸の浅さに疲れが出やすい。" },
+  "カルカ": {
+    work: "人を守り、育てる仕事に縁がある。看護・介護・保育・飲食・不動産・家業・地域の仕事など、相手の暮らしに寄り添う場で力を出す。職場の雰囲気に仕事の出来が左右されやすいので、安心して働ける環境を選ぶことが大事。身内のような仲間に囲まれると強い。",
+    people: "月が自分の星座にあり、情が深い。家族や身内を何より大切にし、相手の世話を焼くことで愛情を示す。気持ちの波が大きく、相手の小さな態度に傷つきやすい。安心できる相手には、とことん尽くす。",
+    care: "気分に左右されやすく、不安が強いと引きこもりがちになる。過去の出来事を思い出して落ち込む癖がある。胃腸に気持ちが出やすいので、食事のリズムを守る。安心できる場所と人を、意識して持っておく。" },
+  "シンハ": {
+    work: "太陽が自分の星座にあり、地位と名誉への運が強い。経営・管理職・政治・公務・芸能・講師など、人の上に立ち、名前で評価される仕事が向く。裏方に回ると力を持て余す。責任を引き受けるほど、周りの信頼が集まる。",
+    people: "堂々として、周りを明るくする。大切な人を守り、気前よくふるまう。認められること、感謝されることが心の栄養になる。軽く扱われると、強く傷つく。",
+    care: "プライドが傷つくと、意地を張って引けなくなる。見栄のための出費や無理に気をつける。心臓や背中に負担をかけないよう、働きすぎを避ける。頼ることは負けではないと考える。" },
+  "カンニャー": {
+    work: "細かい点まで正確に仕上げる力が評価される。経理・医療・薬・研究・品質管理・編集・事務など、分析と実務の仕事が向く。問題を見つけて直す役で重宝される。大まかな方針のまま動く職場では、やり方の粗さが気になって疲れる。",
+    people: "気配りが細かく、相手の役に立つことで愛情を示す。困っている人の手助けを自然にする。気持ちを表に出すのが控えめで、心配や不安を一人でため込みやすい。相手の欠点に目がいきすぎないように。",
+    care: "心配性で、まだ起きていないことまで気に病む。完璧を求めて自分を責めやすい。お腹の調子や神経の疲れに出やすいので、休む時間を予定に入れる。「八割できたら合格」と決めておく。" },
+  "トゥラー": {
+    work: "太陽が力を落とす位置とされ、一人で目立つより、人と組んで成果を出すほうがうまくいく。法律・外交・調停・営業・デザイン・接客など、バランス感覚と人づきあいが活きる仕事が向く。共同経営やパートナーとの仕事にも縁がある。自分の評価を他人に預けすぎない。",
+    people: "人との調和を何より大事にする。争いを避け、相手に合わせるのが上手。パートナーがいることで心が安定するタイプ。合わせすぎて、自分の気持ちを言えなくなることがある。",
+    care: "人に合わせすぎて、決められなくなる。嫌われたくない気持ちから、無理な頼みを受けてしまう。腰まわりを冷やさないように。自分の意見を一つ言ってから、相手に合わせる。" },
+  "ヴリシュチカ": {
+    work: "深く掘り下げ、隠れたものを明らかにする仕事が向く。研究・調査・医療・心理・金融・保険・危機管理など、粘り強さと集中力が求められる場で強い。表に出ない情報を扱う役で信頼される。浅く広く関わる仕事では力が出ない。",
+    people: "月が力を落とす位置とされ、気持ちが深く激しい。心を許す相手は少ないが、許した相手とは深いところでつながろうとする。裏切りには敏感で、一度失った信頼はなかなか戻らない。秘密を守れる人として信頼される。",
+    care: "気持ちを内にため込み、ある日爆発することがある。疑いや嫉妬が強くなると、自分も相手も苦しめる。体の不調をがまんしがちなので、早めに診てもらう。信頼できる人に、気持ちを話す場を持つ。" },
+  "ダヌ": {
+    work: "知識と理念で人を導く仕事に縁がある。教育・法律・宗教・出版・旅行・海外との仕事など、広い視野が活きる場が向く。教える立場、相談に乗る立場で評価されやすい。目先の数字を追い続ける仕事には、やりがいを感じにくい。",
+    people: "おおらかで、明るく前向き。自由を尊重し合える関係を好む。話は理想や将来のことになりやすく、一緒に学んだり旅したりする相手と深まる。束縛されると、気持ちが離れていく。",
+    care: "楽観的すぎて、準備や細部をおろそかにしやすい。約束を多く引き受けて、守れなくなることがある。食べすぎや肝臓の疲れに気をつける。理想を語ったら、次の一歩を具体的に決める。" },
+  "マカラ": {
+    work: "時間をかけて地位を築く晩成型。行政・管理職・建設・製造・物流・伝統産業など、責任と継続が評価される仕事が向く。若いうちは報われにくいが、40代以降に積み上げたものが実を結ぶ。規律のある組織のほうが力を出しやすい。",
+    people: "慎重で、関係を築くのに時間がかかる。感情より責任で人とつながり、約束を守ることで信頼を得る。気持ちを表に出さないので、冷たく見られることがある。長い付き合いの中で、少しずつ心を開く。",
+    care: "責任を背負いすぎて、楽しむことを忘れやすい。悲観的になると、何もかも自分のせいだと感じる。膝や骨、歯など、体の硬いところに疲れが出やすい。休むことも仕事のうちと考える。" },
+  "クンバ": {
+    work: "仕組みを作り、多くの人の役に立つ仕事が向く。IT・科学・技術・社会事業・NPO・組織の改革など、新しい考えを形にする場で力を出す。個人プレーより、チームやネットワークの中で役割を果たすほうが成果が大きい。古いやり方を変える役を任されやすい。",
+    people: "友人のように対等な関係を好む。一人ひとりの個性を尊重し、誰とでも分け隔てなく接する。べたべたした関係は苦手で、気持ちの距離を一定に保とうとする。仲間のためには惜しまず動く。",
+    care: "気持ちを頭で処理して、自分の疲れに気づくのが遅い。人の輪の中にいても孤独を感じることがある。足首や血のめぐりを冷やさないように。理屈で片づけず、気持ちを口に出せる相手を持つ。" },
+  "ミーナ": {
+    work: "人を癒やし、支える仕事に縁がある。医療・福祉・宗教・芸術・音楽・映像・海や水に関わる仕事など、想像力と思いやりが活きる場が向く。競争の激しい職場では消耗しやすい。お金より、意味を感じられるかどうかが長く続くかを決める。",
+    people: "共感力が高く、人の気持ちを自分のことのように感じる。優しく、頼まれると断れない。相手に尽くしすぎて、自分が疲れきることがある。境界線を引く練習が、よい関係を長く保つ。",
+    care: "現実から逃げたくなると、睡眠やお酒、空想に流されやすい。人の頼みを断れず、気づくと抱えこんでいる。足のむくみや冷えに気をつける。一人で静かに過ごす時間を、毎日少しでも持つ。" },
+};
 
 // インド占星術: 惑星×ラーシの組み合わせ解釈
 // 各惑星がどのラーシにいるかで、その惑星のエネルギーがどう表れるかを解説
@@ -7370,6 +7764,10 @@ function renderJyotish(){
     </div>
 
     <div class="section-title">月の星座 — ${moonRashi.jp}（${moonRashi.n}）</div>
+    ${d.moonDay ? (() => {
+      const r0 = Math.floor(norm360(d.moonDay.start - aya) / 30), r1 = Math.floor(norm360(d.moonDay.end - aya) / 30);
+      return `<div style="font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.8;">※ 生まれた時刻が分からないので、月は正午の位置で出しています。${r0 !== r1 ? `この日は月が${JYOTISH_RASHIS[r0].jp}から${JYOTISH_RASHIS[r1].jp}へ移る日なので、時刻を入れるとどちらの月か決まります。` : ""}月は1日に約13°動くので、ナクシャトラ（月の宿）と、ダシャー（人生の時間軸）が切り替わる年齢は、生まれた時刻で前後します。</div>`;
+    })() : ""}
     <div style="text-align:center; margin:20px 0;">
       <div style="font-size:48px; color:var(--gold); font-family:'Noto Serif JP',serif; font-weight:700;">${moonRashi.jp}</div>
       <div style="font-size:16px; color:var(--muted); margin-top:6px;">インド名: ${moonRashi.n} ／ 支配星: ${moonRashi.lord}</div>
@@ -7427,27 +7825,10 @@ function renderJyotish(){
     <div class="card" style="padding:16px;">${planetRows}</div>
 
     <div class="section-title">仕事・キャリアの方向性</div>
-    <div class="card"><p>${(() => {
-      const sun = sunRashi;
-      const moon = moonRashi;
-      return sun.lord === "木星" ? "哲学・教育・法律・宗教に縁がある。広い視野で人を導く仕事が合う。" :
-        sun.lord === "火星" ? "行動力とリーダーシップが武器。競争のある環境で力を発揮する。技術・スポーツ・軍事にも縁。" :
-        sun.lord === "金星" ? "美・芸術・人間関係に関わる仕事で輝く。外交・デザイン・エンタメに適性。" :
-        sun.lord === "水星" ? "知性とコミュニケーションが武器。ビジネス・メディア・教育・IT分野に向く。" :
-        sun.lord === "土星" ? "忍耐と責任感で長期的な成果を出す。組織運営・管理職・専門職に向く。" :
-        sun.lord === "太陽" ? "リーダーシップと自己表現が天職。政治・経営・芸能に縁がある。" :
-        "感受性と直感を活かす仕事が合う。カウンセリング・芸術・ケアの分野に適性。";
-    })()}<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽のラーシ${sunRashi.jp}の支配星${sunRashi.lord}の性質から）</span></p></div>
+    <div class="card"><p>${(JYOTISH_READ[sunRashi.n] || {}).work || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：太陽のラーシ＝${sunRashi.n}（${sunRashi.jp}）。インド占星術では太陽が仕事・地位・社会での立場を表す。支配星は${sunRashi.lord}）</span></p></div>
 
     <div class="section-title">人間関係の傾向</div>
-    <div class="card"><p>${moonRashi.desc.split("。")[0]}。この月の性質が、親しい人との関係で最も強く出ます。${
-      moonRashi.lord === "金星" ? "愛情表現が豊かで、美しい関係を求める。" :
-      moonRashi.lord === "火星" ? "情熱的だが衝突も多い。率直さが魅力でもあり課題でもある。" :
-      moonRashi.lord === "木星" ? "寛大で包容力がある。信頼関係を大切にする。" :
-      moonRashi.lord === "土星" ? "慎重で深い関係を好む。信頼を築くのに時間がかかるが、一度築くと長続きする。" :
-      moonRashi.lord === "水星" ? "知的な会話が関係の基盤。言葉でのコミュニケーションを重視する。" :
-      "感情の共有が関係の核。共感力が高く、相手の気持ちに敏感。"
-    }<br><span style="color:var(--muted); font-size:14px;">（根拠：月のラーシ${moonRashi.jp}の支配星${moonRashi.lord}の対人パターンから）</span></p></div>
+    <div class="card"><p>${(JYOTISH_READ[moonRashi.n] || {}).people || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：月のラーシ＝${moonRashi.n}（${moonRashi.jp}）。インド占星術では月が心と気持ちを表し、親しい人との関係に最も強く出る。支配星は${moonRashi.lord}）</span></p></div>
 
     ${dataB && currentMode !== "compat" ? (() => {
       const ayaB = ayanamsha(dataB.jd);
@@ -7479,14 +7860,7 @@ function renderJyotish(){
     })() : ""}
 
     <div class="section-title">注意すべき点</div>
-    <div class="card"><p>月の支配星${moonRashi.lord}の状態が人生全体の質を左右します。${
-      moonRashi.lord === "土星" ? "忍耐が求められる場面が多いが、それが最終的に大きな実りになる。焦りが最大の敵。" :
-      moonRashi.lord === "火星" ? "怒りや衝動のコントロールが課題。エネルギーを建設的な方向に使えれば大きな力になる。" :
-      moonRashi.lord === "金星" ? "快楽や安楽に流されやすい面がある。自律が鍵。" :
-      moonRashi.lord === "水星" ? "考えすぎて動けなくなることがある。完璧を求めすぎない。" :
-      moonRashi.lord === "木星" ? "楽観的すぎて現実を見失うことがある。地に足をつける意識が大切。" :
-      "感情に振り回されやすい面がある。客観的な視点を持つ練習が有効。"
-    }<br><span style="color:var(--muted); font-size:14px;">（根拠：月のラーシ${moonRashi.jp}の支配星${moonRashi.lord}の裏面＝強みが行きすぎた時の傾向）</span></p></div>
+    <div class="card"><p>${(JYOTISH_READ[moonRashi.n] || {}).care || ""}<br><span style="color:var(--muted); font-size:14px;">（根拠：月のラーシ＝${moonRashi.n}の気持ちの動き方が行きすぎた時に出やすい形。体のことは生活の目安で、気になる不調は医療機関へ）</span></p></div>
 
     <div class="section-title">ダシャー（大運体系）— 人生の時間軸</div>
     <div style="font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.8;">
@@ -7772,7 +8146,9 @@ function renderConsult(){
     {id:"work", label:"仕事・適職"},
     {id:"money", label:"お金"},
     {id:"relations", label:"人間関係"},
-    {id:"decision", label:"決断"},
+    {id:"decision", label:"迷ったとき"},
+    {id:"health", label:"健康"},
+    {id:"values", label:"好き嫌い"},
   ];
 
   let html = `
@@ -7819,6 +8195,7 @@ function renderConsult(){
 
   html += `
     <div class="section-title">あなたの恋愛</div>
+    ${currentMode !== "compat" && window.RSynth && RSynth.topicHtml ? RSynth.topicHtml(d, "love") : ""}
 
     <!-- サマリー: あなたに合うタイプ（3層） -->
     <div class="card hi" style="margin-bottom:20px;">
@@ -8235,6 +8612,7 @@ function renderConsult(){
 
     html += `
     <div class="section-title">あなたの仕事・適職</div>
+    ${window.RSynth && RSynth.topicHtml ? RSynth.topicHtml(d, "work") + RSynth.qaListHtml(d, "work", true) : ""}
 
     <div class="card hi" style="margin-bottom:20px;">
       <h3 style="font-size:18px; margin-bottom:16px;">あなたの仕事タイプ</h3>
@@ -8350,6 +8728,7 @@ function renderConsult(){
 
     html += `
     <div class="section-title">あなたのお金</div>
+    ${window.RSynth && RSynth.topicHtml ? RSynth.topicHtml(d, "money") + RSynth.qaListHtml(d, "money", true) : ""}
 
     <div class="card hi" style="margin-bottom:20px;">
       <h3 style="font-size:18px; margin-bottom:12px;">稼ぎ方の傾向</h3>
@@ -8419,6 +8798,7 @@ function renderConsult(){
 
     html += `
     <div class="section-title">あなたの人間関係</div>
+    ${window.RSynth && RSynth.topicHtml ? RSynth.topicHtml(d, "love") + RSynth.qaListHtml(d, "love", true) : ""}
 
     <div class="card hi" style="margin-bottom:20px;">
       <h3 style="font-size:18px; margin-bottom:12px;">対人パターン</h3>
@@ -8583,7 +8963,7 @@ function renderConsult(){
         { name:"九星気学", key:`${kyNameA?.name||""}×${kyNameB2?.name||""}`, score: kyA.honmei===kyB2.honmei?75:65,
           desc: kyA.honmei===kyB2.honmei?`同じ本命星。性格が似ている。`:`異なる本命星。互いの個性が刺激になる。` },
         { name:"マヤ暦", key:`${sealA?.n||""}×${sealB2?.n||""}`, score: kinDiff===0?90:kinDiff===130?85:kinDiff%20===0?80:65, desc: maCompat },
-        { name:"宿曜（最重要）", key:`${shukuA?.name||""}×${shukuB2?.name||""}`, score: shukuScore,
+        { name:"宿曜（最重要）", key:`${shukuA?.n||""}×${shukuB2?.n||""}`, score: shukuScore,
           desc: `${shukuComp.name}。${shukuComp.desc}` },
       ];
 
@@ -8771,12 +9151,12 @@ function renderConsult(){
           <div style="padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
             <div style="font-size:13px; color:var(--muted);">あなた</div>
             <div style="font-size:15px; color:var(--gold);">☉ ${sunSignA.n} ／ ${d.day.stem}（${dayElA}）</div>
-            <div style="font-size:14px; color:#6a6050;">${shukuA?.name||""}宿 ／ LP${lpA}</div>
+            <div style="font-size:14px; color:#6a6050;">${shukuA?.n||""} ／ LP${lpA}</div>
           </div>
           <div style="padding:10px; background:rgba(201,147,58,0.08); border-radius:6px;">
             <div style="font-size:13px; color:var(--muted);">お相手</div>
             <div style="font-size:15px; color:var(--gold);">☉ ${sunSignB.n} ／ ${db.day.stem}（${dayElB2}）</div>
-            <div style="font-size:14px; color:#6a6050;">${shukuB2?.name||""}宿 ／ LP${lpB}</div>
+            <div style="font-size:14px; color:#6a6050;">${shukuB2?.n||""} ／ LP${lpB}</div>
           </div>
         </div>
       </div>
@@ -8805,7 +9185,7 @@ function renderConsult(){
         <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:16px;">
           <div style="text-align:center; padding:12px; background:rgba(201,147,58,0.08); border-radius:6px;">
             <div style="font-size:13px; color:var(--muted);">あなた</div>
-            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuA?.name||"—"}</div>
+            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuA?.n||"—"}</div>
             <div style="font-size:13px; color:#6a6050;">${shukuA?.k||""}</div>
           </div>
           <div style="text-align:center;">
@@ -8814,7 +9194,7 @@ function renderConsult(){
           </div>
           <div style="text-align:center; padding:12px; background:rgba(201,147,58,0.08); border-radius:6px;">
             <div style="font-size:13px; color:var(--muted);">お相手</div>
-            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuB2?.name||"—"}</div>
+            <div style="font-size:20px; color:var(--gold); font-weight:700;">${shukuB2?.n||"—"}</div>
             <div style="font-size:13px; color:#6a6050;">${shukuB2?.k||""}</div>
           </div>
         </div>
@@ -8891,10 +9271,9 @@ function renderConsult(){
       })()}
 
       <div class="section-title">AIで深く読む</div>
-      <div class="card" style="margin-bottom:16px; text-align:center;">
-        <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">2人の命盤データをAIに渡すと、9占術を統合した詳細な相性鑑定文を生成できます。</p>
+      ${window.RSynth && RSynth.summaryConsultHtml ? RSynth.summaryConsultHtml() : `<div class="card" style="margin-bottom:16px; text-align:center;">
         <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
-      </div>
+      </div>`}
       `;
       // 相性モードの場合はここで終了
       document.getElementById("tab10").innerHTML = html;
@@ -8923,6 +9302,8 @@ function renderConsult(){
 
     // 冒頭のまとめ（タイプ・占術の一致・強み・今の時期）。詳しい説明はその下に畳んで置く
     try { html += buildSynthesisHtml(d); } catch (e) { console.warn("まとめの描画エラー:", e); }
+    // 知りたいことから見る（仕事・お金・人間関係・健康・好き嫌い・迷ったときの結論を1行ずつ）
+    try { if (currentMode !== "compat") html += RSynth.topicIndexHtml(d); } catch (e) { console.warn("知りたいことの一覧の描画エラー:", e); }
     html += `
     <div class="rs-more-title">もっと詳しく</div>
     ${(() => {
@@ -9914,7 +10295,8 @@ function renderConsult(){
           const yearForAge = d.y + age;
           const yearStar = kyuseiYearStar(yearForAge);
           // 本命星の回座位置を算出
-          const diff = ((yearStar - kData.honmei) % 9 + 9) % 9;
+          // 本命星 − 中宮の星（九星タブと同じ向き）。2026-10-19 直した：引く向きが逆で、中宮以外の年は違う宮になっていた
+          const diff = ((kData.honmei - yearStar) % 9 + 9) % 9;
           const kaizaNum = ((5 + diff - 1) % 9) + 1; // 簡易計算
           const left = (age / maxAge * 100).toFixed(2);
           const width = (1 / maxAge * 100).toFixed(2);
@@ -10113,12 +10495,12 @@ function renderConsult(){
                   return `${sunDesc}${moonDesc ? ` 月${moonSign.n}：${moonDesc}` : ""}`;
                 })() },
                 { name:"四柱推命", key:`日主${d.day.stem}（${dayMasterEl}）`, desc: ({"甲":"まっすぐ上に伸びる大木。理想と向上心が強く、曲がることを嫌う。リーダー気質だが頑固な面も。","乙":"しなやかに絡みつく蔓草。柔軟で適応力が高く、人との縁を活かす。表面は穏やかで内面は強い。","丙":"燃え盛る太陽の火。明るく情熱的で、周囲を照らす存在感がある。エネルギーが強く、人を動かす。","丁":"灯台の炎。繊細で感受性が高く、人の心を温める。小さな光だが確実に照らし続ける。","戊":"動かない大山。安定感と包容力があり、信頼の基盤になる。どっしりと構え、周囲を支える。","己":"肥沃な大地。人を育て支える力がある。柔軟だが芯は強く、縁の下の力持ち。","庚":"鋭い刀。決断力と実行力があり、無駄を嫌う。白黒はっきりさせたい性格。","辛":"磨かれた宝石。繊細で美意識が高く、完璧を求める。傷つきやすいが輝きは本物。","壬":"大海の水。知性と包容力があり、どんな形にも対応できる。スケールが大きく、深みがある。","癸":"雨水。感受性が豊かで直感が鋭い。静かに深く浸透し、気づかないうちに影響を与える。"})[d.day.stem] || "" },
-                { name:"紫微斗数", key:`命宮${lifeStarName}`, desc: zwStarExpl(lifeStarName) },
+                { name:"紫微斗数", key:`命宮${lifeStarName}${d.hourKnown ? "" : "（仮）"}`, desc: zwStarExpl(lifeStarName) + (d.hourKnown ? "" : "（生まれた時刻が分からないので、正午で出した仮の命宮）") },
                 { name:"算命学", key:`中央${sm.stars.center}`, desc: JUSSHU_EXPL[sm.stars.center] || "" },
                 { name:"数秘術", key:`LP${nu.lifePath}`, desc: NUMEROLOGY_MEANINGS[nu.lifePath]?.desc || "" },
                 { name:"九星気学", key:honmei2.name, desc: honmei2.desc || "" },
                 { name:"マヤ暦", key:seal?.n||"—", desc: seal?.desc || "" },
-                { name:"宿曜", key:shuku?.name||"—", desc: shuku?.desc || "" },
+                { name:"宿曜", key:shuku?.n||"—", desc: shuku?.desc || "" },
                 { name:"インド占星術", key:NAKS[nakIdx]||"—", desc: NAK_DESC[nakIdx]||"" },
               ];
               return rows.map((r,i) => `
@@ -10183,12 +10565,9 @@ function renderConsult(){
     </div></details>
 
     <div class="section-title">AIで深く読む</div>
-    <div class="card" style="margin-bottom:16px; text-align:center;">
-      <p style="font-size:15px; color:#6a6050; margin-bottom:16px; line-height:1.7;">命盤データをAI（Claude・ChatGPT等）に渡すと、9占術を統合した詳細な鑑定文を生成できます。</p>
+    ${window.RSynth && RSynth.summaryConsultHtml ? RSynth.summaryConsultHtml() : `<div class="card" style="margin-bottom:16px; text-align:center;">
       <button onclick="exportForAI()" style="padding:13px 32px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">AIに渡すスクリプトをコピー</button>
-      <div style="font-size:13px; color:var(--muted); margin-top:10px;">コピー後、AIに貼り付けて「総合鑑定をお願いします」と送ってください</div>
-      <div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:13px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
-    </div>
+    </div>`}
     `;
   } // end summary
 
@@ -10201,7 +10580,9 @@ function renderConsult(){
     const honmei = KYUSEI_NAMES[ky.honmei];
     const thisYear = new Date().getFullYear();
     const thisYearStar = kyuseiYearStar(thisYear);
-    const kaizaIdx = ((ky.honmei - thisYearStar + 9) % 9) || 9;
+    // 回座する宮の番号（洛書）。中宮の星から 中5→乾6→兌7→艮8→離9→坎1→坤2→震3→巽4 の順に飛ぶ（九星タブと同じ式）。
+    //   2026-10-19 直した：以前は飛ぶ順を通さず番号をそのまま使っていて、九星タブと違う宮を出していた（例：2026年の一白は中宮なのに離宮）
+    const kaizaIdx = ((((ky.honmei - thisYearStar) % 9) + 9) % 9 + 4) % 9 + 1;
     const KAIZA_NAMES = {1:{n:"坎宮（北）"},2:{n:"坤宮（南西）"},3:{n:"震宮（東）"},4:{n:"巽宮（南東）"},5:{n:"中宮"},6:{n:"乾宮（北西）"},7:{n:"兌宮（西）"},8:{n:"艮宮（北東）"},9:{n:"離宮（南）"}};
     const kaiza = KAIZA_NAMES[kaizaIdx] || {n:"不明"};
 
@@ -10237,6 +10618,7 @@ function renderConsult(){
 
     html += `
     <div class="section-title">決断・迷いごと</div>
+    ${window.RSynth && RSynth.topicHtml ? RSynth.topicHtml(d, "decide") + RSynth.qaListHtml(d, "decide", true) : ""}
 
     <div class="card hi" style="margin-bottom:20px;">
       <h3 style="font-size:18px; margin-bottom:16px;">6つの占術が語る「今の時期」</h3>
@@ -10334,6 +10716,16 @@ function renderConsult(){
     </div>
     `;
   } // end decision
+
+  // 健康・好き嫌い（2026-10-19 追加）：9つの占術をまとめた結論と、占術ごとの答え
+  if (consultCategory === "health" || consultCategory === "values") {
+    const key = consultCategory === "health" ? "health" : "like";
+    html += `
+    <div class="section-title">${consultCategory === "health" ? "体の傾向と、気をつけたいこと" : "好き嫌い・大事にしていること"}</div>
+    ${window.RSynth ? RSynth.topicHtml(d, key) : ""}
+    ${window.RSynth ? RSynth.qaListHtml(d, key) : ""}
+    `;
+  }
 
   document.getElementById("tab10").innerHTML = html;
 }
@@ -10594,318 +10986,12 @@ function setTab(i){
   document.querySelectorAll(".tabs button").forEach((b,j)=>{
     b.classList.toggle("active", tabNums[j]===i);
   });
-  [0,1,2,3,4,5,6,7,8,9,10].forEach(j=>{
+  [0,1,2,3,4,5,6,7,8,10].forEach(j=>{
     document.getElementById("tab"+j).classList.toggle("hide", j!==i);
   });
-  if (i===9) loadReading();
   // タブバーの位置までスクロール（タブから表示開始）
   const tabsEl = document.querySelector('.tabs');
   if (tabsEl) tabsEl.scrollIntoView({behavior:'instant', block:'start'});
-}
-
-/* ── 九占術クロスリファレンス表 ── */
-function renderCrossRef(){
-  if (!currentData) return;
-  const d = currentData;
-
-  // 各占術の計算結果を取得
-  const sunSign = SIGNS[signOf(d.sunLon)];
-  const moonSign = SIGNS[signOf(d.moonLon)];
-  const ascSign = d.ascLon !== null ? SIGNS[signOf(d.ascLon)] : null;
-  const sm = calcJintai(d);
-  const nu = calcNumerology(d.y, d.m, d.d);
-  const ky = calcKyusei(d.y, d.m, d);
-  const kyName = KYUSEI_NAMES[ky.honmei];
-  const ma = calcMaya(d.y, d.m, d.d);
-  const seal = MAYA_SEALS[ma.seal];
-  const shukuIdx = calcShukuyo(d);
-  const shuku = SHUKUYO_27[shukuIdx];
-  const nuMeaning = NUMEROLOGY_MEANINGS[nu.lifePath] || {};
-
-  // 紫微斗数の宮と主星を取得
-  const lifeIdx = d.lifeIdx;
-  const starDistrib = d.ziweiDistrib || {};
-  const palaceMap = {};
-  for (let i=0; i<12; i++){
-    const branchIdx = (lifeIdx - i + 12) % 12;
-    palaceMap[PALACE_NAMES[i]] = (starDistrib[branchIdx] || []).join("・");
-  }
-
-  // インド占星術
-  const jyAya = ayanamsha(d.jd);
-  const sidSun = ((d.sunLon - jyAya) % 360 + 360) % 360;
-  const sidMoon = ((d.moonLon - jyAya) % 360 + 360) % 360;
-  const jySunSign = SIGNS[Math.floor(sidSun / 30)];
-  const jyMoonSign = SIGNS[Math.floor(sidMoon / 30)];
-
-  // ダシャー情報
-  const dashaCR = calcDasha(sidMoon, d.y);
-  // 日主
-  const dayMaster = d.day.stem;
-  const dayMasterEl = STEM_EL[STEMS.indexOf(dayMaster)];
-
-  // 大運情報
-  const age = new Date().getFullYear() - d.y;
-  let currentDashaCR = "";
-  for (const ds of dashaCR.dashas) {
-    if (age >= ds.startAge && age < ds.endAge) { currentDashaCR = `${ds.lord}期(${Math.floor(ds.startAge)}〜${Math.floor(ds.endAge)}歳)`; break; }
-  }
-  const daiunList = calcDayun(d);
-  let currentDaiun = "";
-  if (daiunList && daiunList.length > 0) {
-    for (const du of daiunList) {
-      if (age >= du.startAge && age < du.endAge) { currentDaiun = `${du.stem}${du.branch}(${du.startAge}〜${du.endAge-1}歳)`; break; }
-    }
-  }
-
-  // 紫微大限
-  const daigenList = [];
-  for (let i=0; i<7; i++){
-    const brIdx = (lifeIdx - i + 12) % 12;
-    const stars = (starDistrib[brIdx] || []).join("・");
-    daigenList.push({ from: 3+i*10, to: 12+i*10, palace: PALACE_NAMES[i], stars });
-  }
-  let currentDaigen = "";
-  for (const dg of daigenList) {
-    if (age >= dg.from && age <= dg.to) { currentDaigen = `${dg.palace}(${dg.stars})`; break; }
-  }
-
-  // カテゴリ定義
-  const categories = [
-    { label:"性格の核", icon:"🧬",
-      items:[
-        {art:"西洋", val:`☉${sunSign.n} ☽${moonSign.n}${ascSign ? " AC"+ascSign.n : ""}`, level:"◎"},
-        {art:"四柱", val:`日主 ${dayMaster}(${dayMasterEl})`, level:"◎"},
-        {art:"紫微", val:`命宮: ${palaceMap["命宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`中央: ${sm.stars.center}`, level:"◎"},
-        {art:"数秘", val:`LP${nu.lifePath} ${nuMeaning.title||""}`, level:"○"},
-        {art:"九星", val:`${kyName?kyName.name:""}`, level:"○"},
-        {art:"マヤ", val:`${seal?seal.n:""}`, level:"○"},
-        {art:"宿曜", val:`${shuku.n}`, level:"○"},
-        {art:"印度", val:`月:${jyMoonSign.n}`, level:"○"},
-      ]},
-    { label:"仕事・適職", icon:"◆",
-      items:[
-        {art:"西洋", val:`MC/土星の配置`, level:"◎"},
-        {art:"四柱", val:`官星: ${d.pillars.filter(p=>p.ten==="偏官"||p.ten==="正官").map(p=>p.ten).join("・")||"なし"}`, level:"◎"},
-        {art:"紫微", val:`官禄宮: ${palaceMap["官禄宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`東:${sm.stars.east} 西:${sm.stars.west}`, level:"◎"},
-        {art:"数秘", val:`LP${nu.lifePath}`, level:"○"},
-        {art:"九星", val:`${kyName?kyName.career:""}`.slice(0,20), level:"◎"},
-        {art:"マヤ", val:`${seal?seal.kw:""}`, level:"○"},
-        {art:"宿曜", val:`${shuku.n}の適性`, level:"○"},
-        {art:"印度", val:`太陽:${jySunSign.n}`, level:"○"},
-      ]},
-    { label:"金運・財運", icon:"💰",
-      items:[
-        {art:"西洋", val:`木星の配置`, level:"○"},
-        {art:"四柱", val:`財星: ${d.pillars.filter(p=>p.ten==="正財"||p.ten==="偏財").map(p=>p.ten).join("・")||"なし"}`, level:"◎"},
-        {art:"紫微", val:`財帛宮: ${palaceMap["財帛宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`—`, level:"△"},
-        {art:"数秘", val:`—`, level:"△"},
-        {art:"九星", val:`${kyName?kyName.element:""}の財運`, level:"○"},
-        {art:"マヤ", val:`—`, level:"×"},
-        {art:"宿曜", val:`—`, level:"△"},
-        {art:"印度", val:`2H・11H`, level:"○"},
-      ]},
-    { label:"恋愛・結婚", icon:"◇",
-      items:[
-        {art:"西洋", val:`♀${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].n}`, level:"◎"},
-        {art:"四柱", val:`日支 ${d.day.branch}`, level:"○"},
-        {art:"紫微", val:`夫妻宮: ${palaceMap["夫妻宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`南:${sm.stars.south}`, level:"△"},
-        {art:"数秘", val:`—`, level:"△"},
-        {art:"九星", val:`${kyName?kyName.relationship:""}`.slice(0,20), level:"△"},
-        {art:"マヤ", val:`関係KIN4種`, level:"△"},
-        {art:"宿曜", val:`${shuku.n}の相性`, level:"◎"},
-        {art:"印度", val:`月:${jyMoonSign.n}`, level:"◎"},
-      ]},
-    { label:"健康", icon:"🏥",
-      items:[
-        {art:"西洋", val:`♂${SIGNS[signOf(d.planets.find(p=>p.n==="火星").lon)].n}`, level:"○"},
-        {art:"四柱", val:`五行偏り: ${Object.entries(d.wx).filter(([k,v])=>v===0).map(([k])=>k+"不足").join(" ")||"均衡"}`, level:"○"},
-        {art:"紫微", val:`疾厄宮: ${palaceMap["疾厄宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`${sm.juuniDay.name}(${sm.juuniDay.energy}点)`, level:"◎"},
-        {art:"数秘", val:`—`, level:"×"},
-        {art:"九星", val:`${kyName?kyName.health:""}`, level:"◎"},
-        {art:"マヤ", val:`—`, level:"×"},
-        {art:"宿曜", val:`—`, level:"△"},
-        {art:"印度", val:`6H`, level:"○"},
-      ]},
-    { label:"人生の時期", icon:"🕐",
-      items:[
-        {art:"西洋", val:`トランジット`, level:"◎"},
-        {art:"四柱", val:`大運: ${currentDaiun||"—"}`, level:"◎"},
-        {art:"紫微", val:`大限: ${currentDaigen||"—"}`, level:"◎"},
-        {art:"算命", val:`天中殺: ${sm.tenchuType}`, level:"○"},
-        {art:"数秘", val:`PY${nu.personalYear}(${nu.currentYear}年)`, level:"◎"},
-        {art:"九星", val:`年盤の巡り`, level:"○"},
-        {art:"マヤ", val:`260日周期`, level:"○"},
-        {art:"宿曜", val:`—`, level:"△"},
-        {art:"印度", val:`${currentDashaCR||"ダシャー"}`, level:"◎"},
-      ]},
-    { label:"相性", icon:"○",
-      items:[
-        {art:"西洋", val:`シナストリー`, level:"◎"},
-        {art:"四柱", val:`干支の相生・相剋（ぶつかる）`, level:"○"},
-        {art:"紫微", val:`—`, level:"○"},
-        {art:"算命", val:`—`, level:"△"},
-        {art:"数秘", val:`LP比較`, level:"○"},
-        {art:"九星", val:`本命星の相性`, level:"○"},
-        {art:"マヤ", val:`関係KIN4種`, level:"◎"},
-        {art:"宿曜", val:`27宿 栄親壊安`, level:"◎"},
-        {art:"印度", val:`シナストリー`, level:"◎"},
-      ]},
-    { label:"精神・内面", icon:"🧘",
-      items:[
-        {art:"西洋", val:`☽${moonSign.n}`, level:"◎"},
-        {art:"四柱", val:`—`, level:"△"},
-        {art:"紫微", val:`福德宮: ${palaceMap["福德宮"]||"—"}`, level:"◎"},
-        {art:"算命", val:`北:${sm.stars.north}`, level:"○"},
-        {art:"数秘", val:`BD${nu.birthday}`, level:"○"},
-        {art:"九星", val:`月命星: ${KYUSEI_NAMES[ky.getsu]?KYUSEI_NAMES[ky.getsu].name:""}`, level:"△"},
-        {art:"マヤ", val:`WS:${MAYA_SEALS[ma.ws]?MAYA_SEALS[ma.ws].n:""}`, level:"◎"},
-        {art:"宿曜", val:`—`, level:"△"},
-        {art:"印度", val:`月:${jyMoonSign.n}`, level:"○"},
-      ]},
-  ];
-
-  const levelColor = l => l==="◎"?"#c9933a":l==="○"?"#5a8a5a":l==="△"?"#888":"#ccc";
-  const levelTitle = l => l==="◎"?"最も得意":l==="○"?"語れる":l==="△"?"間接的":"守備範囲外";
-
-  let html = `<div class="section-title" style="margin-top:8px;">九占術クロスリファレンス</div>
-    <div class="note" style="margin-bottom:16px;">各占術が人生の各領域をどう語っているかの一覧です。<span style="color:#c9933a;">◎</span>=最も得意 <span style="color:#5a8a5a;">○</span>=語れる <span style="color:#888;">△</span>=間接的 <span style="color:#ccc;">×</span>=守備範囲外</div>`;
-
-  for (const cat of categories) {
-    html += `<div class="card" style="margin-bottom:12px; padding:14px 16px;">
-      <div style="font-size:16px; font-weight:700; margin-bottom:10px; color:var(--gold);">${cat.icon} ${cat.label}</div>
-      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">`;
-    for (const it of cat.items) {
-      html += `<div style="background:#f8f6f0; border-radius:6px; padding:8px 10px; font-size:14px; line-height:1.5;">
-        <div style="display:flex; align-items:center; gap:4px; margin-bottom:2px;">
-          <span style="color:${levelColor(it.level)}; font-weight:700; font-size:13px;" title="${levelTitle(it.level)}">${it.level}</span>
-          <span style="font-weight:600; font-size:13px; color:var(--text);">${it.art}</span>
-        </div>
-        <div style="font-size:13px; color:#555; word-break:break-all;">${it.val}</div>
-      </div>`;
-    }
-    html += `</div></div>`;
-  }
-
-  document.getElementById("crossref-table").innerHTML = html;
-}
-
-/* ── 総合鑑定の保存・読込 ── */
-function getReadingKey(){
-  if (!currentData) return "sanmeiban_reading_default";
-  const d = currentData;
-  return `sanmeiban_reading_${d.y}_${d.m}_${d.d}`;
-}
-function saveReading(text){
-  localStorage.setItem(getReadingKey(), text);
-}
-function renderReading(text){
-  if (!text || !text.trim()) {
-    document.getElementById("reading-empty").style.display = "block";
-    document.getElementById("reading-content").style.display = "none";
-    return;
-  }
-  document.getElementById("reading-empty").style.display = "none";
-  document.getElementById("reading-content").style.display = "block";
-
-  // 貼り付けテキスト（AI出力＝信頼できない入力）はHTMLエスケープしてから整形する。
-  // これをしないと <img src=x onerror=...> 等が innerHTML で実行されてしまう（XSS）。
-  // **太字** / "---" / "1. 見出し" の整形はエスケープ後でも動く（記号は不変）。
-  const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  // プレーンテキストを構造化HTMLに変換
-  // セクション分割: "1. " "2. " ... "6. " または "---" で区切る
-  const lines = escHtml(text).split("\n");
-  let html = "";
-  let inSection = false;
-  let titleDone = false;
-
-  const sectionIcons = {
-    "1":"◆", "2":"—", "3":"◆", "4":"◇", "5":"▲", "6":"✦"
-  };
-  const sectionColors = {
-    "6": "var(--hi)" // 総合メッセージだけハイライト
-  };
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) { html += "<br>"; continue; }
-
-    // タイトル行（最初の行）
-    if (!titleDone && i < 3) {
-      if (line.includes("統合鑑定") || line.includes("総合鑑定") || (line.includes("—") && line.includes("年"))) {
-        html += `<div class="card hi" style="margin-bottom:24px; text-align:center;">
-          <h2 style="font-size:20px; color:var(--gold); margin:0 0 4px;">${line}</h2></div>`;
-        titleDone = true;
-        continue;
-      }
-    }
-
-    // "---" 区切り線
-    if (/^-{3,}$/.test(line)) {
-      html += `<hr style="border:none; border-top:1px solid var(--border); margin:24px 0;">`;
-      continue;
-    }
-
-    // セクション見出し: "### 1. ..." or "1. " で始まる行
-    const secMatch = line.match(/^(?:#{1,3}\s*)?(\d)\.\s+(.+)/);
-    if (secMatch) {
-      const num = secMatch[1];
-      const title = secMatch[2];
-      const icon = sectionIcons[num] || "◆";
-      if (inSection) html += `</div>`; // 前のセクションを閉じる
-      html += `<div class="section-title">${icon} ${num}. ${title}</div>`;
-      html += `<div class="card" style="margin-bottom:8px; ${num==="6"?"background:var(--hi); border-color:var(--gold);":""}">`;
-      html += `<p style="font-size:17px; line-height:1.9;">`;
-      inSection = true;
-      continue;
-    }
-
-    // 太字 **...**
-    let processed = line
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--gold)">$1</strong>');
-
-    // 箇条書き "- "
-    if (/^[-・]/.test(processed)) {
-      processed = `<br>　${processed.replace(/^[-・]\s*/, "・ ")}`;
-    } else if (inSection) {
-      processed = processed + "<br>";
-    } else {
-      processed = `<p style="font-size:17px; line-height:1.9;">${processed}</p>`;
-    }
-
-    html += processed;
-  }
-  if (inSection) html += `</p></div>`;
-
-  document.getElementById("reading-body").innerHTML = html;
-}
-function loadReading(){
-  const saved = localStorage.getItem(getReadingKey());
-  renderReading(saved || "");
-}
-
-// 1973-12-16の鑑定結果をプリセット（デモ用）
-// 旧エンジン時代のプリセット鑑定文は現行計算と矛盾するため削除（将来復活させる場合は現行プロンプトで再生成した文章を人間が用意する）
-const PRESET_READINGS = {};
-function loadReading(){
-  const key = getReadingKey();
-  let saved = localStorage.getItem(key);
-  if (!saved && PRESET_READINGS[key]) {
-    saved = PRESET_READINGS[key];
-    localStorage.setItem(key, saved);
-  }
-  renderReading(saved || "");
-}
-function clearReading(){
-  if (!confirm("鑑定テキストをクリアしますか？")) return;
-  localStorage.removeItem(getReadingKey());
-  renderReading("");
 }
 
 // ── スクロール深度ロガー（結果表示のどこまで読まれるかを自分で計測。GA不要・localStorageのみ・外部送信なし） ──
@@ -10950,17 +11036,6 @@ function clearReading(){
     return log;
   };
 })();
-async function pasteReading(){
-  try {
-    const text = await navigator.clipboard.readText();
-    saveReading(text);
-    renderReading(text);
-  } catch(e) {
-    const text = prompt("鑑定テキストを貼り付けてください：");
-    if (text) { saveReading(text); renderReading(text); }
-  }
-}
-
 /* ── AI用エクスポート ── */
 function goToTarot(){
   if (!currentData) { alert("先に命盤を立ててください"); return; }
