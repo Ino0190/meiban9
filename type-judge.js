@@ -153,10 +153,11 @@ const A1N = [
 // 軸2: 広い vs 狭い — 興味・行動範囲（多方面 / 限定的）
 // ==========================================================================
 const A2P = [
-  // 四柱: 偏財・駅馬・五行多種（軸2専任）
-  { p:3, n:"偏財透干(多方面の財)",    t:d => hasTen(d,'偏財') },
+  // 四柱: 偏財・駅馬（軸2専任）
+  // 2026-10-20 見直し（2000人で 広い72%／深い28% に偏っていた）：
+  //   「五行が4種以上」は98%の人に当たり区別にならないので外した。偏財は正財（深い側・2点）と同じ2点に
+  { p:2, n:"偏財透干(多方面の財)",    t:d => hasTen(d,'偏財') },
   { p:1, n:"日支が駅馬(寅申亥巳)",    t:d => d.day && ["寅","申","亥","巳"].includes(d.day.branch) },
-  { p:1, n:"五行が4種以上",           t:d => d.wx && Object.values(d.wx).filter(v => v > 0).length >= 4 },
   // 紫微: 貪狼・天機・太陽（軸2専任）
   { p:3, n:"貪狼が命宮(多趣味)",      t:d => lifeStar(d,'貪狼') },
   { p:2, n:"天機が命宮(変化)",        t:d => lifeStar(d,'天機') },
@@ -180,13 +181,13 @@ const A2P = [
   { p:2, n:"翼宿(旅・移動)",          t:(d,sm,nu,ky,ma,si) => shukuName(si) === "翼宿" },
   { p:1, n:"張宿(社交)",              t:(d,sm,nu,ky,ma,si) => shukuName(si) === "張宿" },
   // ── 副軸ルール（他軸の主軸要素が「広い」の側面も持つ場合、p:1で追加投票）──
-  { p:1, n:"[副]禄存星(人を引き寄せる)",   t:(d,sm) => smAny(sm,'禄存星') },
+  // 「[副]禄存星」は41%に当たり、禄存（引力・奉仕）は広さの星ではないので外した（2026-10-20）
   { p:1, n:"[副]月が射手座(広い感受性)",   t:d => moon(d) === 8 },
   { p:1, n:"[副]月が双子座(好奇心)",       t:d => moon(d) === 2 },
   { p:1, n:"[副]太陽がダヌ(射手/拡大)",    t:(d,sm,nu,ky,ma,si,jy) => jy && jy.sunRashi === 8 },
   { p:1, n:"[副]木星-太陽の三分(拡大志向)", t:d => hasAspect(d,'木星','太陽','三分') },
-  { p:1, n:"[副]風星座に天体3つ以上(広い知性)", t:d => planetsInElement(d,'風') >= 3 },
-  { p:1, n:"[副]火星座に天体3つ以上(広い行動)", t:d => planetsInElement(d,'火') >= 3 },
+  // 旧「風に3つ以上」「火に3つ以上」は各5割に当たり、深い側に対になる土・水が無かった → 火＋風と土＋水の対にした（2026-10-20）
+  { p:1, n:"[副]火・風の星座に天体6つ以上(外へ広がる)", t:d => planetsInElement(d,'火') + planetsInElement(d,'風') >= 6 },
 ];
 
 const A2N = [
@@ -194,12 +195,13 @@ const A2N = [
   { p:3, n:"冥王星が太陽/月と合",     t:d => hasAspect(d,'冥王星','太陽','合') || hasAspect(d,'冥王星','月','合') },
   // 四柱: 正財・五行偏り（軸2専任）
   { p:2, n:"正財透干(一点蓄積)",      t:d => hasTen(d,'正財') },
-  { p:2, n:"五行に欠如あり(偏り)",    t:d => d.wx && Object.values(d.wx).some(v => v === 0) },
+  // 欠如は27%に当たる。対の「五行が4種以上」を外したので2点→1点に（2026-10-20）
+  { p:1, n:"五行に欠如あり(偏り)",    t:d => d.wx && Object.values(d.wx).some(v => v === 0) },
   { p:1, n:"五行が3種以下に偏る",     t:d => d.wx && Object.values(d.wx).filter(v => v > 0).length <= 3 },
   // 四柱: 五行異常偏重（軸2専任）
   { p:1, n:"水が極端に強い(6以上)",   t:d => d.wx && d.wx['水'] >= 6 },
   { p:1, n:"火が完全欠如(0)",         t:d => d.wx && d.wx['火'] === 0 },
-  { p:1, n:"木が極端に弱い(1以下)",   t:d => d.wx && d.wx['木'] <= 1 },
+  // 「木が極端に弱い(1以下)」は28%に当たり、五行のうち木だけを見る理由が無いので外した（欠けは上の「欠如あり」で見る。2026-10-20）
   // 紫微: 巨門・廉貞（軸2専任）
   { p:3, n:"巨門が命宮(専門性)",      t:d => lifeStar(d,'巨門') },
   { p:2, n:"廉貞が命宮(深い情熱)",    t:d => lifeStar(d,'廉貞') },
@@ -223,8 +225,11 @@ const A2N = [
   // ── 副軸ルール（他軸の主軸要素が「狭い」の側面も持つ場合、p:1で追加投票）──
   { p:1, n:"[副]武曲が命宮(実務特化)",          t:d => lifeStar(d,'武曲') },
   { p:1, n:"[副]七殺が命宮(独立独歩)",          t:d => lifeStar(d,'七殺') },
-  { p:1, n:"[副]偏官透干(深い変容力)",          t:d => hasTen(d,'偏官') },
+  // 「[副]偏官透干」は外した。偏官は軸1（革新）の主ルールで、深さの星ではない（2026-10-20）
   { p:1, n:"[副]亢宿(孤高の専門性)",            t:(d,sm,nu,ky,ma,si) => shukuName(si) === "亢宿" },
+  // 広い側の「火・風に6つ以上」「日支が駅馬」と対にする（2026-10-20）
+  { p:1, n:"[副]土・水の星座に天体6つ以上(内へ深める)", t:d => planetsInElement(d,'土') + planetsInElement(d,'水') >= 6 },
+  { p:1, n:"日支が四庫(辰戌丑未・内に蓄える)",  t:d => d.day && ["辰","戌","丑","未"].includes(d.day.branch) },
 ];
 
 // ==========================================================================
@@ -755,11 +760,24 @@ function vote(rules, d, sm, nu, ky, ma, si, jy) {
   return { total, matched, skipped };
 }
 
-function strengthLabel(plus, minus, pn, mn) {
+// 同点のとき、どちらに入れるか。旧版は4軸とも前側（革新・広い・リーダー・楽天）にしていて、
+// 同点が1〜1.3割ある分だけ前側に寄り、4つとも前側のヒーローがいちばん多くなっていた（2026-10-20）。
+// 軸ごとに別の柱の地支の陰陽で決める（陽支＝前側）。どちらにも偏らず、同じ人なら毎回同じ結果になる
+const YANG_BRANCH = ["子","寅","辰","午","申","戌"];
+const TIE_PILLAR = { "革新": "year", "広い": "month", "リーダー": "day", "楽天": "year_stem", "早咲き": "year", "直感": "month" };
+function tieFront(d, pn) {
+  const k = TIE_PILLAR[pn];
+  if (!d) return true;
+  if (k === "year_stem") return d.year ? ["甲","丙","戊","庚","壬"].includes(d.year.stem) : true;
+  const p = d[k];
+  return p ? YANG_BRANCH.includes(p.branch) : true;
+}
+function strengthLabel(plus, minus, pn, mn, d) {
   const diff = Math.abs(plus - minus);
   const total = plus + minus;
-  if (total === 0) return { winner: pn, label: "判定不能", ambiguous: true };
-  if (plus === minus) return { winner: pn, label: `両面（${pn}/${mn}）`, ambiguous: true };
+  const tie = tieFront(d, pn) ? pn : mn;
+  if (total === 0) return { winner: tie, label: "判定不能", ambiguous: true };
+  if (plus === minus) return { winner: tie, label: `両面（${pn}/${mn}）`, ambiguous: true };
   const winner = plus > minus ? pn : mn;
   const ratio = diff / total;
   if (ratio >= 0.5) return { winner, label: `絶対${winner}`, ambiguous: false };
@@ -794,12 +812,12 @@ function judge(d, sm, nu, ky, ma, si, jy) {
   const m1p = vote(M1P, d, sm, nu, ky, ma, si, jy), m1n = vote(M1N, d, sm, nu, ky, ma, si, jy);
   const m2p = vote(M2P, d, sm, nu, ky, ma, si, jy), m2n = vote(M2N, d, sm, nu, ky, ma, si, jy);
 
-  const s1 = strengthLabel(r1p.total, r1n.total, "革新", "継承");
-  const s2 = strengthLabel(r2p.total, r2n.total, "広い", "狭い");
-  const s3 = strengthLabel(r3p.total, r3n.total, "リーダー", "参謀");
-  const s4 = strengthLabel(r4p.total, r4n.total, "楽天", "慎重");
-  const sm1 = strengthLabel(m1p.total, m1n.total, "早咲き", "晩成");
-  const sm2 = strengthLabel(m2p.total, m2n.total, "直感", "論理");
+  const s1 = strengthLabel(r1p.total, r1n.total, "革新", "継承", d);
+  const s2 = strengthLabel(r2p.total, r2n.total, "広い", "狭い", d);
+  const s3 = strengthLabel(r3p.total, r3n.total, "リーダー", "参謀", d);
+  const s4 = strengthLabel(r4p.total, r4n.total, "楽天", "慎重", d);
+  const sm1 = strengthLabel(m1p.total, m1n.total, "早咲き", "晩成", d);
+  const sm2 = strengthLabel(m2p.total, m2n.total, "直感", "論理", d);
 
   const key = [s1.winner, s2.winner, s3.winner, s4.winner].join("_");
   const type = TYPES[key] || { name: "判定不能", desc: "" };

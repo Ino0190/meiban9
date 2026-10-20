@@ -937,8 +937,8 @@ a.rs-go:hover{color:#6a4e10}
 </div>
 
 <script src="lunar-data.js?v=1"></script>
-<script src="type-judge.js?v=13"></script>
-<script src="synthesis.js?v=17"></script>
+<script src="type-judge.js?v=14"></script>
+<script src="synthesis.js?v=20"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1163,6 +1163,14 @@ function lunarDate(y, m, d){
   while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (L[mid].start <= n) lo = mid; else hi = mid - 1; }
   const e = L[lo];
   return { year: e.year, month: e.num, day: n - e.start + 1, leap: e.leap };
+}
+// 紫微斗数の流年（今年の干）。命盤と同じく旧暦の年で数え、旧正月（春節）で切り替える。
+// 旧版は1月1日で切り替えていて、1月〜旧正月前の約1か月は前の年の干になるはずが次の年の干になっていた（2026-10-20）
+function zwFlowYear(dt){
+  const t = dt || new Date();
+  const L = lunarDate(t.getFullYear(), t.getMonth() + 1, t.getDate());
+  const y = L ? L.year : t.getFullYear();
+  return { year: y, stem: STEMS[((y - 4) % 10 + 10) % 10] };
 }
 
 /* ============ 四柱推命 ============ */
@@ -2032,7 +2040,7 @@ ${(() => {
     const loser = a.plus >= a.minus ? a.mn : a.pn;
     const total = a.plus + a.minus;
     const pct = total > 0 ? Math.round(Math.max(a.plus, a.minus) / total * 100) : 50;
-    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（${pct}%確度、${a.plus}票 vs ${a.minus}票）\n    → ${AXIS_DISPLAY[winner]}側に判定。${AXIS_DISPLAY[loser]}側の要素も${Math.min(a.plus,a.minus)}票あり、完全な一方向ではない。`;
+    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（支持割合${pct}%：${a.plus}票 対 ${a.minus}票。判定ルールの票の割合で、当たる確率ではない）\n    → ${AXIS_DISPLAY[winner]}側に判定。${AXIS_DISPLAY[loser]}側の要素も${Math.min(a.plus,a.minus)}票あり、完全な一方向ではない。`;
   }).join("\n");
 
   const myParts = tj.key.split("_");
@@ -2128,11 +2136,9 @@ ${(d.sihua || []).map(sh => {
   return `  ${sh.type}: ${sh.star} → ${palaceName}`;
 }).join("\n")}
 
-◆ 流年四化（${new Date().getFullYear()}年・${STEMS[((new Date().getFullYear() - 1984) % 10 + 10) % 10]}年）
+◆ 流年四化（旧暦${zwFlowYear().year}年・${zwFlowYear().stem}年。旧正月で切り替え）
 ${(() => {
-  const nowYear = new Date().getFullYear();
-  const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
-  const ryuStem = STEMS[ryuStemIdx];
+  const ryuStem = zwFlowYear().stem;
   const placedSet = new Set(Object.values(d.ziweiDistrib || {}).flat());
   const ryuSihua = calcSihua(ryuStem, null, placedSet);
   return ryuSihua.map(sh => {
@@ -2245,8 +2251,7 @@ ${ascR ? `◆ ラグナ: ${ascR.n}（${ascR.jp}）— 西洋では${SIGNS[signOf
 ${(() => {
   const moonSidExport = norm360(d.moonLon - aya);
   const dashaExport = calcDasha(moonSidExport, d.y);
-  const nowExport = new Date();
-  const ageExport = nowExport.getFullYear() - d.y;
+  const ageExport = ageExact(d.y, d.m, d.d);
   let currentDsExport = null;
   for (const ds of dashaExport.dashas) {
     if (ageExport >= ds.startAge && ageExport < ds.endAge) { currentDsExport = ds; break; }
@@ -2269,7 +2274,8 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
 - 【11】の「何個の占術がそろったか」を使い、多くの占術がそろう点ははっきり、そろった数が2つ以下の点は控えめに書く。
-- 【12】は羅占盤が画面に出している読み。これと食い違う読みをするときは、そう読む根拠を示す。
+- 星・干支・宿・数などの計算値は計算し直さずそのまま使う。【12】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
+- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。
 - 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込む。読み手が「結局、自分はどう生きればいいのか」がわかること。
 - 健康に関する記述は生活習慣の目安であり、医学的助言ではないことを前提とした書き方にする。
@@ -2473,7 +2479,8 @@ ${(() => { try { return window.RSynth && RSynth.compatDigest ? "\n" + RSynth.com
 【共通指示】
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
-- 【相性の画面の読み】は羅占盤が画面に出している読み。これと食い違う読みをするときは、そう読む根拠を示す。
+- 星・干支・宿・数などの計算値は計算し直さずそのまま使う。【相性の画面の読み】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
+- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。
 - 【2人それぞれの知りたいこと別のまとめ】で、2人の人間関係・恋愛・迷ったとき・好き嫌いの傾向を比べ、合うところと、すれ違いやすいところを具体的に書く。
 - 生まれた時刻が「不明」の人は、時刻で決まる材料（ASC・紫微斗数の命宮など）を根拠にした断定をしない。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の付き合い方」「距離感」「具体的な行動」に落とし込む。
@@ -4165,6 +4172,15 @@ function getCurrentAge(y,m,d){
   if (now.getMonth()+1 < m || (now.getMonth()+1===m && now.getDate() < d)) age--;
   return age;
 }
+// 小数の年齢（ダシャーは区切りが年の途中に来るので、整数の年齢では残り年数がずれる。2026-10-20）
+function ageExact(y,m,d){
+  return (Date.now() - new Date(y, m-1, d).getTime()) / (365.2425 * 86400000);
+}
+// 生まれてから a 年後の「〇年〇月」
+function ymAfter(y,m,d,a){
+  const t = new Date(new Date(y, m-1, d).getTime() + a * 365.2425 * 86400000);
+  return t.getFullYear() + "年" + (t.getMonth()+1) + "月";
+}
 
 // 位相法（十二支同士の関係判定）
 function calcPhases(pillars) {
@@ -4173,7 +4189,8 @@ function calcPhases(pillars) {
   const labels = ["年支","月支","日支","時支"];
 
   // 六合
-  const LIUHE = [[0,1],[1,10],[2,9],[3,8],[4,7],[5,6]]; // 子丑,寅亥,卯戌,辰酉,巳申,午未
+  // 2026-10-20 修正：旧表は子丑以外が1つずつずれていた（丑戌・寅酉・卯申・辰未・巳午を六合と出していた）
+  const LIUHE = [[0,1],[2,11],[3,10],[4,9],[5,8],[6,7]]; // 子丑,寅亥,卯戌,辰酉,巳申,午未
   // 冲
   const CHONG = [[0,6],[1,7],[2,8],[3,9],[4,10],[5,11]];
   // 三合局
@@ -4311,7 +4328,9 @@ function calcGuardianGod(d) {
     enemy = GEN_MAP[dayEl]; // 日主を生む五行＝さらに強める→忌
     enemyDesc = `${enemy}は日主をさらに強めるため忌神。${enemy}の年や大運では独善的になりやすい。`;
   } else if (strength === "身弱") {
-    enemy = WUXING_KOKU[dayEl]; // 日主を抑える五行→忌
+    // 日主を抑える（剋す）五行＝官殺。旧版は WUXING_KOKU（日主が剋す五行）を使い、火の日主に「金が抑える」と出していた（2026-10-20 修正）
+    const KE_ME = {木:"金",火:"水",土:"木",金:"火",水:"土"};
+    enemy = KE_ME[dayEl];
     enemyDesc = `${enemy}は日主を抑えるため忌神。${enemy}の年や大運ではプレッシャーが増す。`;
   }
 
@@ -4611,12 +4630,11 @@ function renderZiwei(){
       <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${d.year.stem}。副星（文昌・文曲・左輔・右弼）が含まれる場合は宮への配置は次のバージョンで対応予定です。</div>
     </div>
 
-    <div class="section-title">流年四化 — 今年（${new Date().getFullYear()}年）強く動く星</div>
+    <div class="section-title">流年四化 — 今年（旧暦${zwFlowYear().year}年）強く動く星</div>
     <div class="card" style="margin-bottom:16px;">
       ${(() => {
-        const nowYear = new Date().getFullYear();
-        const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
-        const ryuStem = STEMS[ryuStemIdx];
+        const nowYear = zwFlowYear().year;
+        const ryuStem = zwFlowYear().stem;
         const ryuSihua = calcSihua(ryuStem, null, new Set(Object.values(d.ziweiDistrib || {}).flat()));
         const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
         const sihuaDesc = {
@@ -4646,7 +4664,7 @@ function renderZiwei(){
             </div>`;
           }).join("")}
         </div>
-        <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ ${nowYear}年（${ryuStem}年）の流年四化。毎年1月1日に自動更新されます。</div>`;
+        <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ ${nowYear}年（${ryuStem}年）の流年四化。命盤と同じく旧暦の年で数え、旧正月（春節）で次の年に切り替わります（立春で切り替える流派もあります）。</div>`;
         return html;
       })()}
     </div>
@@ -4663,7 +4681,7 @@ function renderZiwei(){
     </div>
     ${dayunHtml}
 
-    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星・流年四化は未実装です。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
@@ -7383,13 +7401,13 @@ const JYOTISH_READ = {
 const JYOTISH_PLANET_READING = {
   "太陽": {
     what: "魂の目的・社会的な自己・権威との関係",
-    0: "行動で自分を証明する人。リーダーとして先頭に立つことで輝く。待つのが苦手で、自分から切り拓く。",
+    0: "太陽が高揚するラーシ。行動で自分を証明する人。リーダーとして先頭に立つことで輝く。待つのが苦手で、自分から切り拓く。",
     1: "安定した環境で着実に力を発揮する。物質的な豊かさと精神的な充実の両方を求める。声や話し方に存在感がある。",
     2: "知的好奇心が魂の燃料。複数の分野に関心を持ち、情報を集めて発信することで自己を確立する。",
     3: "家族や身近な人を守ることが人生の軸。感情が豊かで、安心できる居場所を作ることに力を注ぐ。",
     4: "自己表現と創造性が人生の中心。注目されることでエネルギーが湧く。リーダーシップが自然体。太陽の本来の座（ムーラトリコーナ）で力が強い。",
     5: "細部への目配りと実務能力で社会に貢献する。完璧を求める傾向があり、自分にも他人にも厳しくなりやすい。",
-    6: "人間関係とパートナーシップを通じて自己を知る。調和を重んじるが、自分の意見を抑えすぎないことが課題。",
+    6: "太陽が減衰するラーシ。人間関係とパートナーシップを通じて自己を知る。人に合わせすぎて自信を持ちにくいことがある。調和を重んじるが、自分の意見を抑えすぎないことが課題。",
     7: "深い変容を経験する人生。表面的なものに満足せず、物事の核心に迫る。秘密を守る力がある。",
     8: "哲学や精神的な探究が人生のテーマ。教える・導く役割に縁がある。海外や異文化との接点が多い。",
     9: "社会的な達成と責任を重んじる。キャリアに対する意識が高く、地位や評価を得るために努力する。",
@@ -7405,7 +7423,7 @@ const JYOTISH_PLANET_READING = {
     4: "プライドが高く、認められたい欲求が強い。創造的な表現を通じて感情を発散する。寛大だが、無視されると深く傷つく。",
     5: "感情を分析的に処理する傾向。心配性で細かいことが気になるが、その繊細さが人の役に立つ。健康への関心が高い。",
     6: "人間関係の中で心の安定を見つける。一人でいるのが苦手で、パートナーや仲間との調和を求める。",
-    7: "感情の深さが際立つ。表面には出さないが、内面では激しい感情が渦巻いている。直感が鋭く、人の本音を見抜く。",
+    7: "月が減衰するラーシ。感情の深さが際立ち、心が揺れやすい。表面には出さないが、内面では激しい感情が渦巻いている。直感が鋭く、人の本音を見抜く。気持ちを言葉にして外に出すことが安定の鍵。",
     8: "楽観的で前向きな心。精神的な成長や哲学に惹かれる。旅や冒険を通じて心が満たされる。",
     9: "感情を抑制しがちで、責任感が強い。孤独を感じやすいが、それを仕事や社会的役割で埋めようとする。忍耐力がある。",
     10: "独特の感性を持ち、一般的な感情パターンに当てはまらない。友人や仲間との繋がりに心の安定を見出す。",
@@ -7424,7 +7442,7 @@ const JYOTISH_PLANET_READING = {
     8: "哲学的・宗教的な知性。大きな視点で物事を捉える。教育や出版に縁がある。",
     9: "戦略的で計画的な知性。長期的な視点で物事を考える。ビジネスや政治に向いている。",
     10: "革新的な思考。既存の常識にとらわれず、独自の理論を構築する。テクノロジーや科学に強い。",
-    11: "直感的な知性。論理よりもインスピレーションで答えに辿り着く。詩的な表現力がある。",
+    11: "水星が減衰するラーシ。論理よりもインスピレーションで答えに辿り着く。細かい事務や筋道立てた説明は苦手になりやすい。詩的な表現力がある。書いて整理する習慣が助けになる。",
   },
   "金星": {
     what: "愛情・美意識・人間関係・喜びの感じ方・金運",
@@ -7433,7 +7451,7 @@ const JYOTISH_PLANET_READING = {
     2: "知的な会話が恋愛の入口。友人関係から恋愛に発展しやすい。多趣味で社交的。",
     3: "家庭的な愛情。パートナーに母性的な優しさを求める。料理や家の装飾にセンスがある。",
     4: "華やかな恋愛。注目される関係を好む。芸術的な才能があり、創造的な表現で人を魅了する。",
-    5: "控えめだが誠実な愛情表現。相手の健康や生活を気遣う。実用的な贈り物を選ぶ。",
+    5: "金星が減衰するラーシ。控えめだが誠実な愛情表現。相手の欠点が目につきやすく、愛情を素直に受け取りにくいことがある。相手の健康や生活を気遣い、実用的な形で愛を示す。",
     6: "金星の本来の座。パートナーシップの達人。美しいものに囲まれた生活を好む。社交的で人気がある。",
     7: "深く激しい愛情。嫉妬や執着が強くなりやすいが、その分だけ深い絆を築ける。秘密の恋に縁がある。",
     8: "自由な恋愛観。束縛を嫌い、精神的な繋がりを重視する。異文化の人との恋愛に縁がある。",
@@ -7446,7 +7464,7 @@ const JYOTISH_PLANET_READING = {
     0: "火星の本来の座。行動力が最も自然に発揮される。競争に強く、リーダーシップがある。短気だが決断が速い。",
     1: "粘り強い行動力。一度決めたら最後までやり抜く。怒りを溜め込みやすいが、爆発すると激しい。",
     2: "言葉で戦う人。議論や交渉で力を発揮する。手先が器用で、複数のことを同時にこなせる。",
-    3: "家族を守るために戦う。感情的になりやすく、身内への攻撃には激しく反応する。不動産に縁がある。",
+    3: "火星が減衰するラーシ。家族を守るために戦うが、行動力が気分に左右されやすい。身内への攻撃には激しく反応する。怒りを溜めずに小出しにするのが課題。不動産に縁がある。",
     4: "創造的なエネルギー。スポーツや芸術で力を発揮する。自己主張が強く、ドラマチックな行動を取る。",
     5: "精密な行動力。計画的に動き、無駄を嫌う。健康管理や技術的な仕事に向いている。",
     6: "パートナーシップの中で行動力が発揮される。一人より二人で動く方が力が出る。争いを避ける傾向。",
@@ -7467,13 +7485,13 @@ const JYOTISH_PLANET_READING = {
     6: "パートナーシップが幸運の源。結婚や事業提携で運が開ける。法律や外交に縁がある。",
     7: "変容を通じて深い知恵を得る。困難な経験が後の大きな幸運に繋がる。オカルトや神秘学に縁がある。",
     8: "木星の本来の座。哲学・宗教・高等教育で力を発揮する。海外に幸運がある。精神的な指導者の素質。",
-    9: "社会的な地位と名誉を得やすい。組織の中で重要な役割を担う。晩年に大きな成功。",
+    9: "木星が減衰する（本来の力を出しにくい）ラーシ。理想や信念より、現実の成果や形を重んじる。幸運が大きく舞い込むより、責任を引き受けて時間をかけて積み上げた分だけ返ってくる。目先の損得で信念を曲げないことが課題。",
     10: "人道的な活動が幸運を呼ぶ。友人やネットワークからの恩恵が大きい。革新的なビジョンで社会に貢献。",
     11: "木星の本来の座。霊性と慈悲が深い。精神的な豊かさに恵まれる。芸術や癒しの分野で幸運。",
   },
   "土星": {
     what: "試練・忍耐・責任・人生の課題・時間をかけて得るもの",
-    0: "行動に制限がかかりやすい。焦らず着実に進むことが求められる。忍耐を学ぶ配置。",
+    0: "土星が減衰するラーシ。行動に制限がかかりやすく、焦りと停滞の間で揺れやすい。焦らず着実に進むことが求められる。忍耐を学ぶ配置。",
     1: "経済的な試練を経験しやすいが、それを乗り越えると堅実な財を築ける。質素な美意識。",
     2: "コミュニケーションに慎重さが求められる。言葉の重みを知っている。学びに時間がかかるが、深い知識を得る。",
     3: "家庭環境に課題がある場合がある。感情を抑制しがちだが、晩年に安定した家庭を築く。",
@@ -7606,22 +7624,25 @@ function calcDasha(moonSidLon, birthYear) {
 }
 
 // アンタルダシャー（小運）計算: マハーダシャー内を9惑星で分割
+// 2026-10-20 修正：①DASHA_SEQUENCE に key が無く、どの大運でもケートゥから始めていた → 大運の星（lord）から始める
+//   ②生まれたときの途中の大運を、残りの年数で9つに割っていた → 本来の年数で割り、生まれる前に終わった小運は外す
 function calcAntardasha(mahadasha) {
   const totalYears = 120; // ヴィムショッタリー全体
-  const startSeqIdx = DASHA_SEQUENCE.findIndex(ds => ds.key === mahadasha.key);
+  const startSeqIdx = Math.max(0, DASHA_SEQUENCE.findIndex(ds => ds.lord === mahadasha.lord));
+  const full = mahadasha.years;
   const antars = [];
-  let cumAge = mahadasha.startAge;
+  let cumAge = mahadasha.endAge - full; // 最初の大運は生まれる前に始まっている（負になる）
 
   for (let i = 0; i < 9; i++) {
     const idx = (startSeqIdx + i) % 9;
     const ds = DASHA_SEQUENCE[idx];
     // アンタルダシャーの期間 = (マハーダシャーの年数 × アンタルダシャー惑星の年数) / 120
-    const duration = (mahadasha.remainingYears * ds.years) / totalYears;
-    antars.push({
+    const duration = (full * ds.years) / totalYears;
+    if (cumAge + duration > 0) antars.push({
       ...ds,
-      startAge: cumAge,
+      startAge: Math.max(0, cumAge),
       endAge: cumAge + duration,
-      duration,
+      duration: cumAge + duration - Math.max(0, cumAge),
     });
     cumAge += duration;
   }
@@ -7632,7 +7653,9 @@ function calcAntardasha(mahadasha) {
 function jyotishPlanetReading(planetName, rashiIndex) {
   const pr = JYOTISH_PLANET_READING[planetName];
   if (!pr) return null;
-  const reading = pr[rashiIndex] || pr.gen || null;
+  let reading = pr[rashiIndex] || pr.gen || null;
+  // 減衰には、和らぐ条件（ニーチャ・バンガ）がある。簡易版では判定していないので、そう書く（2026-10-20）
+  if (reading && /が減衰/.test(reading)) reading += "（減衰が和らぐ条件＝ニーチャ・バンガがあるかは、この簡易版では判定していません）";
   return reading ? { what: pr.what, reading } : null;
 }
 
@@ -7736,8 +7759,7 @@ function renderJyotish(){
       ${(() => {
         const moonSidSum = siderealPlanets[1].sLon;
         const dashaSum = calcDasha(moonSidSum, d.y);
-        const nowSum = new Date();
-        const ageSum = nowSum.getFullYear() - d.y + (nowSum.getMonth() + 1 >= d.m ? 0 : -1);
+        const ageSum = ageExact(d.y, d.m, d.d);
         let curDs = null, prevDs = null, nextDs = null;
         for (let i = 0; i < dashaSum.dashas.length; i++) {
           if (ageSum >= dashaSum.dashas[i].startAge && ageSum < dashaSum.dashas[i].endAge) {
@@ -7869,8 +7891,7 @@ function renderJyotish(){
     ${(() => {
       const moonSid = siderealPlanets[1].sLon;
       const dasha = calcDasha(moonSid, d.y);
-      const now = new Date();
-      const currentAge = now.getFullYear() - d.y + (now.getMonth() + 1 >= d.m ? 0 : -1);
+      const currentAge = ageExact(d.y, d.m, d.d);
 
       // ナクシャトラ情報カード
       let html = '<div class="card hi" style="margin-bottom:16px;">';
@@ -7894,17 +7915,19 @@ function renderJyotish(){
       }
 
       if (currentDasha) {
-        const remainInCurrent = (currentDasha.endAge - currentAge).toFixed(0);
+        const remainYears = currentDasha.endAge - currentAge;
+        const remainInCurrent = remainYears < 1 ? "1年未満" : "約" + Math.round(remainYears) + "年";
+        const endYm = ymAfter(d.y, d.m, d.d, currentDasha.endAge);
         html += '<div class="card" style="margin-bottom:16px; padding:16px;">';
         html += '<h3 style="margin-bottom:12px;">⏳ 人生の今いる場所</h3>';
         if (prevDasha) {
           html += '<div style="font-size:15px; color:var(--muted); margin-bottom:6px;">◀ ' + Math.floor(prevDasha.startAge) + '〜' + Math.floor(prevDasha.endAge) + '歳: <strong>' + prevDasha.jp + '</strong>期（' + prevDasha.years + '年間）— ' + prevDasha.theme.split("。")[0] + '</div>';
         }
         html += '<div style="font-size:16px; padding:10px 14px; background:var(--hi); border-radius:8px; margin-bottom:6px;">';
-        html += '● <strong style="color:var(--gold)">' + Math.floor(currentDasha.startAge) + '〜' + Math.floor(currentDasha.endAge) + '歳: ' + currentDasha.jp + '期</strong>（' + currentDasha.remainingYears.toFixed(0) + '年間）← いま（残り約' + remainInCurrent + '年）';
+        html += '● <strong style="color:var(--gold)">' + Math.floor(currentDasha.startAge) + '〜' + Math.floor(currentDasha.endAge) + '歳: ' + currentDasha.jp + '期</strong>（' + currentDasha.remainingYears.toFixed(0) + '年間）← いま（' + endYm + 'ごろまで・残り' + remainInCurrent + '）';
         html += '</div>';
         if (nextDasha) {
-          html += '<div style="font-size:15px; color:var(--muted); margin-top:6px;">▶ ' + Math.floor(nextDasha.startAge) + '〜' + Math.floor(nextDasha.endAge) + '歳: <strong>' + nextDasha.jp + '</strong>期（' + nextDasha.years + '年間）— ' + nextDasha.theme.split("。")[0] + '</div>';
+          html += '<div style="font-size:15px; color:var(--muted); margin-top:6px;">▶ ' + endYm + 'ごろから・' + Math.floor(nextDasha.startAge) + '〜' + Math.floor(nextDasha.endAge) + '歳: <strong>' + nextDasha.jp + '</strong>期（' + nextDasha.years + '年間）— ' + nextDasha.theme.split("。")[0] + '</div>';
         }
         html += '</div>';
 
@@ -7925,10 +7948,11 @@ function renderJyotish(){
         html += '<div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.7;">マハーダシャー（大運）の中をさらに9つの惑星期間に分割したもの。「今年〜来年の空気感」がわかります。</div>';
         html += '<div style="display:flex; flex-direction:column; gap:3px;">';
         antars.forEach(a => {
-          const isCur = curAntar && a.key === curAntar.key && Math.abs(a.startAge - curAntar.startAge) < 0.01;
+          const isCur = curAntar === a;
           const isPast = currentAge >= a.endAge;
-          const startY = Math.floor(d.y + a.startAge);
-          const endY = Math.floor(d.y + a.endAge);
+          // 年は誕生日から数える（旧版は生まれ年に足していて、誕生月によっては1年ずれた）
+          const startY = ymAfter(d.y, d.m, d.d, a.startAge).replace(/年.*/, "");
+          const endY = ymAfter(d.y, d.m, d.d, a.endAge).replace(/年.*/, "");
           const dur = a.duration;
           html += '<div style="display:grid; grid-template-columns:100px 1fr; gap:8px; padding:6px 10px; border-radius:5px; font-size:14px; ' +
             (isCur ? 'background:var(--hi); border:1px solid var(--gold);' : isPast ? 'opacity:0.4;' : '') + '">';
@@ -8720,7 +8744,10 @@ function renderConsult(){
     };
     // 四柱推命の財星
     const zaiStars = d.pillars.filter(p=>p.ten==="正財"||p.ten==="偏財");
-    const zaiDesc = zaiStars.length === 0 ? "命式に財星（正財・偏財）がない。お金への執着が薄く、稼ぐことより使命や興味を優先するタイプ。ただし大運で財星が巡る時期に収入が増える。"
+    // 天干に無くても蔵干（地支の中）にある財星は「無い」と言わない（2026-10-20）
+    const zaiHidden = [...new Set(d.pillars.flatMap(p => (ZOUKAN[p.branch]||[]).map(s => tenGod(d.day.stem, s))).filter(t => t==="正財"||t==="偏財"))];
+    const zaiDesc = zaiStars.length === 0 && zaiHidden.length ? `天干に財星（正財・偏財）は出ていないが、蔵干（地支の中）に${zaiHidden.join("・")}がある。お金の力は表に出にくく、経験や年齢とともに形になるタイプ。大運で財星が巡る時期に収入が動きやすい。`
+      : zaiStars.length === 0 ? "命式に財星（正財・偏財）がない（天干・蔵干とも）。お金への執着が薄く、稼ぐことより使命や興味を優先するタイプ。ただし大運で財星が巡る時期に収入が増える。"
       : zaiStars.some(p=>p.ten==="偏財") ? "偏財がある。投資・副業・人脈を通じた収入に縁がある。一つの収入源に頼らない方が合っている。"
       : "正財がある。堅実な収入に恵まれる。給与所得や安定した事業で着実に資産を築くタイプ。";
 
@@ -8736,7 +8763,7 @@ function renderConsult(){
         ${MONEY_STAR[wealthStarFirst] ? MONEY_STAR[wealthStarFirst].split("。").slice(0,2).join("。")+"。" : ""}
         ${zaiDesc.split("。")[0]}。
       </p>
-      <p style="font-size:13px; color:var(--muted); margin-top:8px;">財帛宮（${wealthStarFirst}）・${zaiStars.length > 0 ? zaiStars.map(p=>p.ten).join("・") : "財星なし"}</p>
+      <p style="font-size:13px; color:var(--muted); margin-top:8px;">財帛宮（${wealthStarFirst}）・${zaiStars.length > 0 ? zaiStars.map(p=>p.ten).join("・") : zaiHidden.length ? "財星は蔵干に" + zaiHidden.join("・") : "財星なし"}</p>
     </div>
 
     <div class="card" style="margin-bottom:20px;">
@@ -9292,10 +9319,10 @@ function renderConsult(){
     const zwDayunS = calcZiweiDayun(d, lifeIdx);
     const currentZwDuS = zwDayunS.find(du => age >= du.startAge && age < du.endAge);
 
-    // 流年四化
+    // 流年四化（旧正月で切り替え）
     const nowYear = new Date().getFullYear();
-    const ryuStemIdx = ((nowYear - 1984) % 10 + 10) % 10;
-    const ryuStem = STEMS[ryuStemIdx];
+    const ryuY = zwFlowYear();
+    const ryuStem = ryuY.stem;
     const placedSet = new Set(Object.values(d.ziweiDistrib || {}).flat());
     const ryuSihua = calcSihua(ryuStem, null, placedSet);
     const sihuaColor = {化禄:"#4a8c50", 化権:"#c04030", 化科:"#3060a0", 化忌:"#808080"};
@@ -9526,16 +9553,17 @@ function renderConsult(){
             }
           }
           // ダシャー
-          const currentAge3 = getCurrentAge(d.y, d.m, d.d);
+          const currentAge3 = ageExact(d.y, d.m, d.d);
           let currentDasha = "";
           try {
             if (typeof ayanamsha === 'function') {
               const aya3 = ayanamsha(d.jd);
               const moonSid3 = norm360(d.moonLon - aya3);
-              const dashas = calcDasha(moonSid3, d.y);
-              if (Array.isArray(dashas)) {
+              // calcDasha は {dashas:[…]} を返す。旧版は配列かを見ていたので、ここは一度も出ていなかった（2026-10-20）
+              const dashas = calcDasha(moonSid3, d.y).dashas || [];
+              {
                 const cd = dashas.find(dd => currentAge3 >= dd.startAge && currentAge3 < dd.endAge);
-                if (cd) currentDasha = cd.planet + "期";
+                if (cd) currentDasha = cd.lord + "期";
               }
             }
           } catch(e2) { /* ダシャー取得失敗は無視 */ }
@@ -10528,7 +10556,7 @@ function renderConsult(){
           ${currentZwDuS.stem ? `<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">${calcSihua(currentZwDuS.stem, null, placedSet).map(sh=>`<span style="font-size:12px; color:${sihuaColor[sh.type]}; background:${sihuaColor[sh.type]}18; padding:1px 6px; border-radius:3px;">${sh.type}:${sh.star}</span>`).join("")}</div>` : ""}
         </div>` : ""}
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
-          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">流年四化（${nowYear}年・${ryuStem}年）</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:3px;">流年四化（旧暦${ryuY.year}年・${ryuStem}年）</div>
           <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">${ryuSihua.map(sh=>{
             let pname="—";
             if(!sh.unplaced){for(let i=0;i<12;i++){const bi=(lifeIdx-i+12)%12;if((d.ziweiDistrib[bi]||[]).includes(sh.star)){pname=PALACE_NAMES[i];break;}}}
@@ -10595,14 +10623,14 @@ function renderConsult(){
     const aya = ayanamsha(d.jd);
     const sidMoon = norm360(d.moonLon - aya);
     const dashaInfo = calcDasha(sidMoon, d.y);
-    const nowDate = new Date();
-    const currentAgeDasha = nowDate.getFullYear() - d.y;
+    const currentAgeDasha = ageExact(d.y, d.m, d.d);
     let currentMahaDasha = "";
     let currentDashaLord = "";
     for (const ds of dashaInfo.dashas) {
       if (currentAgeDasha >= ds.startAge && currentAgeDasha < ds.endAge) {
         currentDashaLord = ds.lord || ds.jp || "";
-        currentMahaDasha = currentDashaLord + "期（" + Math.round(ds.startAge) + "〜" + Math.round(ds.endAge) + "歳）";
+        // 区切りの書き方を他の画面（タブ・相談文）と同じ切り捨てにそろえる
+        currentMahaDasha = currentDashaLord + "期（" + Math.floor(ds.startAge) + "〜" + Math.floor(ds.endAge) + "歳）";
         break;
       }
     }
