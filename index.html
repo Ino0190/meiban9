@@ -938,7 +938,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=1"></script>
 <script src="type-judge.js?v=14"></script>
-<script src="synthesis.js?v=20"></script>
+<script src="synthesis.js?v=21"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -4421,18 +4421,22 @@ function renderZiwei(){
     ? lifeStars.map(s=>`<strong style="color:${starColor(s)}">${s}</strong>`).join("・")
     : "無主星";
   // 主星があれば星の説明＋命宮での読み（ZW_LIFE）。無主星なら向かいの遷移宮の主星を借りて読む（借星）
-  const lifeRead = s => `<div style="margin-top:6px"><strong style="color:${starColor(s)}">${s}</strong> — ${zwStarExpl(s)}${ZW_LIFE[s] ? `<br>${ZW_LIFE[s]}` : ""}</div>`;
-  const borrowStars = lifeStars.length ? [] : (starDistrib[(lifeIdx + 6) % 12] || []).filter(s => ZW_LIFE[s]);
-  const lifeStarExpl = lifeStars.length
+  // 副星（右弼・禄存など）は説明が空のまま「右弼 —」と出ていた → 副星の短い説明を出す。無主星かは主星（14星）だけで見る（2026-10-20）
+  const lifeRead = s => ZW_LIFE[s]
+    ? `<div style="margin-top:6px"><strong style="color:${starColor(s)}">${s}</strong> — ${zwStarExpl(s)}<br>${ZW_LIFE[s]}</div>`
+    : `<div style="margin-top:6px"><strong>${s}</strong>（副星） — ${ZW_SUB_EXPL[s] || ""}</div>`;
+  const lifeMain = lifeStars.filter(s => ZW_LIFE[s]);
+  const borrowStars = lifeMain.length ? [] : (starDistrib[(lifeIdx + 6) % 12] || []).filter(s => ZW_LIFE[s]);
+  const lifeStarExpl = lifeMain.length
     ? lifeStars.map(lifeRead).join("")
-    : "命宮に主星がないので、向かいの遷移宮（" + BRANCHES[(lifeIdx + 6) % 12] + "宮）の星を借りて読む「借星」で判断します。" +
+    : lifeStars.map(lifeRead).join("") + "命宮に主星がないので、向かいの遷移宮（" + BRANCHES[(lifeIdx + 6) % 12] + "宮）の星を借りて読む「借星」で判断します。" +
       (borrowStars.length ? "借りた星は少し弱めに表れ、周りの人や環境に合わせて顔を変えやすいとされます。" + borrowStars.map(lifeRead).join("") : "遷移宮にも主星がないので、四化と大限の流れを重く見ます。");
 
   const center = `<div class="zwcenter">
     <div style="font-size:13px; color:#999; margin-bottom:6px;">命宮</div>
     <div class="year">${BRANCHES[lifeIdx]}宮</div>
     <div style="font-size:15px; color:var(--text); margin:6px 0;">${lifeStars.length ? lifeStars.join("・") : "無主星"}</div>
-    <div style="font-size:14px; color:#6a6050; line-height:1.6;">${palaceExpl("命宮", lifeStars[0]).split("。").slice(0,2).join("。")}。</div>
+    <div style="font-size:14px; color:#6a6050; line-height:1.6;">${palaceExpl("命宮", lifeMain[0]).split("。").slice(0,2).join("。")}。</div>
   </div>`;
 
   // 主要4宮の個別解説
@@ -4441,14 +4445,16 @@ function renderZiwei(){
     const order = PALACE_NAMES.indexOf(pname);
     const branchIdx = (lifeIdx - order + 12) % 12;
     const stars = starDistrib[branchIdx] || [];
-    const starText = stars.length ? stars.join("・") : "無主星";
+    // 主星（14星）と副星を分けて書く。旧版は右弼・禄存・天喜なども「主星：」に並べていた（2026-10-20）
+    const mainS = stars.filter(s => ZW_LIFE[s]), subS = stars.filter(s => !ZW_LIFE[s]);
+    const starText = (mainS.length ? mainS.join("・") : "なし（無主星）") + (subS.length ? "　副星：" + subS.join("・") : "");
     return `<div class="palace-detail">
       <div class="head">
         <span class="pn">${pname}</span>
         <span class="loc">${BRANCHES[branchIdx]}宮</span>
       </div>
       <div class="stars">主星：${starText}</div>
-      <div class="expl">${palaceExpl(pname, stars[0])}</div>
+      <div class="expl">${mainS.length ? mainS.map(s => palaceExpl(pname, s)).filter((x, i, a) => a.indexOf(x) === i).join(" ") : palaceExpl(pname)}</div>
     </div>`;
   }).join("");
 
@@ -4627,7 +4633,7 @@ function renderZiwei(){
           </div>`;
         }).join("")}
       </div>
-      <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${d.year.stem}。副星（文昌・文曲・左輔・右弼）が含まれる場合は宮への配置は次のバージョンで対応予定です。</div>
+      <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${d.year.stem}。四化は主星のほか、文昌・文曲・左輔・右弼にも付きます（入っている宮もここに出しています）。</div>
     </div>
 
     <div class="section-title">流年四化 — 今年（旧暦${zwFlowYear().year}年）強く動く星</div>
@@ -4694,6 +4700,19 @@ function starColor(star){
              "七殺":"#d04030", "破軍":"#804060"};
   return c[star] || "#6888a0";
 }
+// 副星10星の短い説明（命宮の欄で「右弼 —」と空になっていたので足した・2026-10-20）
+const ZW_SUB_EXPL = {
+  "左輔":"補佐の星。周りの助けを得やすく、人をまとめる手伝いがうまい。",
+  "右弼":"補佐の星。目立たないところで支える力があり、人の縁に助けられる。",
+  "文昌":"学問と文書の星。試験・資格・書くことに強い。",
+  "文曲":"才芸の星。話す・表現する・芸事に強い。",
+  "天魁":"貴人の星（陽）。目上や公の場で引き立てを受けやすい。",
+  "天鉞":"貴人の星（陰）。身近な人や陰の支えから助けを受けやすい。",
+  "禄存":"財を守る星。お金を蓄えて守る力がある。慎重で、守りに入りやすい面も。",
+  "天馬":"移動の星。動くほど運が動く。転居・出張・遠方に縁がある。",
+  "紅鸞":"縁の星。出会いや恋愛、祝い事に縁がある。",
+  "天喜":"喜びの星。祝い事や楽しい出来事に縁がある。",
+};
 // 命宮に入ったときの読み（性格・仕事・気をつけること・2026-10-19 井内さん「その人だけの文にする」）。zwStarExpl は星そのものの説明
 const ZW_LIFE = {
   "紫微":"自分が中心になって物事を決めたい気持ちが強い。人をまとめ、方向を示す役で力が出る一方、人の下で細かく指示されると誇りが傷つく。支えてくれる人がいるほど伸びる星なので、助けてくれる人を大切にし、一人で全部を背負わない。",
@@ -4836,6 +4855,15 @@ function palaceExpl(name, starName){
       "父母宮×天同":"穏やかな親子関係。甘やかされて育った面も。",
     };
     if (specific[key]) return specific[key];
+    // 宮×星の文が無い組み合わせ（財帛宮×天機・官禄宮×天同・夫妻宮×巨門など）は、宮のテーマ名だけの一般文になっていた。
+    // 主星なら「その宮のテーマに、この星の性質が出る」と星の説明で書く（2026-10-20）
+    const ex = zwStarExpl(starName);
+    if (ex) {
+      const THEME = { "命宮":"人生の基調", "兄弟宮":"兄弟・友人との関係", "夫妻宮":"恋愛・結婚", "子女宮":"子供や創作との関係", "財帛宮":"お金の稼ぎ方と使い方",
+        "疾厄宮":"体の傾向", "遷移宮":"外での運", "僕役宮":"部下・協力者との関係", "官禄宮":"仕事の進め方", "田宅宮":"家と住まい", "福德宮":"心の満足と趣味", "父母宮":"親・目上との関係" };
+      const [head, ...rest] = ex.split("。");
+      return `${THEME[name] || name}に、${starName}（${head}）の性質が出る。${rest.filter(Boolean).join("。")}${rest.filter(Boolean).length ? "。" : ""}`;
+    }
   }
   // 星の組み合わせがない場合は一般的な説明
   const m = {
