@@ -4,6 +4,9 @@
 使い方（Divination/ で実行）
   python3 _check.py            基準の12人で全項目を照合（直したら毎回これを回す）
   python3 _check.py --sweep    1950〜2030年の毎日（正午）で一致率を出す
+  python3 _check.py --update-types   計算を直してタイプが変わるのを受け入れたとき、_type_snapshot.json を書き直す
+  python3 _check_random.py 500       ランダムな誕生日・時刻・出生地で、大運・紫微の全星と四化と大限・ダシャー・九星の方位・数秘・宿曜の相性も検算
+  （基準の人のあとに、位相法・忌神・インドの高揚減衰・紫微の流年の干のルールと、40人の16タイプが前と同じかも見る）
 必要なもの: pyswisseph, playwright（Chrome）
 
 参照の定義
@@ -225,7 +228,7 @@ APP_JS = """(cases) => cases.map(c => {
   const ma = calcMaya(d.y, d.m, d.d), ky = calcKyusei(d.y, d.m, d), sm = calcJintai(d);
   const S = MAYA_SEALS.map(s => s.n);
   return {
-    年柱: d.year.stem + d.year.branch, 月柱: d.month.stem + d.month.branch, 日柱: d.day.stem + d.day.branch, 時柱: d.hour.stem + d.hour.branch,
+    年柱: d.year.stem + d.year.branch, 月柱: d.month.stem + d.month.branch, 日柱: d.day.stem + d.day.branch, 時柱: d.hourKnown ? d.hour.stem + d.hour.branch : undefined,
     天中殺: BRANCHES[sm.k1] + BRANCHES[sm.k2],
     本命星: ky.honmei, 月命星: ky.getsu,
     KIN: ma.kin, WS: S[ma.ws], 類似: S[ma.analogSeal], 反対: S[ma.antipodeSeal], 神秘: S[ma.occultSeal], ガイド: S[ma.guideSeal],
@@ -314,6 +317,92 @@ def selftest():
     print("参照の自己テスト:", "OK" if ok else "NG")
     return ok
 
+# ─────────────── 解釈のルール（2026-10-20 外部レビューで六合の表のずれ等が見つかったので足した） ───────────────
+RULES_JS = """() => {
+  const ph = {};
+  BRANCHES.forEach(a => BRANCHES.forEach(b => { if (a !== b) ph[a + b] = calcPhases([{branch: a}, {branch: b}]).map(x => x.type).sort().join(','); }));
+  const P = ['太陽','月','水星','金星','火星','木星','土星'];
+  const jy = {}; P.forEach(p => { jy[p] = Object.fromEntries([...Array(12).keys()].map(i => [i, String(JYOTISH_PLANET_READING[p][i] || '')])); });
+  const fy = [[2027,1,15],[2027,2,10],[2026,2,16],[2026,2,17]].map(x => zwFlowYear(new Date(x[0], x[1]-1, x[2])).stem);
+  return { ph, jy, fy };
+}"""
+GUARD_JS = """(cases) => cases.map(c => { const d = calcPersonData(c.bd, c.bt || '', c.bt ? 'known' : 'unknown', 'F', ''); const g = calcGuardianGod(d);
+  return { el: STEM_EL[STEMS.indexOf(d.day.stem)], s: g.strength, enemy: g.enemy }; })"""
+DASHA_JS = """(cases) => cases.flatMap(c => { const d = calcPersonData(c.bd, c.bt || '', c.bt ? 'known' : 'unknown', 'F', '');
+  return calcDasha(norm360(d.moonLon - ayanamsha(d.jd)), d.y).dashas.map(m => { const a = calcAntardasha(m);
+    return { bd: c.bd, lord: m.lord, first: !!m.isFirst, a0: a[0].lord, n: a.length, sum: a.reduce((s, x) => s + x.duration, 0), len: m.endAge - m.startAge, end: a[a.length - 1].endAge, mEnd: m.endAge, s0: a[0].startAge, mStart: m.startAge }; }); })"""
+TYPE_JS = """(cases) => cases.map(c => { const d = calcPersonData(c.bd, c.bt || '', c.bt ? 'known' : 'unknown', 'X', c.bt ? '東京都' : ''); const tj = RSynth.buildSynthesis(d).tj;
+  return { key: tj.key, name: tj.type.name, votes: [tj.a1, tj.a2, tj.a3, tj.a4].map(a => a.pn + a.plus + ':' + a.mn + a.minus).join(' ') }; })"""
+SNAP = HERE / "_type_snapshot.json"
+
+def type_cases():
+    import random
+    r = random.Random(20261020)
+    out = [(bd, bt) for bd, bt, _ in CASES] + [("1973-12-16", None), ("1973-12-16", "12:00")]
+    for _ in range(26):
+        out.append((f"{r.randint(1950, 2010)}-{r.randint(1, 12):02d}-{r.randint(1, 28):02d}", r.choice([None, f"{r.randint(0, 23):02d}:30"])))
+    return out
+
+def run_js(js, arg=None):
+    with sync_playwright() as p:
+        b = p.chromium.launch(channel="chrome")
+        pg = b.new_page()
+        pg.goto((HERE / "index.html").as_uri())
+        pg.wait_for_function("typeof EPH !== 'undefined'", timeout=60000)
+        out = [pg.evaluate(j, a) if a is not None else pg.evaluate(j) for j, a in zip(js, arg)]
+        b.close()
+    return out
+
+def rules_and_types(fails):
+    import json
+    tc = type_cases()
+    base = [{"bd": bd, "bt": bt} for bd, bt, _ in CASES]
+    rules, guard, dasha, types = run_js([RULES_JS, GUARD_JS, DASHA_JS, TYPE_JS], [None, base, base, [{"bd": bd, "bt": bt} for bd, bt in tc]])
+    def chk(k, ok, msg=""):
+        print(f"  {'✓' if ok else '✗'} {k} {msg}")
+        if not ok:
+            fails.setdefault(k, []).append(msg)
+    print("\n■ 解釈のルール")
+    B = BRANCHES
+    pair = lambda s: {frozenset(s[i:i + 2]) for i in range(0, len(s), 2)}
+    LIUHE, CHONG, HAI = pair("子丑寅亥卯戌辰酉巳申午未"), pair("子午丑未寅申卯酉辰戌巳亥"), pair("子未丑午寅巳卯辰申亥酉戌")
+    XING = [set("寅巳申"), set("丑戌未"), set("子卯")]
+    bad = []
+    for a in B:
+        for b in B:
+            if a == b:
+                continue
+            want = sorted([t for t, S in (("六合", LIUHE), ("冲", CHONG), ("害", HAI)) if frozenset(a + b) in S] + (["刑"] if any({a, b} <= x for x in XING) else []))
+            if rules["ph"][a + b] != ",".join(want):
+                bad.append(f"{a}{b}={rules['ph'][a + b] or 'なし'}（正しくは{','.join(want) or 'なし'}）")
+    chk("位相法（六合・冲・害・刑）132組", not bad, " / ".join(bad[:6]))
+    SHENG = {"木": "水", "火": "木", "土": "火", "金": "土", "水": "金"}   # 生我
+    KE = {"木": "金", "火": "水", "土": "木", "金": "火", "水": "土"}      # 剋我
+    gbad = [f"{g['el']}・{g['s']}→{g['enemy']}" for g in guard if (g["s"] == "身弱" and g["enemy"] != KE[g["el"]]) or (g["s"] == "身強" and g["enemy"] != SHENG[g["el"]])]
+    chk("守護神法の忌神（身弱＝剋我・身強＝生我）", not gbad, " / ".join(gbad))
+    DEB = {"太陽": 6, "月": 7, "水星": 11, "金星": 5, "火星": 3, "木星": 9, "土星": 0}
+    EXA = {"太陽": 0, "月": 1, "水星": 5, "金星": 11, "火星": 9, "木星": 3, "土星": 6}
+    jbad = [f"{p}減衰" for p, i in DEB.items() if "減衰" not in rules["jy"][p][str(i)]] + [f"{p}高揚" for p, i in EXA.items() if "高揚" not in rules["jy"][p][str(i)]]
+    jbad += [f"{p}の{i}に減衰" for p in DEB for i in range(12) if i != DEB[p] and "減衰" in rules["jy"][p][str(i)]]
+    chk("インドの高揚・減衰（7惑星）", not jbad, " / ".join(jbad))
+    want_fy = [STEMS[(lunar_date(dt.date(*x))[4] - 4) % 10] for x in [(2027, 1, 15), (2027, 2, 10), (2026, 2, 16), (2026, 2, 17)]]
+    chk("紫微の流年の干（旧正月で切り替え）", rules["fy"] == want_fy, f"アプリ={rules['fy']} 参照={want_fy}")
+    # 小運：途中から始まる最初の大運以外は大運と同じ星から始まり、9つ。どれも大運の始まり〜終わりをすき間なく埋める
+    dbad = [f"{x['bd']} {x['lord']}期" for x in dasha if (not x["first"] and (x["a0"] != x["lord"] or x["n"] != 9))
+            or abs(x["sum"] - x["len"]) > 1e-6 or abs(x["end"] - x["mEnd"]) > 1e-6 or abs(x["s0"] - x["mStart"]) > 1e-6]
+    chk(f"インドの小運（{len(dasha)}の大運）", not dbad, " / ".join(dbad[:5]))
+    print("\n■ 16タイプ（_type_snapshot.json と比べる。わざと変えたときは --update-types）")
+    now = {f"{bd} {bt or '時刻不明'}": t for (bd, bt), t in zip(tc, types)}
+    if not SNAP.exists() or "--update-types" in sys.argv:
+        SNAP.write_text(json.dumps(now, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"  記録した（{len(now)}人）")
+        return
+    old = json.loads(SNAP.read_text(encoding="utf-8"))
+    diff = [k for k in now if k in old and old[k]["key"] != now[k]["key"]]
+    for k in diff:
+        print(f"  ✗ {k}: {old[k]['name']} → {now[k]['name']}\n      前 {old[k]['votes']}\n      今 {now[k]['votes']}")
+    chk(f"タイプが前と同じ（{len(now)}人）", not diff, f"{len(diff)}人変わった" if diff else "")
+
 def main():
     if not selftest():
         sys.exit(2)
@@ -322,7 +411,7 @@ def main():
     fails = {}
     for (bd, bt, label), a in zip(CASES, app):
         y, m, d = map(int, bd.split("-"))
-        h, mi = (map(int, bt.split(":")) if bt else (5, 0))
+        h, mi = (map(int, bt.split(":")) if bt else (12, 0))   # 時刻不明は正午（2026-10-19 アプリを05:00→正午に変えた）
         rows = []
         pil, mi_, yy, _ = ref_pillars(y, m, d, h, mi, bool(bt))
         for k, v in pil.items():
@@ -367,6 +456,7 @@ def main():
             if not good:
                 fails.setdefault(k, []).append(bd)
             print(f"  {'✓' if good else '✗'} {k:<12} アプリ={got}  参照={want}")
+    rules_and_types(fails)
     print("\n━━ まとめ ━━")
     if not fails:
         print("全項目一致")
