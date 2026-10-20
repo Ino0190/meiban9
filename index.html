@@ -22,7 +22,7 @@
 // 天文暦（約4MB）は画面の表示を止めずに裏で読む。命盤を立てるとき（cast）だけ読み終わりを待つ
 window.EPH_READY = new Promise(function (resolve, reject) {
   var s = document.createElement("script");
-  s.src = "ephemeris-data.js"; s.async = true;
+  s.src = "ephemeris-data.js?v=2"; s.async = true;
   s.onload = resolve; s.onerror = reject;
   document.head.appendChild(s);
 });
@@ -748,20 +748,20 @@ a.rs-go:hover{color:#6a4e10}
 
     <div class="label">あなたの生年月日</div>
     <div style="display:flex; gap:6px; align-items:center;">
-      <input type="date" id="birthdate" min="1900-01-01" max="2099-12-31" style="flex:1;">
+      <input type="date" id="birthdate" min="1920-01-01" max="2080-12-31" style="flex:1;">
       <input type="text" id="birthdate-quick" placeholder="19990707" maxlength="8"
         style="width:90px; font-size:12px; text-align:center; letter-spacing:1px;"
         oninput="quickDateInput(this,'birthdate')"
         title="8桁で入力（例：19990707）">
     </div>
-    <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19990707）で入力すると自動設定</div>
+    <div style="font-size:12px; color:var(--muted); margin-top:3px;">右の欄に8桁（例：19990707）で入力すると自動設定。1920〜2080年生まれに対応</div>
 
     <details class="more-input" id="more-input">
       <summary>生まれた時刻・性別・出生地も入れる（もっと当たる）</summary>
       <div class="more-input-body">
         <div class="label">出生時刻</div>
         <div class="row">
-          <input type="time" id="birthtime" onchange="document.getElementById('timemode').value = this.value ? 'known' : 'unknown'">
+          <input type="time" id="birthtime" oninput="document.getElementById('timemode').value = this.value ? 'known' : 'unknown'" onchange="document.getElementById('timemode').value = this.value ? 'known' : 'unknown'">
           <select id="timemode">
             <option value="known">時刻あり</option>
             <option value="unknown" selected>不明</option>
@@ -787,7 +787,7 @@ a.rs-go:hover{color:#6a4e10}
 
       <div class="label">お相手の生年月日</div>
       <div style="display:flex; gap:6px; align-items:center;">
-        <input type="date" id="birthdate-b" min="1900-01-01" max="2099-12-31" style="flex:1;">
+        <input type="date" id="birthdate-b" min="1920-01-01" max="2080-12-31" style="flex:1;">
         <input type="text" id="birthdate-b-quick" placeholder="19990707" maxlength="8"
           style="width:90px; font-size:12px; text-align:center; letter-spacing:1px;"
           oninput="quickDateInput(this,'birthdate-b')"
@@ -796,7 +796,7 @@ a.rs-go:hover{color:#6a4e10}
 
       <div class="label">出生時刻</div>
       <div class="row">
-        <input type="time" id="birthtime-b">
+        <input type="time" id="birthtime-b" oninput="document.getElementById('timemode-b').value = this.value ? 'known' : 'unknown'" onchange="document.getElementById('timemode-b').value = this.value ? 'known' : 'unknown'">
         <select id="timemode-b">
           <option value="known">時刻あり</option>
           <option value="unknown" selected>不明</option>
@@ -936,9 +936,9 @@ a.rs-go:hover{color:#6a4e10}
 
 </div>
 
-<script src="lunar-data.js?v=1"></script>
+<script src="lunar-data.js?v=2"></script>
 <script src="type-judge.js?v=14"></script>
-<script src="synthesis.js?v=22"></script>
+<script src="synthesis.js?v=24"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -951,7 +951,7 @@ const DIVINATION_INTRO = {
   sanmei: {title:"算命学", origin:"中国（戦国時代〜漢代）→日本で独自発展（高尾義政が体系化）。", what:"生年月日から「人体星図」（十大主星5つ＋十二大従星3つ）を算出し、性格・才能・エネルギーの時間分布・天中殺を読む。四柱推命と同じ干支ベースだが、星の体系と解釈方法が異なる。", strong:"人体星図による「場面ごとの顔」の分析、十二大従星によるエネルギーの時間分布（いつ元気でいつ省エネか）、天中殺による人生の構造的テーマ。"},
   numerology: {title:"数秘術", origin:"古代ギリシャ（ピタゴラス・紀元前6世紀）→カバラ→現代。", what:"生年月日の数字を足して1桁（またはマスターナンバー11/22/33）にした「ライフパスナンバー」から、人生のテーマと才能を読む。9年周期の「パーソナルイヤー」で今年の流れも分かる。", strong:"シンプルで直感的。1つの数字に人生のテーマが凝縮される。9年周期で「今年は何をすべきか」が明確。"},
   kyusei: {title:"九星気学", origin:"中国（漢代）→日本で独自発展。方位学としても使われる。", what:"生まれた年から「本命星」（一白〜九紫の9種類）、生まれた月から「月命星」を算出。性格・運勢・方位の吉凶を読む。日本で最もポピュラーな東洋占術の一つ。", strong:"本命星による基本性格、月命星による内面の性格、方位の吉凶（引越し・旅行の方角選び）。シンプルで実用的。"},
-  maya: {title:"マヤ暦", origin:"古代マヤ文明（紀元前3000年頃〜）。中米グアテマラ・メキシコ。", what:"260日周期の「ツォルキン暦」でKINナンバー（1〜260）を算出。20の「太陽の紋章」と13の「銀河の音」の組み合わせで、魂の目的と役割を読む。", strong:"「魂の目的」という深い視点。20の紋章が示す本質と、13の音が示す役割の組み合わせ。他の占術にはない「宇宙的な使命」の視点。"},
+  maya: {title:"マヤ暦（ドリームスペル）", origin:"古代マヤ文明の260日暦（ツォルキン）を元に、ホゼ・アグエイアスらが1990年ごろに作った「ドリームスペル（13の月の暦）」の数え方。日本で広く使われている方式で、古代マヤの数え方とは同じ日でもKINが違う。", what:"260日周期でKINナンバー（1〜260）を算出（1987年7月26日＝KIN34の系列）。20の「太陽の紋章」と13の「銀河の音」の組み合わせで、魂の目的と役割を読む。", strong:"「魂の目的」という深い視点。20の紋章が示す本質と、13の音が示す役割の組み合わせ。他の占術にはない「宇宙的な使命」の視点。"},
   shukuyo: {title:"宿曜占星術", origin:"インド（ナクシャトラ）→中国→日本（空海が伝えたとされる・平安時代）。", what:"月の位置から27の「宿」を算出し、性格と相性を読む。特に相性占いに強く、「栄親・安壊・友衰・危成・命業胎」の6種類の関係性で人間関係を精密に分析する。", strong:"27宿による細かい性格分析（12星座より2倍以上細かい）。相性占いの精度が非常に高い。日本の歴史上、政治や軍事にも使われた実績。"},
   jyotish: {title:"インド占星術（ジョーティシュ）", origin:"古代インド（ヴェーダ時代・紀元前1500年頃〜）。世界最古の占星術体系の一つ。", what:"西洋占星術と似た構造だが、サイデリアル（恒星基準）で計算するため、全ての惑星位置が約24°ずれる。月の星座（ラーシ）を最重視し、ダシャー（大運体系）で「いつ何が起きるか」を精密に予測する。", strong:"ダシャー（ヴィムショッタリー・ダシャー120年周期）による時期予測。月のラーシによる「心の在り方」の分析。西洋占星術とは異なる視点で同じ人を見ることで、多面的な理解が得られる。"},
 };
@@ -1112,18 +1112,20 @@ function norm360(x){ x = x % 360; return x<0 ? x+360 : x; }
 function signOf(lon){ return Math.floor(lon/30); }
 function degIn(lon){ return (lon%30).toFixed(1); }
 
-// 精密天文暦テーブルからの天体位置取得（線形補間）
+// 天文暦テーブル（毎日0:00 UT）から、前後4日の3次（ラグランジュ）補間で時刻の黄経を出す。表の外は null
+// 2026-10-20 独立監査: 小数2桁の線形補間だと月が最大0.06°、節入りが最大7分ずれていた → 太陽・月を小数4桁にして3次補間（誤差は月で約0.001°）
 function ephLookup(jd, key) {
   if (typeof EPH === "undefined" || !EPH[key]) return null;
-  const idx = jd - EPH_START_JD;
-  if (idx < 0 || idx >= EPH[key].length - 1) return null;
-  const i = Math.floor(idx);
-  const frac = idx - i;
-  let a = EPH[key][i], b = EPH[key][i + 1];
-  // 360°→0°の境界を跨ぐ場合の補正
-  if (b - a > 180) b -= 360;
-  if (a - b > 180) a -= 360;
-  return norm360(a + (b - a) * frac);
+  const T = EPH[key], idx = jd - EPH_START_JD;
+  if (!(idx >= 1 && idx < T.length - 2)) return null;
+  const i = Math.floor(idx), x = idx - i;
+  const p = [T[i - 1], T[i], T[i + 1], T[i + 2]];
+  for (let k = 1; k < 4; k++) {   // 360°→0°をまたぐときは続きの角度に直す
+    while (p[k] - p[k - 1] > 180) p[k] -= 360;
+    while (p[k - 1] - p[k] > 180) p[k] += 360;
+  }
+  return norm360(-p[0] * x * (x - 1) * (x - 2) / 6 + p[1] * (x + 1) * (x - 1) * (x - 2) / 2
+                 - p[2] * (x + 1) * x * (x - 2) / 2 + p[3] * (x + 1) * x * (x - 1) / 6);
 }
 
 // 精密版の天体位置取得（テーブルがあればテーブル、なければ簡略計算にフォールバック）
@@ -1138,7 +1140,7 @@ function getPlanetLon(name, jd) {
 function getRahuLon(jd) { return ephLookup(jd, "rahu"); }
 function getKetuLon(jd) { const r = getRahuLon(jd); return r !== null ? norm360(r + 180) : null; }
 
-/* ============ 旧暦（lunar-data.js の月表を引く・JST・中気のない月が閏月） ============ */
+/* ============ 旧暦（lunar-data.js の月表を引く・JST・冬至の月を11月とし、13か月の年だけ最初に中気のない月を閏月。2033年は閏11月） ============ */
 let _LUNAR_MONTHS = null;
 function lunarMonths(){
   if (_LUNAR_MONTHS) return _LUNAR_MONTHS;
@@ -1234,6 +1236,26 @@ function daysSinceSetsuiri(jd, sunLon){
   const t = sunCrossJd(target, jd - norm360(sunLon - target) / 0.9856);
   const jst = x => Math.floor(x + 0.5 + 9/24);
   return jst(jd) - jst(t) + 1;
+}
+// 節月の始まりの節（0＝寅月の立春 … 11＝丑月の小寒）
+const SETSU_NAMES = ["立春","啓蟄","清明","立夏","芒種","小暑","立秋","白露","寒露","立冬","大雪","小寒"];
+// 時刻が分からない人の生まれた日に節入りがあるときの注意書き（四柱推命・算命学・九星気学のタブとAI用の文で使う）
+function setsuDayNote(d){
+  const s = d && d.setsuDay;
+  if (!s) return "";
+  const t = String(s.hh).padStart(2, "0") + ":" + String(s.mm).padStart(2, "0"), b = s.before, a = s.after;
+  const K = n => KYUSEI_NAMES[n].name, gz = p => p.stem + p.branch;
+  const ch = [];
+  if (s.yearChanges) ch.push(`年柱 ${gz(b.year)}→${gz(a.year)}`);
+  ch.push(`月柱 ${gz(b.month)}→${gz(a.month)}`);
+  if (b.ky.honmei !== a.ky.honmei) ch.push(`本命星 ${K(b.ky.honmei)}→${K(a.ky.honmei)}`);
+  if (b.ky.getsu !== a.ky.getsu) ch.push(`月命星 ${K(b.ky.getsu)}→${K(a.ky.getsu)}`);
+  const noonAfter = s.hh * 60 + s.mm < 720;
+  return `この日は${t}ごろに節入り（${s.name}）があり、生まれた時刻が${t}より前か後かで ${ch.join("・")} が変わります（算命学の星も月柱から出すので変わることがあります）。時刻が分からないので、正午（${noonAfter ? "節入りの後" : "節入りの前"}）の値で出しています。時刻を入れると決まります。`;
+}
+function setsuDayCard(d){
+  const t = setsuDayNote(d);
+  return t ? `<div class="card" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;"><p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">節入りの日です。</strong>${t}</p></div>` : "";
 }
 // 年柱・月柱: 生まれた瞬間の太陽黄経で節月を決める（0＝寅月＝立春315°〜 … 10＝子月・11＝丑月）
 function pillarsFromSun(y, m, sunLon){
@@ -1377,7 +1399,8 @@ function calcSihua(yearStem, fuxingDistrib, placedStarsSet) {
   if (placedStarsSet) {
     placedFuxing = placedStarsSet;
   } else if (fuxingDistrib) {
-    placedFuxing = new Set(Object.values(fuxingDistrib).flat());
+    // calcFuxing は {星名: 宮の番号}。旧版は値（宮の番号）の集合で星名を探していて、副星の四化がいつも「未配置」になっていた（2026-10-20 監査）
+    placedFuxing = new Set(Object.keys(fuxingDistrib));
   } else {
     placedFuxing = new Set();
   }
@@ -1470,6 +1493,12 @@ function fillBirthplaceOptions(){
 }
 document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
 
+// 生年月日の対応範囲。天体の表（ephemeris-data.js 1919-12〜2081-03）と旧暦の表（lunar-data.js 1918-12〜2081-11）の中で、
+// 前後に節入り・補間の余白を取った範囲。旧版は入力欄が1900〜2099年で、表の外は誤差が数十度ある簡略式に落ちていた（2026-10-20 監査）
+const BD_MIN = "1920-01-01", BD_MAX = "2080-12-31";
+const BD_RANGE_MSG = "生年月日は1920年1月1日〜2080年12月31日の範囲で入力してください（天体の位置と旧暦の表がこの範囲です）";
+function bdInRange(bd){ return /^\d{4}-\d{2}-\d{2}$/.test(bd || "") && bd >= BD_MIN && bd <= BD_MAX; }
+
 function calcPersonData(bd, bt, tm, sex, bp) {
   bp = normBirthplace(bp);
   const [y,m,d] = bd.split("-").map(Number);
@@ -1493,6 +1522,8 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   const place = BIRTHPLACES[bp] || null;
   const abroad = bp === "海外";
   const geo = place || { lat: 35, lon: 135 };
+  // 出生地を選んでいないときの上昇点・MC・ハウスは、日本の中央で出した仮の値（画面とAI用の文で「仮」と書く。2026-10-20 監査）
+  const geoTentative = tm === "known" && !place && !abroad;
   const ascLon = tm==="known" && !abroad ? ascendant(jd, geo.lat, geo.lon) : null;
   const mcLon = tm==="known" && !abroad ? midheaven(jd, geo.lon) : null;
   const houses = tm==="known" && !abroad ? placidusHouses(jd, geo.lat, geo.lon) : null;
@@ -1507,6 +1538,19 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   });
   const ym = pillarsFromSun(y, m, sunLon);
   const setsuDays = daysSinceSetsuiri(jd, sunLon);
+  // 時刻が分からないとき、その日のうちに節入り（年柱・月柱・九星が変わる瞬間）があるか。あれば時刻と前後の値を持つ（2026-10-20 監査）
+  let setsuDay = null;
+  if (!hourKnown) {
+    const j0 = julianDay(y,m,d,0,0), j1 = julianDay(y,m,d,23,59);
+    const a = pillarsFromSun(y, m, getSunLon(j0)), b = pillarsFromSun(y, m, getSunLon(j1));
+    if (a.mIdx !== b.mIdx) {
+      const t = sunCrossJd(norm360(315 + 30 * b.mIdx), j0 + 0.5);
+      const jst = new Date((t - 2440587.5) * 86400000 + 9 * 3600000);
+      const side = (p, j) => ({ year: p.year, month: p.month, ky: calcKyusei(y, m, { sunLon: getSunLon(j) }) });
+      setsuDay = { hh: jst.getUTCHours(), mm: jst.getUTCMinutes(), name: SETSU_NAMES[b.mIdx], yearChanges: a.effY !== b.effY,
+                   before: side(a, j0), after: side(b, j1) };
+    }
+  }
   const year = ym.year;
   const month = ym.month;
   const day = getDayPillar(y,m,d);
@@ -1556,7 +1600,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
   const sihua = calcSihua(ziweiYear.stem, fuxingPos);
   return {
-    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay,
+    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay, setsuDay, geoTentative,
     jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
     pillars, wx, lifeIdx, year, month, day, hour,
     ziweiDistrib: fullDistrib,
@@ -1574,8 +1618,8 @@ function quickDateInput(el, targetId) {
     const y = parseInt(v.slice(0,4), 10);
     const m = parseInt(v.slice(4,6), 10);
     const d = parseInt(v.slice(6,8), 10);
-    // 月・日の範囲チェック
-    if (m < 1 || m > 12 || d < 1 || d > new Date(y, m, 0).getDate()) {
+    // 年（対応範囲）・月・日の範囲チェック
+    if (y < 1920 || y > 2080 || m < 1 || m > 12 || d < 1 || d > new Date(y, m, 0).getDate()) {
       el.style.borderColor = "#ef4444";
       return;
     }
@@ -1605,6 +1649,7 @@ function cast(){
   const sex = document.querySelector('input[name="sex"]:checked').value;
   const bp = document.getElementById("birthplace").value;
   if (!bd){ alert("生年月日を入力してください"); return; }
+  if (!bdInRange(bd)){ alert(BD_RANGE_MSG); return; }
 
   // フォームの値をlocalStorageに保存
   localStorage.setItem("sanmeiban_form", JSON.stringify({ bd, bt, tm, sex, bp }));
@@ -1615,6 +1660,7 @@ function cast(){
   if (currentMode === "compat") {
     const bdB = document.getElementById("birthdate-b").value;
     if (!bdB) { alert("お相手の生年月日を入力してください"); return; }
+    if (!bdInRange(bdB)) { alert("お相手の" + BD_RANGE_MSG); return; }
     const btB = document.getElementById("birthtime-b").value;
     const tmB = document.getElementById("timemode-b").value;
     const sexB = document.querySelector('input[name="sex-b"]:checked')?.value || "X";
@@ -1805,7 +1851,7 @@ document.addEventListener("DOMContentLoaded", restoreForm);
 // 再訪時に保存済みの生年月日で結果を開く（入力データの送信はしない。種類だけの再訪ログを送る）
 function autoOpen(f){
   try {
-    if (currentData || currentMode === "compat") return;
+    if (currentData || currentMode === "compat" || !bdInRange(f.bd)) return;
     currentData = calcPersonData(f.bd, f.bt, f.tm || "unknown", f.sex || "X", f.bp || "");
     dataB = null;
     window._quietRender = true;
@@ -1868,7 +1914,7 @@ function renderAll(){
   document.getElementById("h-date").textContent =
     `${d.y}年 ${d.m}月 ${d.d}日`;
   document.getElementById("h-meta").textContent =
-    `${d.tm==="known" ? `${String(d.h).padStart(2,"0")}:${String(d.mi).padStart(2,"0")}` : "時刻不明"}／ ${d.bp || "出生地不明"}`;
+    `${d.tm==="known" ? `${String(d.h).padStart(2,"0")}:${String(d.mi).padStart(2,"0")}` : "時刻不明"}／ ${d.bp || (d.geoTentative ? "出生地未選択（上昇点は仮）" : "出生地不明")}`;
   const glyphs = [
     `☉ ${sunSign.n} ${degIn(d.sunLon)}°`,
     `☽ ${moonSign.n} ${degIn(d.moonLon)}°`,
@@ -2009,8 +2055,8 @@ function buildExportText(){
 ━━━━━━━━━━━━━━━━━━━━
 生年月日: ${d.y}年${d.m}月${d.d}日
 出生時刻: ${timeStr}
-性別: ${{M:"男性",F:"女性",X:"回答なし"}[d.sex]}
-出生地: ${d.bp || "不明"}
+性別: ${{M:"男性",F:"女性",X:"回答なし"}[d.sex]}${dayunDirKnown(d) ? "" : "（大運・大限の向きが決まらないので、10年ごとの運は仮）"}
+出生地: ${d.bp || "不明"}${d.geoTentative ? "（上昇点・MC・ハウスは日本の中央＝北緯35°・東経135°で出した仮の値。都道府県を選ぶと数度変わる）" : ""}${setsuDayNote(d) ? "\n※ " + setsuDayNote(d) : ""}
 
 ━━━━━━━━━━━━━━━━━━━━
 【1】16タイプ判定（羅占盤タイプ）
@@ -2035,12 +2081,16 @@ ${(() => {
     "リーダー":"先頭に立つ","参謀":"サポートが得意",
     "楽天":"楽観的","慎重":"慎重"
   };
+  // 勝った側は判定本体（TypeJudge）と同じものを使う。旧版はここで「票が同じなら前の側」と決め直していて、
+  // 同点・0票対0票のとき画面のタイプと食い違っていた（2026-10-20 監査）
   const axisResults = [tj.a1, tj.a2, tj.a3, tj.a4].map((a, i) => {
-    const winner = a.plus >= a.minus ? a.pn : a.mn;
-    const loser = a.plus >= a.minus ? a.mn : a.pn;
+    const winner = a.winner, loser = winner === a.pn ? a.mn : a.pn;
+    const wv = winner === a.pn ? a.plus : a.minus, lv = winner === a.pn ? a.minus : a.plus;
     const total = a.plus + a.minus;
-    const pct = total > 0 ? Math.round(Math.max(a.plus, a.minus) / total * 100) : 50;
-    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（支持割合${pct}%：${a.plus}票 対 ${a.minus}票。判定ルールの票の割合で、当たる確率ではない）\n    → ${AXIS_DISPLAY[winner]}側に判定。${AXIS_DISPLAY[loser]}側の要素も${Math.min(a.plus,a.minus)}票あり、完全な一方向ではない。`;
+    if (total === 0) return `  ${AXIS_NAMES[i]}: 判定材料なし（0票 対 0票）\n    → どちらの側のルールにも当てはまらなかった。タイプ名を出すために、年柱などの陰陽で仮に${AXIS_DISPLAY[winner]||winner}側としている。この軸は性格の根拠にしない。`;
+    if (wv === lv) return `  ${AXIS_NAMES[i]}: 同点（${a.plus}票 対 ${a.minus}票）\n    → 同点なので、年柱などの陰陽で${AXIS_DISPLAY[winner]||winner}側としている。両方の面を持つと読む。`;
+    const pct = Math.round(wv / total * 100);
+    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（支持割合${pct}%：${wv}票 対 ${lv}票。判定ルールの票の割合で、当たる確率ではない）\n    → ${AXIS_DISPLAY[winner]||winner}側に判定。${AXIS_DISPLAY[loser]||loser}側の要素も${lv}票あり、完全な一方向ではない。`;
   }).join("\n");
 
   const myParts = tj.key.split("_");
@@ -2091,7 +2141,7 @@ ${neighborText}
 ◆ 3つの核
   太陽: ${sunSign.n} ${degIn(d.sunLon)}°
   月:   ${moonSign.n} ${degIn(d.moonLon)}°
-  ASC:  ${ascSign ? `${ascSign.n} ${degIn(d.ascLon)}°` : (d.tm === "known" ? "海外生まれのため算出なし" : "時刻不明のため算出なし")}
+  ASC:  ${ascSign ? `${ascSign.n} ${degIn(d.ascLon)}°${d.geoTentative ? "（出生地未選択のため日本の中央で出した仮の値）" : ""}` : (d.tm === "known" ? "海外生まれのため算出なし" : "時刻不明のため算出なし")}
 
 ◆ 10天体の配置
 ${planetLines}
@@ -2113,7 +2163,7 @@ ${pillarLines}${d.hourKnown ? "" : "\n  時柱: 出生時刻不明のため算�
 ◆ 五行バランス（干支合計）
 ${wxLines}
 
-◆ 大運（10年周期）
+◆ 大運（10年周期）${dayunDirKnown(d) ? "" : "\n  ※ " + dayunDirNote(d, "大運") + "向きを前提にした読みはしない"}
 ${shichuDayunLines}
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -2123,7 +2173,7 @@ ${shichuDayunLines}
 ◆ 十二宮の主星配置
 ${palaceLines.join("\n")}
 
-◆ 四化（生年干：${d.year.stem}）
+◆ 四化（生年干：${(d.ziweiYear || d.year).stem}。紫微斗数は旧正月で年を切り替える）
 ${(d.sihua || []).map(sh => {
   let palaceName = sh.unplaced ? "（副星・未配置）" : "—";
   if (!sh.unplaced) {
@@ -2153,7 +2203,7 @@ ${(() => {
   }).join("\n");
 })()}
 
-◆ 大限（10年周期）
+◆ 大限（10年周期）${dayunDirKnown(d) ? "" : "\n  ※ " + dayunDirNote(d, "大限") + "向きを前提にした読みはしない"}${d.tm === "known" ? "" : "\n  ※ 出生時刻が不明なので、命宮と大限は正午に生まれたとした仮のもの"}
 ${ziweiDayunLines}
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -2247,7 +2297,7 @@ ${(() => {
   return `◆ アヤナムシャ: ${aya.toFixed(1)}°
 ◆ 太陽ラーシ: ${sunR.n}（${sunR.jp}）— 西洋では${SIGNS[signOf(d.sunLon)].n}
 ◆ 月ラーシ: ${moonR.n}（${moonR.jp}）— 西洋では${SIGNS[signOf(d.moonLon)].n}
-${ascR ? `◆ ラグナ: ${ascR.n}（${ascR.jp}）— 西洋では${SIGNS[signOf(d.ascLon)].n}` : (d.tm === "known" ? "◆ ラグナ: 海外生まれのため算出なし" : "◆ ラグナ: 時刻不明のため算出なし")}
+${ascR ? `◆ ラグナ: ${ascR.n}（${ascR.jp}）— 西洋では${SIGNS[signOf(d.ascLon)].n}${d.geoTentative ? "（出生地未選択のため日本の中央で出した仮の値）" : ""}` : (d.tm === "known" ? "◆ ラグナ: 海外生まれのため算出なし" : "◆ ラグナ: 時刻不明のため算出なし")}
 ${(() => {
   const moonSidExport = norm360(d.moonLon - aya);
   const dashaExport = calcDasha(moonSidExport, d.y);
@@ -2274,8 +2324,9 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
 - 【11】の「何個の占術がそろったか」を使い、多くの占術がそろう点ははっきり、そろった数が2つ以下の点は控えめに書く。
-- 星・干支・宿・数などの計算値は計算し直さずそのまま使う。【12】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
-- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。
+- 星・干支・宿・数などの計算値は基本はそのまま使う。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する。【12】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
+- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。実際に起きた出来事は入力されていないので、過去や未来の出来事を起きたこととして書かない（「〜が出やすい時期」と書く）。
+- 健康・お金・仕事の結果（病気、収入、昇進、結婚など）を予言しない。占術が示すのは傾向と時期の読みで、出来事の発生までは計算していない。
 - 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込む。読み手が「結局、自分はどう生きればいいのか」がわかること。
 - 健康に関する記述は生活習慣の目安であり、医学的助言ではないことを前提とした書き方にする。
@@ -2286,7 +2337,7 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 - 見出し以外の装飾（太字の乱用、区切り線）は使わない。前置き・後書き・要約は書かない。
 
 ## 1. この人の物語
-幼少期→青年期→壮年期→現在→未来の流れを描写する。大運・大限・ダシャー・パーソナルイヤーの転換期を物語の節目に使い、16タイプの個性を主人公の性格として描く。
+幼少期→青年期→壮年期→現在→未来の流れを、それぞれの時期に出やすいテーマとして描写する。大運・大限・ダシャー・パーソナルイヤーの転換期を物語の節目に使い、16タイプの個性を主人公の性格として描く。実際の出来事は入力されていないので、「〜しやすい時期だった／になる」と書き、起きたこととして書かない。
 
 ## 2. 性格の核 — 矛盾こそ本質
 九占術を統合して「要するにこういう人」を描く。占術間の矛盾（例: ある占術では社交的、別の占術では孤独を好む）を最低2つ取り上げ、それが何を意味するかを議論する。
@@ -2309,7 +2360,7 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 ## 8. この人への手紙
 全体を通じて最も伝えたいことを、温かく、しかし正直に。
 
-※ 天体位置はSwiss Ephemeris精密暦（±0.01°）です。紫微斗数は14主星＋四化（生年干・大限干・流年干）を実装済み。算命学は人体星図（十大主星＋十二大従星）＋天中殺を実装。マヤ暦・宿曜・インド占星術（ダシャー＋ナクシャトラ）も計算済みです。
+※ 天体位置は Swiss Ephemeris（Moshier暦）の毎日の値を3次補間したもの（太陽・月で約0.001°）。生年1920〜2080年に対応。旧暦は冬至の月を11月とする定気法（日本時間）。紫微斗数は14主星＋四化（生年干・大限干・流年干）を実装済み。算命学は人体星図（十大主星＋十二大従星）＋天中殺を実装。マヤ暦・宿曜・インド占星術（ダシャー＋ナクシャトラ）も計算済みです。
 `;
 }
 
@@ -2332,7 +2383,8 @@ function buildCompatExportText(){
   const ayaA = ayanamsha(d.jd);
   const moonRashiA = JYOTISH_RASHIS[Math.floor(norm360(d.moonLon - ayaA)/30)];
   const lifeIdxA = d.lifeIdx;
-  const lifeStarsA = (d.ziweiDistrib||{})[lifeIdxA] || [];
+  // 命宮主星は14主星だけ（副星は混ぜない。2026-10-20 監査: 「天相・天魁」のように副星が主星として出ていた）
+  const lifeStarsA = ((d.ziweiDistrib||{})[lifeIdxA] || []).filter(s => ZW_LIFE[s]);
 
   // Bさんの基本情報
   const sunB = SIGNS[signOf(db.sunLon)].n;
@@ -2348,7 +2400,7 @@ function buildCompatExportText(){
   const ayaB = ayanamsha(db.jd);
   const moonRashiB = JYOTISH_RASHIS[Math.floor(norm360(db.moonLon - ayaB)/30)];
   const lifeIdxB = db.lifeIdx;
-  const lifeStarsB = (db.ziweiDistrib||{})[lifeIdxB] || [];
+  const lifeStarsB = ((db.ziweiDistrib||{})[lifeIdxB] || []).filter(s => ZW_LIFE[s]);
 
   // 相性判定
   const shukuyoRel = shukuyoCompat(shukuIdxA, shukuIdxB);
@@ -2404,7 +2456,7 @@ ${typeInfoText}
 生年月日: ${d.y}年${d.m}月${d.d}日
 出生時刻: ${d.tm==="known" ? d.h+":"+String(d.mi).padStart(2,"0") : "不明"}
 性別: ${{M:"男性",F:"女性",X:"回答なし"}[d.sex]}
-出生地: ${d.bp || "不明"}
+出生地: ${d.bp || "不明"}${d.geoTentative ? "（ASCは日本の中央で出した仮の値）" : ""}${dayunDirKnown(d) ? "" : "\n（性別が未選択なので、大運・大限の向きは決まらない）"}
 
 ◆ 西洋占星術: 太陽${sunA} / 月${moonA}${d.ascLon!==null ? " / ASC"+SIGNS[signOf(d.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemA}（${dayElA}）
@@ -2422,7 +2474,7 @@ ${typeInfoText}
 生年月日: ${db.y}年${db.m}月${db.d}日
 出生時刻: ${db.tm==="known" ? db.h+":"+String(db.mi).padStart(2,"0") : "不明"}
 性別: ${{M:"男性",F:"女性",X:"回答なし"}[db.sex]}
-出生地: ${db.bp || "不明"}
+出生地: ${db.bp || "不明"}${db.geoTentative ? "（ASCは日本の中央で出した仮の値）" : ""}${dayunDirKnown(db) ? "" : "\n（性別が未選択なので、大運・大限の向きは決まらない）"}
 
 ◆ 西洋占星術: 太陽${sunB} / 月${moonB}${db.ascLon!==null ? " / ASC"+SIGNS[signOf(db.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemB}（${dayElB}）
@@ -2443,10 +2495,10 @@ ${typeInfoText}
   金星: ${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].n}（${SIGNS[signOf(d.planets.find(p=>p.n==="金星").lon)].e}）× ${SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].n}（${SIGNS[signOf(db.planets.find(p=>p.n==="金星").lon)].e}）
 
 ◆ 四柱推命
-  日主の関係: ${dayStemA}（${dayElA}）× ${dayStemB}（${dayElB}）= ${wxRel}
+  日主の関係: ${dayStemA}（${dayElA}）× ${dayStemB}（${dayElB}）= ${wxRel}（干合を先に見る）
 
 ◆ 紫微斗数
-  命宮主星: ${lifeStarsA.join("・")||"無主星"} × ${lifeStarsB.join("・")||"無主星"}
+  命宮主星: ${lifeStarsA.join("・")||"無主星"} × ${lifeStarsB.join("・")||"無主星"}${d.tm === "known" && db.tm === "known" ? "" : "（時刻が分からない人の命宮は正午で出した仮のもの。根拠にしない）"}
 
 ◆ 算命学
   中心星: ${smA.stars.center} × ${smB.stars.center}
@@ -2463,13 +2515,16 @@ ${typeInfoText}
   音: ${mA.tone} × ${mB.tone}
 
 ◆ 宿曜占星術（最重要）
-  ${shukuA.n} × ${shukuB.n}
-  あなた→相手: ${shukuyoRel.name}（${shukuyoRel.type}）
-  相手→あなた: ${shukuyoRelRev.name}（${shukuyoRelRev.type}）
-  判定: ${shukuyoRel.desc}
+  ${shukuA.n} × ${shukuB.n} = ${shukuyoRel.name}
+  あなたから見て相手は「${shukuyoRel.seen}」、相手から見てあなたは「${shukuyoRel.type}」
+  相手から見たあなた（${shukuyoRel.type}）: ${shukuyoRel.desc}
+  あなたから見た相手（${shukuyoRelRev.type}）: ${shukuyoSwapWho(shukuyoRelRev.desc)}
 
 ◆ インド占星術
   月ラーシ: ${moonRashiA.jp} × ${moonRashiB.jp}
+
+◆ 相性総合（羅占盤の目安。関係の行き先を決めるものではない）
+${(() => { try { const cs = compatScore(d, db); return `  ${cs.total}点（${compatScoreLabel(cs.total)}）＝${cs.how}\n` + cs.rows.map(r => `  ${r.name}: ${r.used ? r.score + "点" : "点に入れない"}${r.weight > 1 ? "（2倍）" : ""} ${r.key}`).join("\n"); } catch (e) { return "  —"; } })()}
 ${(() => { try { return window.RSynth && RSynth.compatDigest ? "\n" + RSynth.compatDigest(d, db) + "\n" : ""; } catch (e) { return ""; } })()}
 ━━━━━━━━━━━━━━━━━━━━
 鑑定依頼
@@ -2479,8 +2534,9 @@ ${(() => { try { return window.RSynth && RSynth.compatDigest ? "\n" + RSynth.com
 【共通指示】
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
-- 星・干支・宿・数などの計算値は計算し直さずそのまま使う。【相性の画面の読み】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
-- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。
+- 星・干支・宿・数などの計算値は基本はそのまま使う。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する。【相性の画面の読み】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
+- 上のデータに無い配置や条件を、確かめた事実のように付け足さない。2人の出会い方や今の気持ち、実際の出来事は入力されていないので、起きたこととして書かない。
+- 相性の点数は羅占盤のルールで出した目安。関係がうまくいくか・続くかを予言するものとして書かない。
 - 【2人それぞれの知りたいこと別のまとめ】で、2人の人間関係・恋愛・迷ったとき・好き嫌いの傾向を比べ、合うところと、すれ違いやすいところを具体的に書く。
 - 生まれた時刻が「不明」の人は、時刻で決まる材料（ASC・紫微斗数の命宮など）を根拠にした断定をしない。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の付き合い方」「距離感」「具体的な行動」に落とし込む。
@@ -2503,7 +2559,7 @@ ${(() => { try { return window.RSynth && RSynth.compatDigest ? "\n" + RSynth.com
 占術間で「危険信号」が出ている部分を率直に指摘。「こうすればうまくいく」の具体的アドバイスも。
 
 ## 5. 2人の物語 — 出会い、関係を深めていくストーリー
-それぞれの人生の物語（幼少期→青年期→現在）を簡潔に描いた上で、2人が出会った必然性、惹かれ合う理由、ぶつかるポイント、乗り越えた先の関係を物語として描写する。宿曜の関係性（${shukuyoRel.name}）と16タイプの軸差を物語の骨格に使う。
+2人それぞれの今の時期（大運・大限・ダシャー・パーソナルイヤー）を簡潔に比べた上で、惹かれ合いやすい理由、ぶつかりやすいポイント、乗り越え方を、これから関係を深めていく物語として描写する。宿曜の関係性（${shukuyoRel.name}）と16タイプの軸差を物語の骨格に使う。出会い方や過去の出来事は入力されていないので作らない。
 
 ## 6. この2人への手紙
 全体を通じて、この2人に最も伝えたいことを温かく、しかし正直に。
@@ -2753,7 +2809,7 @@ function compatHeader(tabKey) {
       // 太陽同士の距離
       const sunDist = Math.abs(signOf(d.sunLon) - signOf(db.sunLon));
       const sunDistN = sunDist > 6 ? 12 - sunDist : sunDist;
-      const sunNote = sunDistN===0?"同じ星座。価値観が近く、話が合いやすい。":sunDistN===6?"正反対の星座。強烈に惹かれ合うが、ぶつかることも。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。自然と居心地が良い。":sunDistN===3||sunDistN===9?"刺激的な組み合わせ。互いに成長させ合う。":"異なる星座。違いが新鮮さになる。";
+      const sunNote = sunDistN===0?"同じ星座。価値観が近く、話が合いやすい。":sunDistN===6?"正反対の星座。強烈に惹かれ合うが、ぶつかることも。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。自然と居心地が良い。":sunDistN===3||sunDistN===9?"刺激的な組み合わせ。互いに成長させ合う。":sunDistN===2?"協力しやすい組み合わせ（60°）。":"異なる星座。違いが新鮮さになる。";
       // 月同士（感情の相性）
       const moonDist = Math.abs(signOf(d.moonLon) - signOf(db.moonLon));
       const moonDistN = moonDist > 6 ? 12 - moonDist : moonDist;
@@ -2960,14 +3016,16 @@ function compatHeader(tabKey) {
     if (tabKey === "shukuyo") {
       const idxA = calcShukuyo(d), idxB = calcShukuyo(db);
       const comp = shukuyoCompat(idxA, idxB);
-      const GOOD_TYPES = {"栄":"発展と繁栄の関係","親":"親しみやすく安心感がある","友":"穏やかで居心地が良い","命":"深い縁で繋がっている"};
-      const BAD_TYPES = {"壊":"ぶつかると激しくなりやすい","衰":"一方的になりやすい","危":"リスクを感じる","業":"試練の関係"};
-      const CAREFUL = {"安":"相手の言動に揺さぶられやすい","壊":"無意識に相手を揺さぶりやすい。距離感を大切に","危":"近づきすぎると逆効果","業":"試練を通じて成長する関係","胎":"宿命的だが変化も激しい"};
-      return {
-        good: GOOD_TYPES[comp.type] ? [GOOD_TYPES[comp.type]] : [],
-        bad: BAD_TYPES[comp.type] ? [BAD_TYPES[comp.type]] : [],
-        careful: CAREFUL[comp.type] ? [CAREFUL[comp.type]] : [],
-      };
+      // 組（2人で同じ）で書く。旧版は役割で書いていて、入力の順で良い点・注意点が入れ替わった（2026-10-20）
+      const P = {
+        命:{good:["深い縁で繋がっている"], bad:[], careful:["似すぎてぶつかることもある"]},
+        栄親:{good:["発展と親しみの関係。一緒にいると互いに伸びる"], bad:[], careful:[]},
+        友衰:{good:["穏やかで居心地が良い"], bad:[], careful:["片方が尽くしすぎて一方的になりやすい"]},
+        安壊:{good:[], bad:["ぶつかると激しくなりやすい"], careful:["揺さぶる側・揺さぶられる側が出やすい。距離感を大切に"]},
+        危成:{good:["刺激し合って成長できる"], bad:[], careful:["近づきすぎると逆効果"]},
+        業胎:{good:["宿命的な縁"], bad:[], careful:["試練を通じて成長する関係"]},
+      }[comp.pair] || {good:[], bad:[], careful:[]};
+      return { good: P.good, bad: P.bad, careful: P.careful };
     }
     if (tabKey === "jyotish") {
       const ayaA = ayanamsha(d.jd), ayaB = ayanamsha(db.jd);
@@ -3310,7 +3368,12 @@ function renderWest(){
         const hasTense = aspects.some(a => a.name==="四分" || a.name==="衝");
         const hasHarmony = aspects.some(a => a.name==="合" || a.name==="三分" || a.name==="六分");
         if (!hasTense && hasHarmony) return "調和系のみで葛藤ゼロ。才能が自然に出やすいが、現状維持に流れやすい面も。";
-        if (hasTense && hasHarmony) return "調和系と緊張系の両方あり。葛藤が成長を促し、才能が磨かれる配置。";
+        // 両方ある人が9割を超え、全員同じ文になっていた → 数と、いちばん強い（角度の誤差が小さい）組を書く（2026-10-20）
+        if (hasTense && hasHarmony) {
+          const nT = aspects.filter(a => a.name==="四分" || a.name==="衝").length, nH = aspects.length - nT, top = aspects[0];
+          return `調和系${nH}つ・緊張系${nT}つ。いちばん強いのは${top.p1}と${top.p2}の${top.name}（${top.expl.replace(/。$/, "")}）。` +
+            (nT > nH ? "緊張系が多めで、葛藤を力に変えていく配置。" : nH > nT ? "調和系が多めで、才能が自然に出やすい。そのぶん緊張系の組が成長の課題になる。" : "調和と葛藤が半々で、才能を葛藤で磨いていく配置。");
+        }
         if (hasTense && !hasHarmony) return "緊張系が中心。困難を乗り越える力が強い。リラックスを意識的に。";
         return aspects.length + "個のアスペクトあり。";
       })()}</td>
@@ -3361,7 +3424,7 @@ function renderWest(){
     <div class="section-title">3つの核</div>
     <div class="card hi" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('太陽',true);this.style.boxShadow='0 0 12px rgba(201,147,58,0.3)'" onmouseleave="highlightPlanet('太陽',false);this.style.boxShadow=''"><h3>☉ 太陽星座：あなたの本質 — ${sunSign.n}</h3><p>${sunCore(sunSign.n)}。</p></div>
     <div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('月',true);this.style.boxShadow='0 0 12px rgba(176,200,224,0.4)'" onmouseleave="highlightPlanet('月',false);this.style.boxShadow=''"><h3 style="color:#b0c8e0">☽ 月星座：家での自分 — ${SIGNS[signOf(d.moonLon)].n}</h3><p>${moonCore(SIGNS[signOf(d.moonLon)].n)}。</p>${d.moonDay && d.moonDay.signChanges ? `<p style="font-size:14px; color:var(--muted); margin-top:8px;">※ この日は月が${SIGNS[signOf(d.moonDay.start)].n}から${SIGNS[signOf(d.moonDay.end)].n}へ移る日です。生まれた時刻が分からないので正午の位置（${SIGNS[signOf(d.moonLon)].n}）で読んでいます。時刻を入れると、どちらの月か決まります。</p>` : ""}</div>
-    ${ascTheme ? `<div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('ASC',true);this.style.boxShadow='0 0 12px rgba(144,112,160,0.4)'" onmouseleave="highlightPlanet('ASC',false);this.style.boxShadow=''"><h3 style="color:#9070a0">↑ 上昇点：第一印象 — ${SIGNS[signOf(d.ascLon)].n}</h3><p>${ascCore(SIGNS[signOf(d.ascLon)].n)}。</p></div>` : `<div class="card"><h3 style="color:#808080">↑ 上昇点：第一印象 — 出生時刻未入力</h3><p>出生時刻を入れると上昇点（アセンダント）を算出します。</p></div>`}
+    ${ascTheme ? `<div class="card" style="cursor:pointer;transition:box-shadow 0.2s;" onmouseenter="highlightPlanet('ASC',true);this.style.boxShadow='0 0 12px rgba(144,112,160,0.4)'" onmouseleave="highlightPlanet('ASC',false);this.style.boxShadow=''"><h3 style="color:#9070a0">↑ 上昇点：第一印象 — ${SIGNS[signOf(d.ascLon)].n}</h3><p>${ascCore(SIGNS[signOf(d.ascLon)].n)}。</p>${d.geoTentative ? `<p style="font-size:14px; color:var(--muted); margin-top:8px;">※ 出生地を選んでいないので、日本の中央（北緯35°・東経135°）で仮に出しています。都道府県を選ぶと数度変わり、星座やハウスが変わることもあります。</p>` : ""}</div>` : `<div class="card"><h3 style="color:#808080">↑ 上昇点：第一印象 — 出生時刻未入力</h3><p>出生時刻を入れると上昇点（アセンダント）を算出します。</p></div>`}
 
     <div class="section-title">10天体の個別解釈</div>
     <div class="two-col">${individualReadings}</div>
@@ -3582,6 +3645,8 @@ function detectAspects(planets, ascLon){
   ];
   const list = [];
   const all = planets.slice();
+  // 上昇点（ASC）とのアスペクトも数える。旧版は引数で受け取っても使っておらず、ASCの線を描く処理だけがあった（2026-10-20 監査）
+  if (typeof ascLon === "number" && isFinite(ascLon)) all.push({ n: "ASC", s: "ASC", lon: ascLon });
   for (let i=0; i<all.length; i++){
     for (let j=i+1; j<all.length; j++){
       const diff = Math.abs(all[i].lon - all[j].lon);
@@ -3890,6 +3955,7 @@ function renderShichu(){
   document.getElementById("tab1").innerHTML = `
     ${introCard("shichu")}
     ${compatHeader("shichu")}
+    ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? shichuCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの四柱推命 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本質</strong>: ${dayMasterTheme(dayStem).split("。")[0]}（日主${dayStem}＝${dayEl}）。
@@ -3943,6 +4009,7 @@ function renderShichu(){
 
     <div class="section-title">大運（10年周期）</div>
     ${tenGodGuide}
+    ${dayunDirKnown(d) ? "" : `<p style="font-size:15px; color:#a07020; line-height:1.7; margin:0 0 10px;">※ ${dayunDirNote(d, "大運")}</p>`}
     ${dayunHtml}
 
     <div class="note">※ 四柱推命の日柱は2000年1月1日＝戊午の系列、年柱・月柱は生まれた瞬間の太陽の位置（立春・節入り）で決めています。日の変わり目は0時です。</div>
@@ -4080,6 +4147,12 @@ function wuxingBalance(wx, dayEl){
 
   return advice;
 }
+// 大運・大限の向き（陽年の男性・陰年の女性は順行、それ以外は逆行）は性別で決まる。
+// 性別「言わない」は向きが決まらないので、計算は逆行で出すが画面・AI用の文では「仮」と書き、時期の判断に使わない（2026-10-20 監査）
+function dayunDirKnown(d){ return !!d && (d.sex === "M" || d.sex === "F"); }
+function dayunDirNote(d, what){
+  return dayunDirKnown(d) ? "" : `性別を選んでいないので、${what}の向き（順行・逆行）が決まりません。下は仮に逆行で出しています。性別を選ぶと決まります。`;
+}
 // 大運算出（精密版：節気ベースの起運年齢計算）
 function calcDayun(d){
   const yearStemIdx = STEMS.indexOf(d.year.stem);
@@ -4088,67 +4161,26 @@ function calcDayun(d){
   const monthStemIdx = STEMS.indexOf(d.month.stem);
   const monthBranchIdx = BRANCHES.indexOf(d.month.branch);
 
-  // 節気ベースの起運年齢計算
+  // 節気ベースの起運年齢計算（順行は次の節、逆行は前の節までの日数を3日＝1歳で数える。節＝立春315°から30°ごと）
   let startAge = 3; // デフォルト
   if (typeof EPH !== "undefined" && EPH.sun) {
-    // 節気 = 太陽黄経が30°の倍数になる瞬間（立春315°、驚蟄345°、清明15°...）
-    // 月柱の節気: 各月の節入り = 太陽黄経が特定の角度に達する日
-    // 節気の黄経: 立春315, 啓蟄345, 清明15, 立夏45, 芒種75, 小暑105,
-    //            立秋135, 白露165, 寒露195, 立冬225, 大雪255, 小寒285
-    const solarTermAngles = [315,345,15,45,75,105,135,165,195,225,255,285];
-
     const birthJd = d.jd;
     const birthDayIdx = Math.floor(birthJd - EPH_START_JD);
 
-    if (birthDayIdx >= 0 && birthDayIdx < EPH.sun.length - 400) {
-      // 順行: 次の節気を探す / 逆行: 前の節気を探す
-      let targetJd = null;
-
-      if (forward) {
-        // 次の節気を探す（生まれた日から前方に探索）
-        for (let i = birthDayIdx; i < birthDayIdx + 40; i++) {
-          if (i+1 >= EPH.sun.length) break;
-          const lon1 = EPH.sun[i];
-          const lon2 = EPH.sun[i+1];
-          for (const angle of solarTermAngles) {
-            // lon1 < angle <= lon2 (360°跨ぎ考慮)
-            let a1 = lon1, a2 = lon2, tgt = angle;
-            if (a2 < a1) a2 += 360; // 360°跨ぎ
-            if (tgt < a1) tgt += 360;
-            if (a1 < tgt && tgt <= a2) {
-              // 線形補間で正確な日を算出
-              const frac = (tgt - a1) / (a2 - a1);
-              targetJd = EPH_START_JD + i + frac;
-              break;
-            }
-          }
-          if (targetJd) break;
-        }
-      } else {
-        // 前の節気を探す（生まれた日から後方に探索）
-        for (let i = birthDayIdx; i > birthDayIdx - 40; i--) {
-          if (i-1 < 0) break;
-          const lon1 = EPH.sun[i-1];
-          const lon2 = EPH.sun[i];
-          for (const angle of solarTermAngles) {
-            let a1 = lon1, a2 = lon2, tgt = angle;
-            if (a2 < a1) a2 += 360;
-            if (tgt < a1) tgt += 360;
-            if (a1 < tgt && tgt <= a2) {
-              const frac = (tgt - a1) / (a2 - a1);
-              targetJd = EPH_START_JD + (i-1) + frac;
-              break;
-            }
-          }
-          if (targetJd) break;
-        }
-      }
-
+    // 天文暦の表の中だけ（表は生年の範囲1920〜2080年の前後に余白がある）。
+    // 旧版は表の最後の400日を一律で外して3歳にしていた（2080年生まれで1歳のはずが3歳。2026-10-20 監査）
+    if (birthDayIdx >= 30 && birthDayIdx < EPH.sun.length - 40) {
+      // 生まれた瞬間の太陽黄経から、前後の節（15°＋30°n）を通る瞬間をニュートン法で直接求める。
+      // 旧版の「生まれた日の0時から1日刻み」の探し方は、生まれた日の節入りを順行では生まれる前でも拾い（→1歳）、
+      // 逆行では生まれる前でも見落とす（→前の月の節で9歳）ことがあった（2026-10-20・300人中4人）
+      const s = d.sunLon, k = (((s - 15) % 30) + 30) % 30;
+      const prevT = sunCrossJd(norm360(s - k), birthJd - k / 0.9856);
+      const targetJd = forward ? sunCrossJd(norm360(s - k + 30), prevT + 30.4) : prevT;
       if (targetJd) {
         const daysDiff = Math.abs(birthJd - targetJd);
         startAge = Math.round(daysDiff / 3); // 3日=1歳、整数に丸め
+        // 0歳になる人は1歳から。上は10歳まである（節の間は最大約31日＝10.3歳）。旧版は9歳で止めていた
         if (startAge < 1) startAge = 1;
-        if (startAge > 9) startAge = 9;
       }
     }
   }
@@ -4436,7 +4468,9 @@ function renderZiwei(){
     <div style="font-size:13px; color:#999; margin-bottom:6px;">命宮</div>
     <div class="year">${BRANCHES[lifeIdx]}宮</div>
     <div style="font-size:15px; color:var(--text); margin:6px 0;">${lifeStars.length ? lifeStars.join("・") : "無主星"}</div>
-    <div style="font-size:14px; color:#6a6050; line-height:1.6;">${palaceExpl("命宮", lifeMain[0]).split("。").slice(0,2).join("。")}。</div>
+    <div style="font-size:14px; color:#6a6050; line-height:1.6;">${lifeMain.length
+      ? palaceExpl("命宮", lifeMain[0]).split("。").filter(Boolean).slice(0,2).join("。") + "。"
+      : "主星が無いので、向かいの宮" + (borrowStars.length ? "の" + borrowStars.join("・") + "を借りて読む。" : "にも主星が無く、四化と大限で読む。")}</div>
   </div>`;
 
   // 主要4宮の個別解説
@@ -4503,17 +4537,24 @@ function renderZiwei(){
 
   // 相性特化モード用コンテンツ
   const ziweiCompatContent = (currentMode === "compat" && dataB) ? (() => {
+    // 2026-10-20 修正：お相手の星を、あなたの命盤（starDistrib）からお相手の命宮の位置で引いていた（例：お相手の命宮は七殺なのに「武曲」）。
+    //   夫妻宮も命宮から6つ目（＝遷移宮）を見ていた → お相手の命盤で、命宮から2つ目（夫妻宮）を見る。主星は14星だけで見る
+    const distB = dataB.ziweiDistrib || {};
     const lifeIdxB = dataB.lifeIdx;
-    const lifeStarsB = starDistrib[lifeIdxB] || ["無主星"];
-    const lifeStarB = lifeStarsB[0] || "無主星";
+    const lifeStarB = (distB[lifeIdxB] || []).filter(s => ZW_LIFE[s])[0] || "無主星";
     const partnerDesc = (() => {
+      // 命宮に主星が無い人は、向かいの宮（遷移宮）の主星を借りて読む（借星）
+      if (lifeStarB === "無主星") {
+        const bor = (distB[(lifeIdxB + 6) % 12] || []).filter(s => ZW_LIFE[s]);
+        return bor.length ? "命宮に主星が無く、向かいの宮の" + bor.join("・") + "を借りて読む人。" + zwStarExpl(bor[0]).split("。").filter(s => s.trim()).slice(1).join("。") + "。（命宮主星: 無主星）"
+                          : "命宮にも向かいの宮にも主星が無い人。四化と大限の流れで読む。（命宮主星: 無主星）";
+      }
       const expl = zwStarExpl(lifeStarB);
       if (!expl) return lifeStarB + "が命宮の人。";
       const sentences = expl.split("。").filter(s=>s.trim());
       return sentences.slice(1).join("。") + "。（命宮主星: " + lifeStarB + "）";
     })();
-    const spouseBranch = (lifeIdxB - 6 + 12) % 12;
-    const spouseStarsB = starDistrib[spouseBranch] || ["無主星"];
+    const spouseStarsB = (distB[(lifeIdxB - 2 + 12) % 12] || []).length ? distB[(lifeIdxB - 2 + 12) % 12] : ["星なし"];
     return `<div class="card hi" style="margin-bottom:16px;">
       <h3 style="font-size:20px; margin-bottom:12px;">お相手はこういう人</h3>
       <p style="font-size:16px; line-height:1.9;">${partnerDesc}</p>
@@ -4524,13 +4565,13 @@ function renderZiwei(){
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
           <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">命宮主星の組み合わせ</div>
           <div style="font-size:16px; line-height:1.7;">${
-            lifeStars[0] === lifeStarB ? "同じ主星。性格の核が似ていて共感しやすい。ただし同じ弱点も共有する。" :
-            "異なる主星（" + (lifeStars[0]||"無主星") + " × " + lifeStarB + "）。互いにない資質を持っている。補い合える関係。"
+            (lifeStars.filter(s => ZW_LIFE[s])[0] || "無主星") === lifeStarB ? "同じ主星。性格の核が似ていて共感しやすい。ただし同じ弱点も共有する。" :
+            "異なる主星（" + (lifeStars.filter(s => ZW_LIFE[s])[0] || "無主星") + " × " + lifeStarB + "）。互いにない資質を持っている。補い合える関係。"
           }</div>
         </div>
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
           <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">夫妻宮の星</div>
-          <div style="font-size:16px; line-height:1.7;">あなたの夫妻宮: ${(starDistrib[(lifeIdx-6+12)%12]||["無主星"]).join("・")}。お相手の夫妻宮: ${spouseStarsB.join("・")}。</div>
+          <div style="font-size:16px; line-height:1.7;">あなたの夫妻宮: ${((starDistrib[(lifeIdx-2+12)%12]||[]).length ? starDistrib[(lifeIdx-2+12)%12] : ["星なし"]).join("・")}。お相手の夫妻宮: ${spouseStarsB.join("・")}。</div>
         </div>
       </div>
     </div>`;
@@ -4633,7 +4674,7 @@ function renderZiwei(){
           </div>`;
         }).join("")}
       </div>
-      <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${d.year.stem}。四化は主星のほか、文昌・文曲・左輔・右弼にも付きます（入っている宮もここに出しています）。</div>
+      <div style="font-size:13px; color:var(--muted); margin-top:10px;">※ 生年干：${(d.ziweiYear || d.year).stem}（紫微斗数は旧正月で年を切り替えるので、1月〜2月生まれは四柱推命の年干と違うことがあります）。四化は主星のほか、文昌・文曲・左輔・右弼にも付きます（入っている宮もここに出しています）。</div>
     </div>
 
     <div class="section-title">流年四化 — 今年（旧暦${zwFlowYear().year}年）強く動く星</div>
@@ -4685,6 +4726,7 @@ function renderZiwei(){
         <div style="padding:8px; background:#f8f6f0; border-radius:4px;"><strong>疾厄宮に入る大限</strong><br>健康と体のケアが鍵</div>
       </div>
     </div>
+    ${dayunDirKnown(d) ? "" : `<p style="font-size:15px; color:#a07020; line-height:1.7; margin:0 0 10px;">※ ${dayunDirNote(d, "大限")}</p>`}
     ${dayunHtml}
 
     <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
@@ -5148,6 +5190,7 @@ function renderSanmei(){
   document.getElementById("tab3").innerHTML = `
     ${introCard("sanmei")}
     ${compatHeader("sanmei")}
+    ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? sanmeiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの算命学 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本質（日主${d.day.stem}＝${STEM_EL[STEMS.indexOf(d.day.stem)]}）</strong>: ${dayMasterTheme(d.day.stem).split("。")[0]}。
@@ -5388,7 +5431,7 @@ function renderSanmei(){
       return ``;
     })() : ""}
 
-    <div class="note">※ 蔵干は実装済みです（各柱の地支に含まれる隠れた干を表示＋四柱推命の五行バランスに反映）。位相法（十二支同士の関係判定）・守護神法（日主の強弱判定＋命式のバランス調整）は未実装です。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 蔵干は実装済みです（各柱の地支に含まれる隠れた干を表示＋四柱推命の五行バランスに反映）。十二支同士の関係（位相法）と日主の強弱・守護神（守護神法）は、四柱推命タブで出しています。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
@@ -5418,9 +5461,14 @@ function calcNumerology(y,m,d){
   const now = new Date().getFullYear();
   const pySum = String(now).split("").concat(String(m).split(""),String(d).split(""))
     .reduce((a,b)=>a+Number(b),0);
-  const personalYear = reduceToSingle(pySum);
+  // パーソナルイヤーは9年周期の何年目かなので1〜9まで還元する。旧版はマスターナンバー（11・22・33）で止めていて、
+  // 「PY22」「前の年 PY21」のように周期の表示が崩れていた（2026-10-20）。途中で11・22・33になった年は pyMaster に残す
+  const pyRaw = reduceToSingle(pySum);
+  let personalYear = pyRaw;
+  while (personalYear > 9) personalYear = String(personalYear).split("").reduce((a,b)=>a+Number(b),0);
+  const pyMaster = pyRaw > 9 ? pyRaw : null;
 
-  return { lifePath, birthday, monthNum, personalYear, currentYear: now };
+  return { lifePath, birthday, monthNum, personalYear, pyMaster, currentYear: now };
 }
 
 const NUMEROLOGY_MEANINGS = {
@@ -5594,7 +5642,7 @@ function renderNumerology(){
     </div>
 
     <div class="section-title">パーソナルイヤー ${n.currentYear}年 — 今年のテーマ</div>
-    <div style="font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.7;">${n.currentYear}年 + ${d.m}月${d.d}日 → ${String(n.currentYear).split("").concat(String(d.m).split(""),String(d.d).split("")).join(" + ")} = ${String(n.currentYear).split("").concat(String(d.m).split(""),String(d.d).split("")).reduce((a,b)=>a+Number(b),0)} → ${n.personalYear}。現在の年＋誕生月日で算出する「今年の流れ」です。</div>
+    <div style="font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.7;">${n.currentYear}年 + ${d.m}月${d.d}日 → ${String(n.currentYear).split("").concat(String(d.m).split(""),String(d.d).split("")).join(" + ")} = ${String(n.currentYear).split("").concat(String(d.m).split(""),String(d.d).split("")).reduce((a,b)=>a+Number(b),0)} → ${n.pyMaster ? n.pyMaster + " → " : ""}${n.personalYear}。現在の年＋誕生月日で算出する「今年の流れ」です。${n.pyMaster ? `途中の${n.pyMaster}はマスターナンバーで、その意味が重なる年とも読みます。9年周期では${n.personalYear}年目として数えます。` : ""}</div>
     <div class="card ${n.personalYear===1?"hi":""}">
       <p><strong style="color:var(--gold); font-size:24px;">${n.personalYear}</strong>　${py}</p>
     </div>
@@ -5789,13 +5837,16 @@ function calcPersonalityRadar(pd, smData, nuData) {
     if(tg.includes("食神")||tg.includes("傷官")) av("creative","四柱食傷");
     if(tg.includes("偏財")||tg.includes("正財")) av("action","四柱財");
     if(pd.wx){const wxE=Object.entries(pd.wx);const mx=wxE.reduce((a,b)=>b[1]>a[1]?b:a,["",0]);if(mx[0]==="水"){av("intuition","四柱水");av("nurture","四柱水");} else if(mx[0]==="火"){av("action","四柱火");} else if(mx[0]==="木"){av("creative","四柱木");} else if(mx[0]==="金"){av("think","四柱金");}}
-    // 紫微: 命宮主星
-    const lifeI=pd.lifeIdx; const ls=(pd.ziweiDistrib[lifeI]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
-    const zwM={"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
-    if(zwM[ls]) av(zwM[ls],"紫微");
-    if(ls==="武曲") av("action","紫微武");
-    const offIdx=(pd.lifeIdx-8+12)%12; const offStars=(pd.ziweiDistrib[offIdx]||[]);
-    if(offStars.includes("紫微")||offStars.includes("武曲")) av("leadership","紫微官禄");
+    // 紫微: 命宮主星・官禄宮。命宮は生まれた時刻で決まるので、時刻が分からないときは数えない
+    // （旧版は正午の仮の命宮で数えていて、画面の「時刻不明なら命宮は使わない」と食い違っていた。2026-10-20 監査）
+    if (pd.tm === "known") {
+      const lifeI=pd.lifeIdx; const ls=(pd.ziweiDistrib[lifeI]||[]).filter(s=>["紫微","天機","太陽","武曲","天同","廉貞","天府","太陰","貪狼","巨門","天相","天梁","七殺","破軍"].includes(s))[0]||"";
+      const zwM={"紫微":"leadership","天機":"think","太陽":"social","武曲":"leadership","天同":"nurture","廉貞":"creative","天府":"stable","太陰":"intuition","貪狼":"social","巨門":"think","天相":"nurture","天梁":"think","七殺":"action","破軍":"creative"};
+      if(zwM[ls]) av(zwM[ls],"紫微");
+      if(ls==="武曲") av("action","紫微武");
+      const offIdx=(pd.lifeIdx-8+12)%12; const offStars=(pd.ziweiDistrib[offIdx]||[]);
+      if(offStars.includes("紫微")||offStars.includes("武曲")) av("leadership","紫微官禄");
+    }
     // 算命: 中央・東・南
     if(smData){
       const smM={"貫索星":"stable","石門星":"social","鳳閣星":"creative","調舒星":"intuition","禄存星":"action","司禄星":"stable","車騎星":"action","牽牛星":"leadership","龍高星":"think","玉堂星":"think"};
@@ -5900,6 +5951,13 @@ function personalityHighlight(votes, typeName, axis3Winner) {
 
 // 年の九星（その年の年盤の中宮の星）: 11 - (西暦を9で割った余り)。例 1990=一白 2000=九紫 2024=三碧 2026=一白
 function kyuseiYearStar(y){ return ((11 - (y % 9 + 9) % 9) % 9) || 9; }
+// 九星の「今年」。生まれの本命星と同じく立春（太陽黄経315°）で切り替える。
+// 旧版は西暦の年をそのまま使っていて、1月1日〜立春前は次の年の盤になっていた（2026-10-20 監査）
+function kyuseiNowYear(dt){
+  const t = dt || new Date();
+  const y = t.getFullYear(), m = t.getMonth() + 1;
+  return pillarsFromSun(y, m, getSunLon(julianDay(y, m, t.getDate(), t.getHours(), t.getMinutes()))).effY;
+}
 
 function calcKyusei(y, m, p){
   // 節月の番号: 0=寅月（立春〜）… 10=子月（大雪〜）, 11=丑月（小寒〜立春前）
@@ -6058,8 +6116,8 @@ function renderKyusei(){
   const honmei = KYUSEI_NAMES[k.honmei];
   const getsu = KYUSEI_NAMES[k.getsu];
 
-  // 今年の九星の位置（年盤）
-  const thisYear = new Date().getFullYear();
+  // 今年の九星の位置（年盤）。年は立春で切り替える
+  const thisYear = kyuseiNowYear();
   const thisYearStar = kyuseiYearStar(thisYear);
 
   // 本命星の回座位置を算出（洛書の飛泊順）
@@ -6120,6 +6178,7 @@ function renderKyusei(){
   document.getElementById("tab5").innerHTML = `
     ${introCard("kyusei")}
     ${compatHeader("kyusei")}
+    ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? kyuseiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの九星気学 — ひとことで言うと</h3>
       <p><strong style="color:var(--gold)">本命星</strong>: ${honmei.name}。${honmei.desc.split("。")[0]}。
@@ -6624,7 +6683,7 @@ function renderMaya(){
         </div>
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
           <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">銀河の音</div>
-          <div style="font-size:16px; line-height:1.7;">あなた: 音${m.tone}　お相手: 音${mB.tone}。${Math.abs(m.tone - mB.tone) <= 2 ? "近い音同士。リズムが合いやすい。" : m.tone + mB.tone === 14 ? "合計14の補完関係。互いに足りないものを補い合う。" : "異なるリズム。互いの違いが新鮮さを生む。"}</div>
+          <div style="font-size:16px; line-height:1.7;">あなた: 音${m.tone}　お相手: 音${mB.tone}。${m.tone === mB.tone ? "同じ音。リズムが合いやすい。" : Math.abs(m.tone - mB.tone) <= 2 ? "近い音同士。リズムが合いやすい。" : m.tone + mB.tone === 14 ? "合計14の補完関係。互いに足りないものを補い合う。" : "異なるリズム。互いの違いが新鮮さを生む。"}</div>
         </div>
       </div>
     </div>`;
@@ -6655,7 +6714,7 @@ function renderMaya(){
 
     <div class="section-title">マヤ暦の仕組み</div>
     <div style="font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.8;">
-      マヤ暦は古代マヤ文明の<strong>260日周期のカレンダー（ツォルキン暦）</strong>です。<br>
+      ここで使うのは、古代マヤ文明の<strong>260日周期の暦（ツォルキン）</strong>を元にした「ドリームスペル（13の月の暦）」の数え方です。<br>
       260 = <strong>20の紋章</strong>（あなたの本質＝何者か）× <strong>13の音</strong>（あなたの役割＝どう動くか）。<br>
       この組み合わせで1〜260の<strong>KINナンバー</strong>が決まります。KINは西洋占星術の太陽星座、四柱推命の日柱に相当する「マヤ暦版のあなたの番号」です。<br><br>
       あなたの誕生日（${d.y}年${d.m}月${d.d}日）→ <strong style="color:var(--gold);">KIN ${m.kin}</strong> = 紋章「${seal.n}」× 音${m.tone}
@@ -7154,23 +7213,101 @@ function shukuyoBand(dist){
   const g = Math.min(dist, 27 - dist);
   return g <= 4 ? "近距離" : g <= 8 ? "中距離" : "遠距離";
 }
+// type＝相手から見たあなた（あなた＝type）、seen＝あなたから見た相手（相手＝seen）。説明文 desc は「あなた＝type」の側から書いてある。
+// 例：あなた翼宿・相手昴宿 → あなたから見て相手は胎、相手から見てあなたは業（2026-10-20 監査: 旧版は type を「あなた→相手」と書いていて向きが逆に読めた）
 const SHUKUYO_COMPAT_TABLE = {};
 for (let dist = 0; dist < 27; dist++) {
-  const role = SHUKUYO_SEQ[(27 - dist) % 27];
+  const role = SHUKUYO_SEQ[(27 - dist) % 27], seen = SHUKUYO_SEQ[dist];
   const pair = SHUKUYO_PAIR_OF[role];
   const band = shukuyoBand(dist);
   const info = SHUKUYO_ROLE_INFO[role];
   SHUKUYO_COMPAT_TABLE[dist] = {
-    type: role, pair, band, dist, color: info.color,
-    name: role === "命" ? "命の関係" : `${pair}の関係${band ? "・" + band : ""}（あなた＝${role}）`,
+    type: role, seen, pair, band, dist, color: info.color,
+    name: role === "命" ? "命の関係" : `${pair}の関係${band ? "・" + band : ""}（あなたから見て相手は${seen}・相手から見てあなたは${role}）`,
     desc: info.desc + (band ? SHUKUYO_BAND_NOTE[band] : ""),
   };
 }
 
 function shukuyoCompat(idxA, idxB) {
   const dist = ((idxB - idxA) % 27 + 27) % 27;
-  return SHUKUYO_COMPAT_TABLE[dist] || {type:"?",pair:"",band:"",name:"不明",desc:"",color:"var(--muted)"};
+  return SHUKUYO_COMPAT_TABLE[dist] || {type:"?",seen:"?",pair:"",band:"",name:"不明",desc:"",color:"var(--muted)"};
 }
+// 宿曜の説明文の「あなた」と「相手」を入れ替える（相手の側の役割の説明を、あなたの画面に出すとき）
+function shukuyoSwapWho(s){ return String(s || "").replace(/あなた|相手/g, m => m === "あなた" ? "お相手" : "あなた"); }
+// 宿曜の相性の点。役割（業・胎など）は見る向きで入れ替わるので、2人で同じになる組（業胎・栄親など）で付ける。
+// 点は旧版の役割ごとの点の平均（例: 業40・胎75 → 業胎58）。2026-10-20 監査: 役割で点を付けていて、入力の順で総合点が変わった
+const SHUKUYO_PAIR_SCORE = { 命:70, 業胎:58, 栄親:88, 友衰:65, 安壊:60, 危成:60 };
+function shukuyoPairScore(c){ return (c && SHUKUYO_PAIR_SCORE[c.pair]) || 60; }
+
+// 2人の日主の関係（四柱推命）。干合を先に見る（詳細の表・相性の見出しと同じ順）。点は2人を入れ替えても同じ
+// 2026-10-20 監査: 総合点の行だけ干合を見ず、甲×己を「木剋土・40点」としていた
+function dayMasterRel(d, db){
+  const sA = d.day.stem, sB = db.day.stem, eA = STEM_EL[STEMS.indexOf(sA)], eB = STEM_EL[STEMS.indexOf(sB)];
+  const GEN = {木:"火",火:"土",土:"金",金:"水",水:"木"}, KE = {木:"土",火:"金",土:"水",金:"木",水:"火"};
+  const kango = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]].some(([a,b]) => (sA===a && sB===b) || (sA===b && sB===a));
+  if (kango) return { kind:"干合", score:85, desc:`${sA}と${sB}は干合（天干どうしが引き合う特別な組み合わせ）。五行では${eA}と${eB}だが、干合を先に読む。` };
+  if (eA === eB) return { kind:"比和", score:75, desc:`同じ${eA}同士（比和）。価値観が近く共感しやすい。` };
+  if (GEN[eA] === eB) return { kind:"相生", score:85, desc:`あなたの${eA}がお相手の${eB}を生む（相生）。あなたが与える側。` };
+  if (GEN[eB] === eA) return { kind:"相生", score:85, desc:`お相手の${eB}があなたの${eA}を生む（相生）。相手が与える側。` };
+  if (KE[eA] === eB) return { kind:"相剋", score:40, desc:`あなたの${eA}がお相手の${eB}を抑える（ぶつかる関係）。あなたが強い立場になりやすい。` };
+  return { kind:"相剋", score:40, desc:`お相手の${eB}があなたの${eA}を抑える（ぶつかる関係）。相手が強い立場になりやすい。` };
+}
+
+// 相性総合の点（羅占盤のルールで出した目安）。9つの占術を1行ずつ点にし、宿曜だけ2倍の重みで平均する。
+// どの行も2人を入れ替えて同じ点になる。紫微斗数は2人とも生まれた時刻が分かるときだけ数える（命宮が時刻で決まるため）。
+// 2026-10-20 監査: 旧版は「9占術の統合スコア」と書きながら太陽・金星・日主・宿曜・数秘の5つで計算し、表は西洋が2行でインドが無かった
+function compatScore(d, db){
+  const rows = [];
+  const add = (name, key, score, desc, weight, used) => rows.push({ name, key, score, desc, weight: weight || 1, used: used !== false });
+  const elRel = (a, b) => a === b ? "same" : ((a==="火"&&b==="風")||(a==="風"&&b==="火")||(a==="土"&&b==="水")||(a==="水"&&b==="土")) ? "good"
+    : ((a==="火"&&b==="水")||(a==="水"&&b==="火")||(a==="風"&&b==="土")||(a==="土"&&b==="風")) ? "bad" : "mid";
+  // 西洋占星術: 太陽の角度と金星の元素の平均
+  const sd = Math.abs(signOf(d.sunLon) - signOf(db.sunLon)), sn = sd > 6 ? 12 - sd : sd;
+  const sunScore = {0:75,1:50,2:80,3:55,4:90,5:45,6:65}[sn];
+  const vA = d.planets.find(p => p.n === "金星"), vB = db.planets.find(p => p.n === "金星");
+  const eA = SIGNS[signOf(vA.lon)].e, eB = SIGNS[signOf(vB.lon)].e, ve = elRel(eA, eB);
+  const venusScore = {same:80, good:85, bad:40, mid:55}[ve];
+  add("西洋占星術", `太陽${SIGNS[signOf(d.sunLon)].n}×${SIGNS[signOf(db.sunLon)].n}・金星${SIGNS[signOf(vA.lon)].n}×${SIGNS[signOf(vB.lon)].n}`,
+    Math.round((sunScore + venusScore) / 2),
+    `太陽同士の距離${sn * 30}°（${{0:"同じ星座。価値観が近い",1:"隣の星座。似ているようで考え方が違う",2:"六分（60°）。協力しやすい",3:"四分（90°）。刺激的",4:"三分（120°）。調和的",5:"150°。感覚の違いが大きい",6:"正反対の星座。強く惹かれ合う"}[sn]}）・${sunScore}点。` +
+    `金星の元素は${eA}×${eB}（${{same:"同じ元素。愛し方が似ている",good:"補い合う元素",bad:"愛し方の違いが摩擦になりやすい",mid:"異なる元素"}[ve]}）・${venusScore}点。2つの平均。`);
+  // 四柱推命: 日主の関係（干合を先に見る）
+  const dm = dayMasterRel(d, db);
+  add("四柱推命", `日主${d.day.stem}（${STEM_EL[STEMS.indexOf(d.day.stem)]}）×${db.day.stem}（${STEM_EL[STEMS.indexOf(db.day.stem)]}）`, dm.score, dm.desc);
+  // 紫微斗数: 命宮主星（2人とも時刻が分かるときだけ点に入れる）
+  const main = p => (((p.ziweiDistrib || {})[p.lifeIdx] || []).filter(s => ZW_LIFE[s])[0]) || "無主星";
+  const zA = main(d), zB = main(db), both = d.tm === "known" && db.tm === "known";
+  add("紫微斗数", `命宮${zA}×${zB}`, zA === zB ? 75 : 70,
+    both ? (zA === zB ? "同じ命宮主星。性格の核が似ている。" : `${zA}と${zB}の組み合わせ。異なる資質が補い合う。`)
+         : "生まれた時刻が分からない人がいるので、命宮は仮。総合の点には入れていない。", 1, both);
+  // 算命学: 天中殺
+  const tA = calcJintai(d).tenchuType.name, tB = calcJintai(db).tenchuType.name;
+  add("算命学", `${tA}×${tB}`, tA === tB ? 80 : 65, tA === tB ? "同じ天中殺。人生の課題が似ていて、深く理解し合える。" : "異なる天中殺。互いの弱点が重ならず、補い合える。");
+  // 数秘術: ライフパスの差
+  const lA = calcNumerology(d.y, d.m, d.d).lifePath, lB = calcNumerology(db.y, db.m, db.d).lifePath, ld = Math.abs(lA - lB);
+  const lp = ld === 0 ? [75, `同じLP${lA}。価値観が近い。`] : ld <= 3 ? [80, `LP${lA}とLP${lB}は補い合う関係。`] : ld <= 5 ? [60, `LP${lA}とLP${lB}は刺激的な組み合わせ。`] : [65, `LP${lA}とLP${lB}の組み合わせ。`];
+  add("数秘術", `LP${lA}×LP${lB}`, lp[0], lp[1]);
+  // 九星気学: 本命星
+  const kA = calcKyusei(d.y, d.m, d).honmei, kB = calcKyusei(db.y, db.m, db).honmei;
+  add("九星気学", `${KYUSEI_NAMES[kA].name}×${KYUSEI_NAMES[kB].name}`, kA === kB ? 75 : 65, kA === kB ? "同じ本命星。性格が似ている。" : "異なる本命星。互いの個性が刺激になる。");
+  // マヤ暦: KINの差
+  const mA = calcMaya(d.y, d.m, d.d), mB = calcMaya(db.y, db.m, db.d), kd = Math.abs(mA.kin - mB.kin);
+  add("マヤ暦", `${MAYA_SEALS[mA.seal].n}×${MAYA_SEALS[mB.seal].n}`, kd === 0 ? 90 : kd === 130 ? 85 : kd % 20 === 0 ? 80 : 65,
+    kd === 0 ? "同じKIN。" : kd === 130 ? "130離れたKIN。強く惹かれ合うとされる。" : kd % 20 === 0 ? "同じ紋章。本質が似ている。" : kd % 13 === 0 ? "同じ音。リズムが合う。" : "異なるKIN。互いの違いが学びになる。");
+  // 宿曜: 組で点（2倍の重み）
+  const iA = calcShukuyo(d), iB = calcShukuyo(db), sc = shukuyoCompat(iA, iB);
+  add("宿曜", `${SHUKUYO_27[iA].n}×${SHUKUYO_27[iB].n}`, shukuyoPairScore(sc), `${sc.name}。${sc.desc}`, 2);
+  // インド占星術: 月のラーシの関係
+  const rA = Math.floor(norm360(d.moonLon - ayanamsha(d.jd)) / 30), rB = Math.floor(norm360(db.moonLon - ayanamsha(db.jd)) / 30);
+  const rg = Math.min((rB - rA + 12) % 12, (rA - rB + 12) % 12);
+  add("インド占星術", `月${JYOTISH_RASHIS[rA].jp}×${JYOTISH_RASHIS[rB].jp}`, {0:80,1:55,2:75,3:55,4:85,5:45,6:75}[rg], jyotishMoonRel(rA, rB));
+  const used = rows.filter(r => r.used);
+  const total = Math.round(used.reduce((a, r) => a + r.score * r.weight, 0) / used.reduce((a, r) => a + r.weight, 0));
+  const how = `9つの占術の点の平均（宿曜は相性専門の占術なので2倍で数える${used.length < rows.length ? "。" + rows.filter(r => !r.used).map(r => r.name).join("・") + "は生まれた時刻が分からない人がいるので外した" : ""}）`;
+  return { rows, total, how };
+}
+// 相性の点の言い方。点は羅占盤のルールで出した目安で、関係の行き先を決めるものではない（2026-10-20 監査）
+function compatScoreLabel(t){ return "羅占盤の目安で" + (t >= 85 ? "とても高い" : t >= 75 ? "高い" : t >= 65 ? "中くらい" : t >= 55 ? "やや低い" : "低い"); }
 
 function renderShukuyo(){
   const d = currentData;
@@ -7195,12 +7332,12 @@ function renderShukuyo(){
       <h3 style="font-size:20px; margin-bottom:12px; color:${compat.color};">☽ 2人の宿曜相性 — ${compat.name}</h3>
       <div style="display:grid; gap:10px;">
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
-          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">あなた → お相手（${compat.type}）</div>
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">お相手から見て、あなたは${compat.type}</div>
           <div style="font-size:16px; line-height:1.7;">${compat.desc}</div>
         </div>
         <div style="padding:10px 14px; background:#f8f6f0; border-radius:6px;">
-          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">お相手 → あなた（${compatReverse.type}）</div>
-          <div style="font-size:16px; line-height:1.7;">${compatReverse.desc}</div>
+          <div style="font-size:16px; color:var(--gold); font-weight:700; margin-bottom:4px;">あなたから見て、お相手は${compatReverse.type}</div>
+          <div style="font-size:16px; line-height:1.7;">${shukuyoSwapWho(compatReverse.desc)}</div>
         </div>
       </div>
     </div>`;
@@ -7313,13 +7450,13 @@ function renderShukuyo(){
           <div style="text-align:center;">
             <div style="font-size:24px; color:var(--gold); font-family:'Noto Serif JP',serif; font-weight:700;">${shuku.n}</div>
             <div style="font-size:14px; color:var(--muted);">${shuku.k}</div>
-            <div style="font-size:13px; color:${compat.color};">あなた（${compat.type}）</div>
+            <div style="font-size:13px; color:${compat.color};">あなた（相手から見て${compat.type}）</div>
           </div>
           <div style="font-size:28px; color:${compat.color};">⇄</div>
           <div style="text-align:center;">
             <div style="font-size:24px; color:var(--gold); font-family:'Noto Serif JP',serif; font-weight:700;">${shukuB.n}</div>
             <div style="font-size:14px; color:var(--muted);">${shukuB.k}</div>
-            <div style="font-size:13px; color:${compat.color};">お相手（${compatReverse.type}）</div>
+            <div style="font-size:13px; color:${compat.color};">お相手（あなたから見て${compatReverse.type}）</div>
           </div>
         </div>
       </div>
@@ -7327,16 +7464,16 @@ function renderShukuyo(){
         宿曜占星術の相性は<strong>方向性がある</strong>のが特徴です。あなたから見た相手と、相手から見たあなたでは関係の質が異なることがあります。
       </div>
       <div class="card" style="margin-bottom:12px;">
-        <p><strong style="color:var(--gold);">あなた（${shuku.n}・${compat.type}）→ お相手（${shukuB.n}・${compatReverse.type}）:</strong><br>${compat.desc.replace(/安の側/g,"あなた").replace(/壊の側/g,"お相手").replace(/友の側/g,"あなた").replace(/衰の側/g,"お相手").replace(/危の側/g,"あなた").replace(/成の側/g,"お相手").replace(/業の側/g,"あなた").replace(/胎の側/g,"お相手")}</p>
+        <p><strong style="color:var(--gold);">お相手（${shukuB.n}）から見て、あなた（${shuku.n}）は${compat.type}:</strong><br>${compat.desc}</p>
       </div>
       <div class="card" style="margin-bottom:12px;">
-        <p><strong style="color:var(--gold);">お相手（${shukuB.n}・${compatReverse.type}）→ あなた（${shuku.n}・${compat.type}）:</strong><br>${compatReverse.desc.replace(/安の側/g,"お相手").replace(/壊の側/g,"あなた").replace(/友の側/g,"お相手").replace(/衰の側/g,"あなた").replace(/危の側/g,"お相手").replace(/成の側/g,"あなた").replace(/業の側/g,"お相手").replace(/胎の側/g,"あなた")}</p>
+        <p><strong style="color:var(--gold);">あなた（${shuku.n}）から見て、お相手（${shukuB.n}）は${compatReverse.type}:</strong><br>${shukuyoSwapWho(compatReverse.desc)}</p>
       </div>`;
     })() : `
     <div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.8;">
       宿曜占星術は<strong>相性判定が最大の強み</strong>です。27宿の組み合わせで「栄親（発展）・安壊（激しい縁）・友衰（穏やかな縁）・危成（刺激）・命業胎（宿命）」の6種類に分類されます。<br><br>
-      <strong>相性を見るには:</strong> 左のサイドバーで「相性を占う」を選び、お相手の生年月日を入力してください。<br><br>
-      <strong>この占術の得意分野:</strong> 性格分析と相性判定。「人生のどの時期にどうなるか」は四柱推命・紫微斗数・数秘術・九星気学・マヤ暦が得意です。宿曜は「あなたはどんな人か」「あの人との相性はどうか」に特化しています。
+      <strong>相性を見るには:</strong> 左のサイドバーで「相性について」を選び、お相手の生年月日を入力してください。<br><br>
+      <strong>この占術の得意分野:</strong> 性格分析と相性判定。「人生のどの時期にどうなるか」は四柱推命・紫微斗数・算命学・九星気学・インド占星術が得意です。宿曜は「あなたはどんな人か」「あの人との相性はどうか」に特化しています。
     </div>`}
 
     <div class="section-title">注意すべき点</div>
@@ -7551,13 +7688,13 @@ const JYOTISH_PLANET_READING = {
 // ダシャー支配星の順序と期間（年）
 const DASHA_SEQUENCE = [
   {lord:"ケートゥ",  years:7,  jp:"ケートゥ（影の尾）", theme:"「今まで当たり前だったもの」が手から離れていく時期。転職・引越し・人間関係の整理など、自分の意志とは関係なく環境が変わりやすい。失うことで逆に「本当に大事なもの」が見えてくる7年間。スピリチュアルな関心が高まる人も多い。"},
-  {lord:"金星",      years:20, jp:"金星（愛と美の星）", theme:"人生で最も華やかで楽しい時期。恋愛・結婚・出産・趣味・旅行など「人生を楽しむ」イベントが集中しやすい20年間。お金回りも良くなる傾向。人間関係が広がり、人から好かれやすい。ただし快楽に流されすぎると後で反動が来る。"},
+  {lord:"金星",      years:20, jp:"金星（愛と美の星）", theme:"楽しみと人とのつながりがテーマになりやすい20年間。恋愛・趣味・旅行・美しいものなど「人生を楽しむ」ことに意識が向きやすい。お金や暮らしの豊かさへの関心も高まりやすい。人間関係が広がりやすい一方、楽しさに流されすぎると後で反動が来やすい。"},
   {lord:"太陽",      years:6,  jp:"太陽（自分自身の星）", theme:"「自分は何者か」がはっきりする時期。昇進・独立・起業など、社会的な立場が変わりやすい6年間。周囲から認められる一方、プライドが高くなりがち。父親や上司との関係が人生に大きく影響する。短いが濃い期間。"},
   {lord:"月",        years:10, jp:"月（心と感情の星）", theme:"心が穏やかになり、家庭や身近な人との関係が充実する時期。「居場所」を大切にしたくなる10年間。母親との関係が焦点になることも。感受性が豊かになり、人の気持ちに敏感になる。人気運が上がり、多くの人に慕われやすい。"},
-  {lord:"火星",      years:7,  jp:"火星（行動とエネルギーの星）", theme:"とにかく動きたくなる時期。新しいことを始める・競争に挑む・体を動かすなど、エネルギーが高まる7年間。不動産の購入や技術の習得にも縁がある。ただし短気になりやすく、ケンカや事故に注意。「やるかやらないか」で迷ったら「やる」が正解の時期。"},
+  {lord:"火星",      years:7,  jp:"火星（行動とエネルギーの星）", theme:"動きたくなりやすい時期。新しいことを始める・競争に挑む・体を動かすなど、行動がテーマになりやすい7年間。不動産や技術の習得に縁があるとされる。短気になりやすいので、急ぐ場面ほど一呼吸おく。迷ったときは、動く方へ背中を押されやすい時期と読む（決めるのは自分の状況で）。"},
   {lord:"ラーフ",    years:18, jp:"ラーフ（欲望と拡大の影）", theme:"「もっと上へ、もっと遠くへ」という野心が強くなる時期。今までの自分の枠を超えるような挑戦をしやすい18年間。海外・転職・異業種・新しい技術など、未知の領域に飛び込む。社会的な成功を掴む人も多いが、欲望に振り回されると「手に入れたのに満たされない」感覚に陥る。この時期の成果は実力半分・運半分。終盤に「本当に欲しかったのはこれだったのか？」と問い直す転換点が来る。"},
-  {lord:"木星",      years:16, jp:"木星（幸運と知恵の星）", theme:"人生で最も恵まれた時期の一つ。学び・教育・精神的な成長がテーマの16年間。良い師匠や仲間に出会いやすく、視野が広がる。子供との関係が深まる人も多い。「与える」ことで自分も豊かになる時期。楽観的になりすぎて現実を見失わないよう注意。"},
-  {lord:"土星",      years:19, jp:"土星（試練と忍耐の星）", theme:"「地道にやるしかない」時期。華やかさはないが、この19年間で積み上げたものが人生の土台になる。仕事の責任が重くなる・体の不調が出やすい・思い通りにいかないことが増える。でも逃げずに向き合った人だけが、次の時期に大きな実りを得る。焦りが最大の敵。"},
+  {lord:"木星",      years:16, jp:"木星（幸運と知恵の星）", theme:"恵みの星の時期とされる。学び・教育・精神的な成長がテーマになりやすい16年間。師や仲間との縁を大切にすると視野が広がりやすい。子供や後輩との関係がテーマになる人もいる。「与える」ことで自分も豊かになりやすい時期。楽観的になりすぎて現実を見失わないよう注意。"},
+  {lord:"土星",      years:19, jp:"土星（試練と忍耐の星）", theme:"地道さがテーマになりやすい19年間。華やかさは少ないが、この時期に積み上げたものが人生の土台になりやすい。責任が重くなる・思い通りに進みにくいと感じやすい時期とされ、体力の管理も意識したい。焦らず向き合うほど、次の時期につながりやすい。"},
   {lord:"水星",      years:17, jp:"水星（知性とコミュニケーションの星）", theme:"頭が冴える時期。勉強・資格取得・ビジネス・執筆・交渉など、知的な活動で成果が出やすい17年間。副業や新しいスキルの習得にも向いている。人との会話から思わぬチャンスが生まれる。器用に立ち回れるが、八方美人になりすぎないよう注意。"},
 ];
 
@@ -7677,6 +7814,20 @@ function calcAntardasha(mahadasha) {
   return antars;
 }
 
+// 2人の月のラーシの関係（a・b はラーシの番号 0〜11）。2026-10-20 修正：旧版は差が5・7（150°＝6・8の関係）を「トライン（120°）」と書いていた。
+//   インド占星術ではお互いの月を1番目として数え、1・7（正反対）・5・9（トライン）は調和、6・8・2・12は感情がすれ違いやすい組み合わせとされる
+function jyotishMoonRel(a, b) {
+  const g = Math.min((b - a + 12) % 12, (a - b + 12) % 12);
+  return {
+    0: "同じ月のラーシ。感情のパターンが似ていて、深く共感できる。",
+    1: "隣り合うラーシ（2・12の関係）。似た感性を持ちつつ、お金や暮らしの感覚で小さなすれ違いが出やすい。",
+    2: "60°（3・11の関係）。友達のように気安く、協力しやすい。",
+    3: "スクエア（90°・4・10の関係）。緊張感があるが、成長を促す。",
+    4: "トライン（120°・5・9の関係）。自然な調和がある。一緒にいて楽。",
+    5: "150°（6・8の関係）。インド占星術では感情がすれ違いやすい組み合わせとされる。言葉にして確かめ合うことが鍵。",
+    6: "正反対のラーシ（1・7の関係）。強く惹かれ合い、補い合う。価値観の違いも大きい。",
+  }[g];
+}
 // 惑星×ラーシの解釈テキストを取得
 function jyotishPlanetReading(planetName, rashiIndex) {
   const pr = JYOTISH_PLANET_READING[planetName];
@@ -7743,14 +7894,7 @@ function renderJyotish(){
     const moonRashiB = JYOTISH_RASHIS[Math.floor(moonSidB / 30)];
     const sunSidB = norm360(dataB.sunLon - ayaB);
     const sunRashiB = JYOTISH_RASHIS[Math.floor(sunSidB / 30)];
-    const dist = Math.abs(Math.floor(moonSidB/30) - Math.floor(norm360(d.moonLon - aya)/30));
-    let compat = "";
-    if (dist === 0) compat = "同じ月のラーシ。感情のパターンが似ていて、深く共感できる。";
-    else if (dist === 1 || dist === 11) compat = "隣り合うラーシ。似た感性を持ちつつ、微妙な違いが新鮮さを生む。";
-    else if (dist === 5 || dist === 7) compat = "トライン（120°）の関係。自然な調和がある。一緒にいて楽。";
-    else if (dist === 6) compat = "正反対のラーシ。強烈に惹かれ合うが、価値観の違いも大きい。補完関係。";
-    else if (dist === 3 || dist === 9) compat = "スクエア（90°）の関係。緊張感があるが、成長を促す。";
-    else compat = "異なる感情パターン。互いの違いを理解することが関係の鍵。";
+    const compat = jyotishMoonRel(Math.floor(norm360(d.moonLon - aya)/30), Math.floor(moonSidB/30));
     const partnerDesc = (() => {
       const desc = moonRashiB.desc || "";
       const sentences = desc.split("。").filter(s=>s.trim());
@@ -7837,7 +7981,7 @@ function renderJyotish(){
     </div>
 
     <div class="section-title">ラーシチャート（南インド式）</div>
-    <div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.7;">インド占星術のホロスコープ。12の星座が固定された格子に、あなたの惑星を配置した図です。上昇点（ラグナ）のマスに三角印が入ります。</div>
+    <div style="font-size:15px; color:var(--muted); margin-bottom:12px; line-height:1.7;">インド占星術のホロスコープ。12の星座が固定された格子に、あなたの惑星を配置した図です。上昇点（ラグナ）のマスに三角印が入ります。${d.geoTentative ? "出生地を選んでいないので、ラグナは日本の中央（北緯35°・東経135°）で仮に出しています。" : ""}</div>
     <div style="display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,auto); gap:3px; max-width:600px; margin:0 auto 20px;">
       ${(() => {
         // 南インド式の12マス配置（固定）
@@ -7884,14 +8028,7 @@ function renderJyotish(){
       const ayaB = ayanamsha(dataB.jd);
       const moonSidB = norm360(dataB.moonLon - ayaB);
       const moonRashiB = JYOTISH_RASHIS[Math.floor(moonSidB / 30)];
-      const dist = Math.abs(Math.floor(moonSidB/30) - Math.floor(norm360(d.moonLon - aya)/30));
-      let compat = "";
-      if (dist === 0) compat = "同じ月のラーシ。感情のパターンが似ていて、深く共感できる。";
-      else if (dist === 1 || dist === 11) compat = "隣り合うラーシ。似た感性を持ちつつ、微妙な違いが新鮮さを生む。";
-      else if (dist === 5 || dist === 7) compat = "トライン（120°）の関係。自然な調和がある。一緒にいて楽。";
-      else if (dist === 6) compat = "正反対のラーシ。強烈に惹かれ合うが、価値観の違いも大きい。補完関係。";
-      else if (dist === 3 || dist === 9) compat = "スクエア（90°）の関係。緊張感があるが、成長を促す。";
-      else compat = "異なる感情パターン。互いの違いを理解することが関係の鍵。";
+      const compat = jyotishMoonRel(Math.floor(norm360(d.moonLon - aya)/30), Math.floor(moonSidB/30));
       return `<div class="section-title">お相手とのインド占星術相性</div>
       <div class="card hi">
         <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; margin-bottom:12px;">
@@ -8180,7 +8317,8 @@ function renderConsult(){
   const shuku = SHUKUYO_27[shukuIdx];
   const dayunList = calcDayun(d);
   const age = getCurrentAge(d.y, d.m, d.d);
-  const currentDayun = dayunList.find(du => age >= du.startAge && age < du.endAge);
+  // 性別を選んでいないと大運の向きが決まらないので、今の大運は使わない（2026-10-20 監査）
+  const currentDayun = dayunDirKnown(d) ? dayunList.find(du => age >= du.startAge && age < du.endAge) : null;
   const currentDayunTen = currentDayun ? tenGod(d.day.stem, currentDayun.stem) : null;
   const dayMasterEl_c = STEM_EL[STEMS.indexOf(d.day.stem)];
 
@@ -8190,6 +8328,14 @@ function renderConsult(){
     const branchIdx = (lifeIdx - i + 12) % 12;
     palaceMap[PALACE_NAMES[i]] = (starDistrib[branchIdx] || []).join("・");
   }
+  // 宮の主星（14星）。無ければ向かいの宮の主星を借りる。旧版は副星が先頭だと副星で読み、星が無い宮は「—」で説明が空だった（2026-10-20）
+  const palaceMainOf = name => {
+    const bi = (lifeIdx - PALACE_NAMES.indexOf(name) + 12) % 12;
+    let m = (starDistrib[bi] || []).filter(s => ZW_LIFE[s]);
+    if (m.length) return { first: m[0], label: m.join("・") };
+    m = (starDistrib[(bi + 6) % 12] || []).filter(s => ZW_LIFE[s]);
+    return m.length ? { first: m[0], label: m.join("・") + "（主星が無いので、向かいの宮から借りた星）" } : { first: "", label: "主星なし" };
+  };
 
   // カテゴリ選択UI
   const cats = [
@@ -8425,31 +8571,22 @@ function renderConsult(){
       ((mElA==="火"&&mElB==="水")||(mElA==="水"&&mElB==="火")||(mElA==="風"&&mElB==="土")||(mElA==="土"&&mElB==="風")) ? 40 : 55;
     scores.push({name:"月の元素", score: moonElScore, weight:1.5});
 
-    // 4. 四柱推命 日主の五行関係
+    // 4. 四柱推命 日主の関係（干合を先に見る。相性総合と同じ dayMasterRel。2人を入れ替えても同じ点）
     const dayElA = STEM_EL[STEMS.indexOf(d.day.stem)];
     const dayElB = STEM_EL[STEMS.indexOf(db.day.stem)];
-    const wxRel = (() => {
-      const cycle = ["木","火","土","金","水"];
-      const iA = cycle.indexOf(dayElA), iB = cycle.indexOf(dayElB);
-      if (iA === iB) return {score:70, desc:"同じ五行（比和）。理解し合えるが刺激が少ない。"};
-      if ((iA+1)%5 === iB) return {score:85, desc:`${dayElA}が${dayElB}を生む（相生）。自然に支え合える関係。`};
-      if ((iB+1)%5 === iA) return {score:80, desc:`${dayElB}が${dayElA}を生む（相生）。相手があなたを支えてくれる。`};
-      if ((iA+2)%5 === iB) return {score:50, desc:`${dayElA}が${dayElB}を抑える（ぶつかる関係）。あなたが主導権を握りやすい。緊張感がある。`};
-      return {score:50, desc:`${dayElB}が${dayElA}を抑える（ぶつかる関係）。相手が強い立場になりやすい。対等さを意識して。`};
-    })();
-    scores.push({name:"日主の五行", score: wxRel.score, weight:1.5});
+    const wxRel = dayMasterRel(d, db);
+    scores.push({name:"日主の関係", score: wxRel.score, weight:1.5});
 
-    // 5. 宿曜の相性
+    // 5. 宿曜の相性（役割ではなく組で点を付ける。2人を入れ替えても同じ点）
     const shukuyoCompResult = shukuyoCompat(shukuIdx, shukuIdxB);
-    const shukuyoScoreMap = {"命":70,"業":40,"胎":75,"栄":90,"親":85,"友":80,"衰":50,"安":85,"壊":35,"危":45,"成":75};
-    const shukuyoScore = shukuyoScoreMap[shukuyoCompResult.type] || 60;
+    const shukuyoScore = shukuyoPairScore(shukuyoCompResult);
     scores.push({name:"宿曜", score: shukuyoScore, weight:1.5});
 
     // 加重平均
     const totalWeight = scores.reduce((a,s) => a + s.weight, 0);
     const totalScore = Math.round(scores.reduce((a,s) => a + s.score * s.weight, 0) / totalWeight);
     const barColor = totalScore >= 80 ? "#22c55e" : totalScore >= 65 ? "#8b6914" : totalScore >= 50 ? "#f59e0b" : "#ef4444";
-    const scoreLabel = totalScore >= 85 ? "とても良い相性" : totalScore >= 75 ? "良い相性" : totalScore >= 60 ? "まずまずの相性" : totalScore >= 45 ? "努力が必要な相性" : "試練の多い相性";
+    const scoreLabel = compatScoreLabel(totalScore);
 
     // 相手の人物像
     const partnerVenusIdeal = VENUS_IDEAL[venusSignB.n] || "";
@@ -8464,7 +8601,8 @@ function renderConsult(){
       <div style="background:#e8e0d4; border-radius:4px; height:12px; overflow:hidden; margin-bottom:8px;">
         <div style="background:${barColor}; height:100%; width:${totalScore}%; border-radius:4px; transition:width 0.3s;"></div>
       </div>
-      <p style="font-size:18px; color:var(--gold); font-weight:700; margin-bottom:12px;">${scoreLabel}</p>
+      <p style="font-size:18px; color:var(--gold); font-weight:700; margin-bottom:6px;">${scoreLabel}</p>
+      <p style="font-size:14px; color:var(--muted); margin-bottom:12px; line-height:1.6;">恋愛に関わる5つ（太陽・金星・月・日主・宿曜）の点の加重平均。羅占盤のルールで出した目安で、関係の行き先を決めるものではありません。</p>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:8px;">
         ${scores.map(s => {
           const c = s.score >= 80 ? "#22c55e" : s.score >= 60 ? "#8b6914" : s.score >= 45 ? "#f59e0b" : "#ef4444";
@@ -8562,7 +8700,7 @@ function renderConsult(){
     </div>
     ${!dataB ? `
     <div class="note" style="font-size:14px; color:var(--muted); line-height:1.7;">
-      生年月日が分かれば、サイドバーの「相性を占う」で9占術すべての相性判定ができます。
+      生年月日が分かれば、サイドバーの「相性について」で9占術すべての相性判定ができます。
     </div>` : ""}
   `;
   } // end love category
@@ -8571,8 +8709,8 @@ function renderConsult(){
   // 仕事・適職カテゴリ
   // ════════════════════════════════════════
   if (consultCategory === "work") {
-    const officialPalace = palaceMap["官禄宮"] || "—";
-    const officialStarFirst = officialPalace.split("・")[0];
+    const officialPalace = palaceMainOf("官禄宮").label;
+    const officialStarFirst = palaceMainOf("官禄宮").first;
     const WORK_STAR = {
       "紫微":"トップに立つ仕事。経営者・管理職・政治家。人の上に立つことで力を発揮する。",
       "天機":"頭脳を使う仕事。企画・参謀・コンサルタント・プログラマー。変化の多い環境が合う。",
@@ -8675,7 +8813,7 @@ function renderConsult(){
           ${WORK_STAR[officialStarFirst] ? WORK_STAR[officialStarFirst].split("。").slice(0,2).join("。")+"。" : ""}
           ${LP_WORK[nu.lifePath] ? LP_WORK[nu.lifePath].split("。")[0]+"。" : ""}
         </p>
-        <p style="font-size:13px; color:var(--muted); margin-top:4px;">官禄宮（${officialStarFirst}）・LP${nu.lifePath}</p>
+        <p style="font-size:13px; color:var(--muted); margin-top:4px;">官禄宮（${officialPalace}）・LP${nu.lifePath}</p>
       </div>
 
       <div style="margin-bottom:16px; padding-top:12px; border-top:1px solid var(--border);">
@@ -8711,7 +8849,8 @@ function renderConsult(){
            currentDayunTen === "食神" || currentDayunTen === "傷官" ? "好きなことを仕事に繋げるチャンス。アウトプットを増やして。" :
            currentDayunTen === "正財" || currentDayunTen === "偏財" ? "収入アップのチャンス。具体的な数字で目標を立てて。" :
            currentDayunTen === "正官" || currentDayunTen === "偏官" ? "責任あるポジションに就くチャンス。手を挙げて。" :
-           "焦らず情報を集める時期。3人の業界人に話を聞いてみて。"}
+           currentDayunTen ? "焦らず情報を集める時期。3人の業界人に話を聞いてみて。" :
+           "性別を選んでいないので大運の向きが決まらず、今の大運からは読みません。性別を選ぶと、ここに今の時期が出ます。"}
       </p>
       <p style="font-size:13px; color:var(--muted); margin-top:8px;">${workTiming.map(t => t.source).join("・")}</p>
     </div>
@@ -8720,8 +8859,8 @@ function renderConsult(){
       <summary style="cursor:pointer; font-size:15px; color:var(--gold); padding:12px 0; border-bottom:1px solid var(--border);">占術の詳細を見る</summary>
       <div style="padding-top:16px;">
         <div class="card" style="margin-bottom:12px;">
-          <h3 style="font-size:14px; color:var(--muted);">官禄宮: ${officialStarFirst}</h3>
-          <p>${WORK_STAR[officialStarFirst] || ""}</p>
+          <h3 style="font-size:14px; color:var(--muted);">官禄宮: ${officialPalace}</h3>
+          <p>${WORK_STAR[officialStarFirst] || "官禄宮にも向かいの宮にも主星が無いので、紫微斗数からは仕事の向きを決めにくい命盤です。ほかの占術の仕事の読みを重く見てください。"}</p>
         </div>
         <div class="card" style="margin-bottom:12px;">
           <h3 style="font-size:14px; color:var(--muted);">中心星: ${sm.stars.center}</h3>
@@ -8752,8 +8891,8 @@ function renderConsult(){
   // お金カテゴリ
   // ════════════════════════════════════════
   if (consultCategory === "money") {
-    const wealthPalace = palaceMap["財帛宮"] || "—";
-    const wealthStarFirst = wealthPalace.split("・")[0];
+    const wealthPalace = palaceMainOf("財帛宮").label;
+    const wealthStarFirst = palaceMainOf("財帛宮").first;
     const MONEY_STAR = {
       "紫微":"大きなお金を動かす力がある。経営・投資で財を成す。小さな節約より大きな収入を目指すタイプ。",
       "天機":"知恵で稼ぐ。アイデアや企画力が収入に直結する。副業や複数の収入源を持ちやすい。",
@@ -8791,7 +8930,7 @@ function renderConsult(){
         ${MONEY_STAR[wealthStarFirst] ? MONEY_STAR[wealthStarFirst].split("。").slice(0,2).join("。")+"。" : ""}
         ${zaiDesc.split("。")[0]}。
       </p>
-      <p style="font-size:13px; color:var(--muted); margin-top:8px;">財帛宮（${wealthStarFirst}）・${zaiStars.length > 0 ? zaiStars.map(p=>p.ten).join("・") : zaiHidden.length ? "財星は蔵干に" + zaiHidden.join("・") : "財星なし"}</p>
+      <p style="font-size:13px; color:var(--muted); margin-top:8px;">財帛宮（${wealthPalace}）・${zaiStars.length > 0 ? zaiStars.map(p=>p.ten).join("・") : zaiHidden.length ? "財星は蔵干に" + zaiHidden.join("・") : "財星なし"}</p>
     </div>
 
     <div class="card" style="margin-bottom:20px;">
@@ -8816,8 +8955,8 @@ function renderConsult(){
       <summary style="cursor:pointer; font-size:15px; color:var(--gold); padding:12px 0; border-bottom:1px solid var(--border);">占術の詳細を見る</summary>
       <div style="padding-top:16px;">
         <div class="card" style="margin-bottom:12px;">
-          <h3 style="font-size:14px; color:var(--muted);">財帛宮: ${wealthStarFirst}</h3>
-          <p>${MONEY_STAR[wealthStarFirst] || ""}</p>
+          <h3 style="font-size:14px; color:var(--muted);">財帛宮: ${wealthPalace}</h3>
+          <p>${MONEY_STAR[wealthStarFirst] || "財帛宮にも向かいの宮にも主星が無いので、紫微斗数からはお金の向きを決めにくい命盤です。四柱推命の財星の読みを重く見てください。"}</p>
         </div>
         <div class="card" style="margin-bottom:12px;">
           <h3 style="font-size:14px; color:var(--muted);">四柱推命 財星</h3>
@@ -8836,8 +8975,8 @@ function renderConsult(){
   // 人間関係カテゴリ
   // ════════════════════════════════════════
   if (consultCategory === "relations") {
-    const servantPalace = palaceMap["僕役宮"] || "—";
-    const servantStarFirst = servantPalace.split("・")[0];
+    const servantPalace = palaceMainOf("僕役宮").label;
+    const servantStarFirst = palaceMainOf("僕役宮").first;
     const CENTER_REL = {
       "貫索星":"一人の時間が必要。少数精鋭の付き合いを好む。群れるのが苦手。信頼した相手には深い絆を築く。",
       "石門星":"社交的で人脈が広い。誰とでも仲良くなれるが、本音を見せる相手は限られる。",
@@ -8893,7 +9032,7 @@ function renderConsult(){
         </div>
         <div class="card" style="margin-bottom:12px;">
           <h3 style="font-size:14px; color:var(--muted);">僕役宮: ${servantPalace}</h3>
-          <p>${servantStarFirst === "天同" ? "穏やかで協力的な人間関係に恵まれる。" : servantStarFirst === "七殺" ? "強い個性の人が集まりやすい。刺激的だが衝突も。" : servantStarFirst === "貪狼" ? "多彩な人脈に恵まれる。社交的な付き合いが多い。" : "この星の性質が、あなたの周囲に集まる人のタイプを示します。"}</p>
+          <p>${servantStarFirst === "天同" ? "穏やかで協力的な人間関係に恵まれる。" : servantStarFirst === "七殺" ? "強い個性の人が集まりやすい。刺激的だが衝突も。" : servantStarFirst === "貪狼" ? "多彩な人脈に恵まれる。社交的な付き合いが多い。" : servantStarFirst ? "周りに集まる人に、" + servantStarFirst + "（" + zwStarExpl(servantStarFirst).split("。")[0] + "）の性質が出やすい。" + zwStarExpl(servantStarFirst).split("。").slice(1).filter(Boolean).join("。") + "。" : "僕役宮にも向かいの宮にも主星が無いので、紫微斗数からは周りの人の傾向を決めにくい命盤です。"}</p>
         </div>
         <div class="card" style="margin-bottom:12px;">
           <h3 style="font-size:14px; color:var(--muted);">${shuku.n}</h3>
@@ -8990,37 +9129,15 @@ function renderConsult(){
         kinDiff % 20 === 0 ? "同じ紋章。本質が似ている。" :
         kinDiff % 13 === 0 ? "同じ音。リズムが合う。" : "異なるKIN。互いの違いが学びになる。";
 
-      // 総合スコア計算
-      const sunDist = Math.abs(signOf(d.sunLon) - signOf(db.sunLon));
-      const sunDistN = sunDist > 6 ? 12 - sunDist : sunDist;
-      const sunScore = {0:75,1:50,2:80,3:55,4:90,5:45,6:65}[sunDistN] || 60;
-      const vElA2 = SIGNS[signOf(venusA.lon)].e, vElB2 = SIGNS[signOf(venusB.lon)].e;
-      const venusScore = vElA2===vElB2?80:((vElA2==="火"&&vElB2==="風")||(vElA2==="風"&&vElB2==="火")||(vElA2==="土"&&vElB2==="水")||(vElA2==="水"&&vElB2==="土"))?85:((vElA2==="火"&&vElB2==="水")||(vElA2==="水"&&vElB2==="火")||(vElA2==="風"&&vElB2==="土")||(vElA2==="土"&&vElB2==="風"))?40:55;
-      const wxScore = isSameEl?75:isAgenB2||isBgenA2?85:isAkillB||isBkillA?40:60;
-      const shukuScoreMap = {"命":70,"業":40,"胎":75,"栄":90,"親":85,"友":80,"衰":50,"安":85,"壊":35,"危":45,"成":75};
-      const shukuScore = shukuScoreMap[shukuComp.type] || 60;
-      const totalScore = Math.round((sunScore*2 + venusScore*2 + wxScore*1.5 + shukuScore*2 + lpCompat.score*1) / 8.5);
+      // 総合スコア：9占術を1行ずつ点にして平均（compatScore。2人を入れ替えても同じ点）
+      const cs = compatScore(d, db);
+      const totalScore = cs.total;
       const scoreColor = totalScore >= 80 ? "#22c55e" : totalScore >= 65 ? "#c09040" : "#c04030";
-      const scoreLabel = totalScore >= 85 ? "非常に相性が良い" : totalScore >= 75 ? "相性が良い" : totalScore >= 65 ? "普通の相性" : totalScore >= 55 ? "やや難しい相性" : "難しい相性";
+      const scoreLabel = compatScoreLabel(totalScore);
+      // 9占術テーブルの行データ（点に入れなかった行は強み・課題の数にも入れない）
+      const compatRows = cs.rows;
+      const scoredRows = compatRows.filter(r => r.used);
 
-      // 9占術テーブルの行データ
-      const compatRows = [
-        { name:"西洋占星術", key:`太陽${sunSignA.n}×${sunSignB.n}`, score: sunScore,
-          desc: `太陽同士の距離${sunDistN*30}°。${sunDistN===0?"同じ星座。価値観が近い。":sunDistN===6?"正反対の星座。強烈に惹かれ合う。":sunDistN===4||sunDistN===8?"調和的な組み合わせ。":"刺激的な組み合わせ。"}` },
-        { name:"西洋占星術（金星）", key:`金星${SIGNS[signOf(venusA.lon)].n}×${SIGNS[signOf(venusB.lon)].n}`, score: venusScore,
-          desc: `金星の元素：${vElA2}×${vElB2}。${vElA2===vElB2?"同じ元素。愛し方が似ている。":(vElA2==="火"&&vElB2==="風")||(vElA2==="風"&&vElB2==="火")?"火と風。情熱と知性が共鳴する。":(vElA2==="土"&&vElB2==="水")||(vElA2==="水"&&vElB2==="土")?"土と水。安定と感情が補い合う。":"異なる元素。愛し方の違いが摩擦になることも。"}` },
-        { name:"四柱推命", key:`${d.day.stem}（${dayElA}）×${db.day.stem}（${dayElB2}）`, score: wxScore, desc: wxRelDesc },
-        { name:"紫微斗数", key:`命宮${lifeStarA}×${lifeStarB2}`, score: lifeStarA===lifeStarB2?75:70,
-          desc: lifeStarA===lifeStarB2?`同じ命宮主星。性格の核が似ている。`:`${lifeStarA}と${lifeStarB2}の組み合わせ。異なる資質が補い合う。` },
-        { name:"算命学（天中殺）", key:`${tenchuA}×${tenchuB2}`, score: tenchuSame?80:65,
-          desc: tenchuSame?`同じ天中殺。人生の課題が似ている。深く理解し合える。`:`異なる天中殺。互いの弱点が重ならない。補い合える関係。` },
-        { name:"数秘術", key:`LP${lpA}×LP${lpB}`, score: lpCompat.score, desc: lpCompat.desc },
-        { name:"九星気学", key:`${kyNameA?.name||""}×${kyNameB2?.name||""}`, score: kyA.honmei===kyB2.honmei?75:65,
-          desc: kyA.honmei===kyB2.honmei?`同じ本命星。性格が似ている。`:`異なる本命星。互いの個性が刺激になる。` },
-        { name:"マヤ暦", key:`${sealA?.n||""}×${sealB2?.n||""}`, score: kinDiff===0?90:kinDiff===130?85:kinDiff%20===0?80:65, desc: maCompat },
-        { name:"宿曜（最重要）", key:`${shukuA?.n||""}×${shukuB2?.n||""}`, score: shukuScore,
-          desc: `${shukuComp.name}。${shukuComp.desc}` },
-      ];
 
       // ── 2人のレーダーチャートを重ねて表示 ──
       html += `
@@ -9172,13 +9289,14 @@ function renderConsult(){
       html += `
       <div class="section-title">相性総合スコア</div>
       <div class="card hi" style="text-align:center; margin-bottom:20px; padding:24px;">
-        <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">9占術の統合スコア</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:8px; line-height:1.6;">${cs.how}</div>
         <div style="font-size:56px; font-weight:700; color:${scoreColor}; line-height:1;">${totalScore}</div>
-        <div style="font-size:18px; color:${scoreColor}; margin:8px 0 16px;">${scoreLabel}</div>
+        <div style="font-size:18px; color:${scoreColor}; margin:8px 0 6px;">${scoreLabel}</div>
+        <div style="font-size:14px; color:var(--muted); margin-bottom:16px;">点は羅占盤のルールで出した目安で、関係がうまくいくか・続くかを決めるものではありません。</div>
         ${(() => {
-          // スコアに応じた具体的な解説
-          const weakRows = compatRows.filter(r => r.score < 65);
-          const strongRows = compatRows.filter(r => r.score >= 80);
+          // スコアに応じた具体的な解説（点に入れた行だけで数える）
+          const weakRows = scoredRows.filter(r => r.score < 65);
+          const strongRows = scoredRows.filter(r => r.score >= 80);
           let challenge = "", advice = "";
           if (totalScore >= 85) {
             challenge = "大きな課題はありません。自然体でいられる関係です。";
@@ -9219,16 +9337,16 @@ function renderConsult(){
       <div class="section-title">9占術の相性判定</div>
       <div class="card" style="margin-bottom:16px; padding:0; overflow:hidden;">
         ${compatRows.map((r,i) => {
-          const barColor = r.score >= 80 ? "#22c55e" : r.score >= 65 ? "#c09040" : "#c04030";
+          const barColor = !r.used ? "#b0a890" : r.score >= 80 ? "#22c55e" : r.score >= 65 ? "#c09040" : "#c04030";
           const isShukuyo = r.name.includes("宿曜");
           return `<div style="padding:12px 16px; ${i>0?'border-top:1px solid var(--border)':''}; ${isShukuyo?'background:#fdf6e8;':''}">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-              <span style="font-size:14px; color:var(--gold); font-weight:700; min-width:120px;">${r.name}${isShukuyo?' ★':''}</span>
+              <span style="font-size:14px; color:var(--gold); font-weight:700; min-width:120px;">${r.name}${isShukuyo?' ★（2倍）':''}</span>
               <span style="font-size:13px; color:var(--muted);">${r.key}</span>
-              <span style="margin-left:auto; font-size:16px; font-weight:700; color:${barColor};">${r.score}</span>
+              <span style="margin-left:auto; font-size:16px; font-weight:700; color:${barColor};">${r.used ? r.score : "—"}</span>
             </div>
             <div style="background:#f0ede6; border-radius:3px; height:6px; margin-bottom:6px;">
-              <div style="width:${r.score}%; height:100%; background:${barColor}; border-radius:3px; transition:width 0.5s;"></div>
+              <div style="width:${r.used ? r.score : 0}%; height:100%; background:${barColor}; border-radius:3px; transition:width 0.5s;"></div>
             </div>
             <div style="font-size:14px; color:#4a4030; line-height:1.6;">${r.desc}</div>
           </div>`;
@@ -9244,8 +9362,8 @@ function renderConsult(){
             <div style="font-size:13px; color:#6a6050;">${shukuA?.k||""}</div>
           </div>
           <div style="text-align:center;">
-            <div style="font-size:22px; color:${shukuComp.color||"var(--gold)"}; font-weight:700;">${shukuComp.type}</div>
-            <div style="font-size:12px; color:var(--muted);">あなた→相手</div>
+            <div style="font-size:22px; color:${shukuComp.color||"var(--gold)"}; font-weight:700;">${shukuComp.pair || shukuComp.type}</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.6;">あなたから見て相手は${shukuComp.seen}<br>相手から見てあなたは${shukuComp.type}</div>
           </div>
           <div style="text-align:center; padding:12px; background:rgba(201,147,58,0.08); border-radius:6px;">
             <div style="font-size:13px; color:var(--muted);">お相手</div>
@@ -9253,34 +9371,37 @@ function renderConsult(){
             <div style="font-size:13px; color:#6a6050;">${shukuB2?.k||""}</div>
           </div>
         </div>
-        <p style="font-size:16px; line-height:1.8; color:var(--text);">${shukuComp.desc}</p>
+        <p style="font-size:16px; line-height:1.8; color:var(--text);"><strong>相手から見たあなた（${shukuComp.type}）：</strong>${shukuComp.desc}</p>
         ${shukuComp.type !== shukuCompRev.type ? `
         <div style="margin-top:12px; padding:10px 14px; background:#f5f2ec; border-radius:6px;">
-          <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">お相手から見たあなた：${shukuCompRev.name}</div>
-          <div style="font-size:14px; color:#4a4030;">${shukuCompRev.desc}</div>
+          <div style="font-size:14px; color:var(--muted); margin-bottom:4px;">あなたから見たお相手（${shukuCompRev.type}）</div>
+          <div style="font-size:14px; color:#4a4030;">${shukuyoSwapWho(shukuCompRev.desc)}</div>
         </div>` : ""}
       </div>
 
       ${(() => {
-        const strongPoints = compatRows.filter(r => r.score >= 80).map(r => r.name.replace("（最重要）",""));
-        const weakPoints = compatRows.filter(r => r.score < 65).map(r => r.name.replace("（最重要）",""));
+        const strongPoints = scoredRows.filter(r => r.score >= 80).map(r => r.name);
+        const weakPoints = scoredRows.filter(r => r.score < 65).map(r => r.name);
         const isStrong = totalScore >= 75;
-        const shukuType = shukuComp.type;
+        // 宿曜で「相手の側の役割」（あなたから見た相手）に出やすい気持ちの傾向。生年月日から今の気持ちや行動は分からないので、
+        // 当てる言い方にしない（2026-10-20 監査: 「脈ありサイン」「〜と感じている可能性が高い」が計算で確かめられる範囲を超えていた）
+        const shukuPair = shukuComp.pair;
         const theirView = (() => {
           const rev = shukuCompRev.type;
-          if (rev==="栄"||rev==="親") return "あなたに好意的で、一緒にいると居心地が良いと感じている可能性が高い。";
-          if (rev==="安") return "あなたに安心感を覚えている。ただし相手はあなたに振り回される面も感じているかもしれない。";
-          if (rev==="壊") return "あなたに強く惹かれているが、同時に不安定さも感じている。感情が揺れやすい関係。";
-          if (rev==="友") return "あなたを信頼できる存在として見ている。ただし恋愛感情に発展するには時間がかかるかも。";
-          if (rev==="衰") return "あなたに尽くしたいと感じている。相手はあなたのために動きやすい。";
-          if (rev==="危") return "あなたに刺激を感じている。リスクを感じながらも惹かれている状態。";
-          if (rev==="命") return "あなたに深い縁を感じている。魂レベルで繋がっている感覚がある。";
-          return "あなたに対して複雑な感情を持っている可能性がある。";
+          const T = {
+            栄:"相手はあなたといると前向きになりやすい組み合わせとされる。", 親:"相手はあなたに親しみを感じやすい組み合わせとされる。",
+            安:"相手はあなたを支えようとする一方で、あなたの言動に揺れやすい側とされる。", 壊:"相手はあなたを揺さぶりやすい側で、強く惹かれ合うが感情の波も出やすいとされる。",
+            友:"相手はあなたを元気づける側になりやすく、信頼から始まる組み合わせとされる。", 衰:"相手はあなたのために動きやすく、尽くす側になりやすいとされる。",
+            危:"相手はあなたとの関係に刺激とリスクの両方を感じやすいとされる。", 成:"相手はあなたから力をもらいやすい側とされる。",
+            業:"相手はあなたに使命感や責任感を抱きやすいとされる。", 胎:"相手はあなたから新しい可能性を受け取りやすいとされる。",
+            命:"同じ宿。互いに深い縁を感じやすい組み合わせとされる。",
+          };
+          return (T[rev] || "宿曜の組み合わせからは、はっきりした傾向は読みにくい。") + "今の気持ちは、相手の言動と言葉で確かめてください。";
         })();
-        const longevity = shukuType==="安"||shukuType==="壊"?"激しく惹かれ合うが感情の波が大きい。意識的に安定を作る努力が必要。":
-          totalScore>=80&&(shukuType==="栄"||shukuType==="親"||shukuType==="命")?"長続きしやすい関係。価値観が合い、一緒にいて自然体でいられる。":
-          totalScore>=70?"努力次第で長続きする関係。互いの違いを理解し合うことが鍵。":
-          "価値観の違いが大きい。深く理解し合うには時間と努力が必要。";
+        const longevity = shukuPair==="安壊"?"強く惹かれ合いやすい一方、感情の波が出やすい組み合わせ。意識して安定を作ると続けやすい。":
+          totalScore>=80&&(shukuPair==="栄親"||shukuPair==="命")?"羅占盤の目安では、価値観が合い自然体でいやすい組み合わせ。":
+          totalScore>=70?"違いを理解し合う努力で、続けやすくなる組み合わせ。":
+          "価値観の違いが出やすい組み合わせ。深く理解し合うには時間をかけるとよい。";
         const moonDistN2 = (() => { const d2=Math.abs(signOf(d.moonLon)-signOf(db.moonLon)); return d2>6?12-d2:d2; })();
         const conflictPoint = moonDistN2===6?"感情のリズムが正反対。「なぜそんな反応をするの？」と感じやすい。感情面での理解が最大の課題。":
           moonDistN2===3||moonDistN2===9?"感情面で刺激し合う。良い時は最高だが、悪い時は激しくぶつかる。":
@@ -9289,12 +9410,12 @@ function renderConsult(){
         return `
       <div class="section-title">恋愛（片思いの場合）</div>
       <details open style="margin-bottom:16px; border:1px solid var(--border); border-radius:8px; background:#fdf6e8;">
-        <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">相手はあなたをどう見ているか ▼</summary>
+        <summary style="padding:14px 16px; cursor:pointer; font-size:16px; color:var(--gold); font-weight:700; list-style:none;">宿曜で見る、相手があなたに向けやすい気持ち（傾向） ▼</summary>
         <div style="padding:4px 16px 16px;">
           <div class="card hi" style="margin-top:8px;">
             <p style="font-size:16px; line-height:1.9;">${theirView}</p>
-            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">脈ありサイン：</strong>${shukuType==="栄"||shukuType==="親"?"一緒にいる時間が自然と増える。あなたの話をよく聞いてくれる。":shukuType==="安"?"あなたに頼ってくる。困った時に連絡してくる。":shukuType==="命"?"目が合うことが多い。特別扱いされている感覚がある。":"連絡の返信が早い。あなたのことを気にかけてくれる言動がある。"}</p>
-            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">アプローチのヒント：</strong>${dayElA==="火"||dayElA==="木"?"積極的に動いてOK。ただし相手のペースも大切に。":dayElA==="水"||dayElA==="金"?"焦らず、じっくり信頼を積み上げる方が効果的。":"自然体で接することが最大の魅力になる。"}${shukuType==="壊"||shukuType==="危"?" 距離感を大切に。近づきすぎると逆効果になることも。":""}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">この組み合わせで出やすい様子：</strong>${shukuPair==="栄親"?"一緒にいる時間が自然と増えやすい。話がよく通じやすい。":shukuPair==="安壊"?"頼ったり頼られたりが強く出やすい。":shukuPair==="命"?"似た反応をしやすく、通じ合う感覚を持ちやすい。":"はっきりした型は出にくい。"}（生年月日の組み合わせの傾向で、今の気持ちを判定するものではありません）</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">アプローチのヒント：</strong>${dayElA==="火"||dayElA==="木"?"積極的に動いてOK。ただし相手のペースも大切に。":dayElA==="水"||dayElA==="金"?"焦らず、じっくり信頼を積み上げる方が効果的。":"自然体で接することが最大の魅力になる。"}${shukuPair==="安壊"||shukuPair==="危成"?" 距離感を大切に。近づきすぎると逆効果になることも。":""}</p>
           </div>
         </div>
       </details>
@@ -9305,7 +9426,7 @@ function renderConsult(){
         <div style="padding:4px 16px 16px;">
           <div class="card hi" style="margin-top:8px;">
             <p style="font-size:16px; line-height:1.9;"><strong style="color:var(--gold);">この関係の強み：</strong><br>${strongPoints.length>0?strongPoints.join("・")+"が特に相性が良い。":""}${isStrong?"総合的に相性が良く、自然体でいられる関係。":"違いを活かせれば補い合える関係。"}</p>
-            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">長続きするか：</strong> ${longevity}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">続けやすさ（目安）：</strong> ${longevity}</p>
             <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">喧嘩になりやすいポイント：</strong> ${conflictPoint}</p>
             ${weakPoints.length>0?`<p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">注意が必要な点：</strong> ${weakPoints.join("・")}の相性に課題がある。意識的に補い合うことが大切。</p>`:""}
           </div>
@@ -9318,7 +9439,7 @@ function renderConsult(){
         <div style="padding:4px 16px 16px;">
           <div class="card" style="margin-top:8px;">
             <p style="font-size:16px; line-height:1.9;"><strong style="color:var(--gold);">信頼度：</strong>${tenchuSame?"同じ天中殺。人生の課題が似ていて、深く理解し合える信頼関係を築きやすい。":totalScore>=75?"相性が良く、信頼関係を築きやすい。":"価値観の違いがあるが、それが仕事では強みになることも。"}</p>
-            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">一緒にいると：</strong>${shukuType==="栄"||shukuType==="親"?"一緒にいると互いに活力が出る。プロジェクトを一緒に進めると成果が出やすい。":shukuType==="安"||shukuType==="壊"?"刺激的だが消耗することも。適度な距離感を保つことが大切。":shukuType==="友"?"穏やかで居心地の良い関係。長期的な協力関係に向いている。":"互いの強みを活かせれば良いチームになれる。"}</p>
+            <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">一緒にいると：</strong>${shukuPair==="栄親"?"互いに活力が出やすい組み合わせ。プロジェクトを一緒に進めると成果につながりやすい。":shukuPair==="安壊"?"刺激的だが消耗することも。適度な距離感を保つことが大切。":shukuPair==="友衰"?"穏やかで居心地の良い組み合わせ。長期的な協力関係に向く。":"互いの強みを活かせれば良いチームになれる。"}</p>
             <p style="font-size:15px; color:#6a6050; margin-top:10px; line-height:1.8;"><strong style="color:var(--gold);">ビジネス相性：</strong>${isAgenB2?"あなたが相手を育てる関係。メンター・リーダーとして機能しやすい。":isBgenA2?"相手があなたを育てる関係。相手から学ぶことが多い。":isSameEl?"同じ五行。同じ方向を向いて動きやすい。":"異なる五行。役割分担が明確になると最強のチームになれる。"}</p>
           </div>
         </div>
@@ -9345,7 +9466,8 @@ function renderConsult(){
 
     // 今の時期（大運・大限・パーソナルイヤー）
     const zwDayunS = calcZiweiDayun(d, lifeIdx);
-    const currentZwDuS = zwDayunS.find(du => age >= du.startAge && age < du.endAge);
+    // 大限は命宮（時刻）と向き（性別）で決まる。どちらかが無いときは「今の時期」に出さない（2026-10-20 監査）
+    const currentZwDuS = dayunDirKnown(d) && d.tm === "known" ? zwDayunS.find(du => age >= du.startAge && age < du.endAge) : null;
 
     // 流年四化（旧正月で切り替え）
     const nowYear = new Date().getFullYear();
@@ -9436,12 +9558,12 @@ function renderConsult(){
       // 今の時期テキスト
       const shichuDayunT = calcDayun(d);
       const currentAgeT = getCurrentAge(d.y, d.m, d.d);
-      const currentDuT = shichuDayunT.find(du => currentAgeT >= du.startAge && currentAgeT < du.endAge);
+      // 性別を選んでいないと大運の向きが決まらないので、今の大運の言葉は出さない（2026-10-20 監査）
+      const currentDuT = dayunDirKnown(d) ? shichuDayunT.find(du => currentAgeT >= du.startAge && currentAgeT < du.endAge) : null;
       const tenT = currentDuT ? tenGod(d.day.stem, currentDuT.stem) : "";
       const tenThemeT = {"比肩":"自分の力で立つ","劫財":"競争の中で磨かれる","食神":"楽しみと創造の","傷官":"才能が溢れ出す","偏財":"チャンスが広がる","正財":"安定を築く","偏官":"試練を超えて成長する","正官":"地位と信頼を得る","偏印":"新しい学びの","正印":"知恵が深まる"};
-      const themeT = tenThemeT[tenT] || "変化の";
       const pyShortT = {1:"始まり",2:"人間関係を育てる",3:"表現する",4:"基盤を固める",5:"変化を受け入れる",6:"責任を果たす",7:"内省する",8:"収穫する",9:"手放す"};
-      const timingText = "今は「" + themeT + "時期」。" + (pyShortT[nu.personalYear] ? pyShortT[nu.personalYear] + "年。" : "") + "焦らず、今できることを積み重ねて。";
+      const timingText = (tenThemeT[tenT] ? "今は「" + tenThemeT[tenT] + "時期」。" : "") + (pyShortT[nu.personalYear] ? "今年は" + pyShortT[nu.personalYear] + "年。" : "") + "焦らず、今できることを積み重ねて。";
 
       // タイプ名→画像ファイル名のマッピング
       const typeImageMap = {
@@ -9773,7 +9895,7 @@ function renderConsult(){
 
     <div class="section-title">9占術が一致するテーマ — 統合傾向レーダー</div>
     <div class="card" style="margin-bottom:20px;">
-      <p style="font-size:14px; color:#6a6050; margin-bottom:8px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向は確実です。</p>
+      <p style="font-size:14px; color:#6a6050; margin-bottom:8px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向がはっきり出ています。</p>
       <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">このレーダーは「どれだけ持っているか（能力の量）」を示します。上の16タイプ診断は「それをどう使うか（指向の方向）」を示します。たとえば統率力が高くても、マーベリックのように群れを率いず一人で発揮するタイプもいます。</p>
       ${(() => {
         // 8つの傾向軸を定義
@@ -10614,7 +10736,7 @@ function renderConsult(){
         return `<div style="margin-top:12px; padding:14px 16px; background:${verdictColor}18; border:1px solid ${verdictColor}44; border-radius:6px; text-align:center;">
           <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">複数占術の統合判断</div>
           <div style="font-size:22px; font-weight:700; color:${verdictColor}; margin-bottom:6px;">${verdict}</div>
-          <div style="font-size:14px; color:#6a6050;">詳しくは「決断」タブで確認できます</div>
+          <div style="font-size:14px; color:#6a6050;">詳しくは上の分類の「迷ったとき」で確認できます</div>
         </div>`;
       })()}
     </div>
@@ -10634,7 +10756,7 @@ function renderConsult(){
     // 全占術の「今の時期」を収集
     const ky = calcKyusei(d.y, d.m, d);
     const honmei = KYUSEI_NAMES[ky.honmei];
-    const thisYear = new Date().getFullYear();
+    const thisYear = kyuseiNowYear();   // 立春で切り替え
     const thisYearStar = kyuseiYearStar(thisYear);
     // 回座する宮の番号（洛書）。中宮の星から 中5→乾6→兌7→艮8→離9→坎1→坤2→震3→巽4 の順に飛ぶ（九星タブと同じ式）。
     //   2026-10-19 直した：以前は飛ぶ順を通さず番号をそのまま使っていて、九星タブと違う宮を出していた（例：2026年の一白は中宮なのに離宮）
@@ -10644,7 +10766,7 @@ function renderConsult(){
 
     // 紫微大限
     const zwDayun = calcZiweiDayun(d, lifeIdx);
-    const currentZwDu = zwDayun.find(du => age >= du.startAge && age < du.endAge);
+    const currentZwDu = dayunDirKnown(d) && d.tm === "known" ? zwDayun.find(du => age >= du.startAge && age < du.endAge) : null;
     const zwStars = currentZwDu ? (starDistrib[(lifeIdx - PALACE_NAMES.indexOf(currentZwDu.palaceName) + 12) % 12] || []).join("・") : "";
 
     // ダシャー
@@ -10681,7 +10803,7 @@ function renderConsult(){
 
       <div style="margin-bottom:14px;">
         <div style="font-size:14px; color:var(--gold); font-weight:700; margin-bottom:4px;">四柱推命</div>
-        <p style="font-size:16px; line-height:1.8;">${currentDayun ? (currentDayunTen === "比肩" || currentDayunTen === "劫財" ? "自力で切り拓く時期。決断は自分の意志で。" : currentDayunTen === "食神" || currentDayunTen === "傷官" ? "表現と創造の時期。直感を信じていい。" : currentDayunTen === "正財" || currentDayunTen === "偏財" ? "現実的な判断が吉。数字で考えて。" : currentDayunTen === "正官" || currentDayunTen === "偏官" ? "社会的な責任を意識した決断を。" : "学びと内省の時期。急がず情報を集めて。") : ""}</p>
+        <p style="font-size:16px; line-height:1.8;">${currentDayun ? (currentDayunTen === "比肩" || currentDayunTen === "劫財" ? "自力で切り拓く時期。決断は自分の意志で。" : currentDayunTen === "食神" || currentDayunTen === "傷官" ? "表現と創造の時期。直感を信じていい。" : currentDayunTen === "正財" || currentDayunTen === "偏財" ? "現実的な判断が吉。数字で考えて。" : currentDayunTen === "正官" || currentDayunTen === "偏官" ? "社会的な責任を意識した決断を。" : "学びと内省の時期。急がず情報を集めて。") : (dayunDirKnown(d) ? "" : "性別を選んでいないので大運の向きが決まらず、今の大運からは読みません。")}</p>
         <p style="font-size:13px; color:var(--muted);">大運${currentDayun ? currentDayun.stem+currentDayun.branch+"（"+currentDayunTen+"）" : "—"}</p>
       </div>
 
@@ -10761,9 +10883,8 @@ function renderConsult(){
 
     <!-- さらに詳しくAIに聞く（読み物を全部読んだ後の最後尾CTA。流れを一方向にするため末尾に配置） -->
     <div style="max-width:1040px; margin:32px auto 0; padding-top:20px; border-top:1px solid rgba(139,105,20,0.2); text-align:left;">
-      <div style="font-size:15px; color:var(--gold); font-weight:700; margin-bottom:10px; text-align:center;">さらに詳しくAIに聞く</div>
-      <div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しくあなたの人格や人生について明らかにできます。その内容に対して質問すると、鑑定結果の傾向からAIが説明をしてくれるようになります。</div>
-      <div style="text-align:center;">
+      ${window.RSynth && RSynth.summaryConsultHtml ? RSynth.summaryConsultHtml() : `<div style="font-size:14px; color:var(--text); line-height:1.8; margin-bottom:16px;">この鑑定結果をご自身でお使いのAIに読ませることで、さらに詳しく読めます。</div>`}
+      <div style="text-align:center; display:${window.RSynth && RSynth.summaryConsultHtml ? "none" : "block"};">
         <button onclick="exportForAI()" style="display:block; width:100%; padding:14px 32px; background:transparent; color:var(--gold); border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px;">AI鑑定用スクリプトをコピー</button>
         <div id="export-msg" style="display:none; font-size:13px; color:var(--gold); margin-top:8px;">✓ コピーしました</div>
         <div style="margin-top:12px; display:none;"><button onclick="requestDirectAI()" class="ai-direct-btn" style="display:block; width:100%; padding:14px 32px; background:var(--gold); color:#fff; border:2px solid var(--gold); border-radius:6px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:1px; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);">✦ AIに直接鑑定してもらう</button></div>
@@ -11106,9 +11227,10 @@ function goToTarot(){
   const n = calcNumerology(d.y, d.m, d.d);
   const dayun = calcDayun(d);
   const currentAge = getCurrentAge(d.y, d.m, d.d);
-  const currentDu = dayun.find(du=>currentAge>=du.startAge&&currentAge<du.endAge);
+  // 向き（性別）・命宮（時刻）が決まらない大運・大限はタロットへ渡さない（2026-10-20 監査）
+  const currentDu = dayunDirKnown(d) ? dayun.find(du=>currentAge>=du.startAge&&currentAge<du.endAge) : null;
   const zwDayun = calcZiweiDayun(d, d.lifeIdx);
-  const currentZwDu = zwDayun.find(du=>currentAge>=du.startAge&&currentAge<du.endAge);
+  const currentZwDu = dayunDirKnown(d) && d.tm === "known" ? zwDayun.find(du=>currentAge>=du.startAge&&currentAge<du.endAge) : null;
 
   // 追加データ収集
   const prevDu = currentDu ? dayun[dayun.indexOf(currentDu)-1] : null;

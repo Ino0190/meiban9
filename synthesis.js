@@ -118,9 +118,12 @@
   function timing(d, nu) {
     const age = getCurrentAge(d.y, d.m, d.d);
     const now = [];
+    // 大運・大限の向き（順行・逆行）は性別で決まる。性別を選んでいないと決まらないので、時期の判断と変わり目に入れない。
+    // 紫微の大限は命宮から数えるので、時刻が分からないときも入れない（2026-10-20 監査: 仮の値で「次の変わり目」が出ていた）
+    const dirKnown = typeof dayunDirKnown === "function" ? dayunDirKnown(d) : true;
     // 四柱推命: 今の大運の十神
     const dy = calcDayun(d);
-    const cur = dy.find(du => age >= du.startAge && age < du.endAge);
+    const cur = dirKnown ? dy.find(du => age >= du.startAge && age < du.endAge) : null;
     if (cur) {
       const ten = tenGod(d.day.stem, cur.stem);
       const TEN = { "比肩": "自分の力で立つ", "劫財": "競争の中で磨かれる", "食神": "楽しみ、作り出す", "傷官": "才能があふれ出す", "偏財": "チャンスが広がる", "正財": "安定を築く", "偏官": "試練を超えて伸びる", "正官": "地位と信頼を得る", "偏印": "新しく学び直す", "正印": "知恵が深まる" };
@@ -139,8 +142,8 @@
     const MAX = 90;
     const flags = Array.from({ length: MAX }, () => []);
     const mark = (from, to, sys) => { for (let a = Math.max(0, Math.floor(from)); a < Math.min(MAX, Math.floor(to)); a++) if (flags[a].indexOf(sys) < 0) flags[a].push(sys); };
-    dy.forEach(du => { if (["偏官", "傷官", "劫財", "偏印"].indexOf(tenGod(d.day.stem, du.stem)) >= 0) mark(du.startAge, du.endAge, "四柱推命"); });
-    try { calcZiweiDayun(d, d.lifeIdx).forEach(du => { if (["遷移宮", "疾厄宮", "官禄宮", "命宮"].indexOf(du.palaceName) >= 0) mark(du.startAge, du.endAge, "紫微斗数"); }); } catch (e) { }
+    if (dirKnown) dy.forEach(du => { if (["偏官", "傷官", "劫財", "偏印"].indexOf(tenGod(d.day.stem, du.stem)) >= 0) mark(du.startAge, du.endAge, "四柱推命"); });
+    if (dirKnown && d.tm === "known") try { calcZiweiDayun(d, d.lifeIdx).forEach(du => { if (["遷移宮", "疾厄宮", "官禄宮", "命宮"].indexOf(du.palaceName) >= 0) mark(du.startAge, du.endAge, "紫微斗数"); }); } catch (e) { }
     try {
       const ds = calcDasha(norm360(d.moonLon - ayanamsha(d.jd)), d.y);
       ds.dashas.forEach(x => { if (["ラーフ", "ケートゥ", "土星", "火星"].indexOf(x.lord) >= 0) mark(x.startAge, x.endAge, "インド占星術"); });
@@ -156,7 +159,8 @@
     }
     const nowSpan = spans.find(s => age >= s.start && age < s.end) || null;
     const nextSpan = spans.find(s => s.start > age) || null;
-    return { age, now, verdict, nowSpan, nextSpan };
+    const left = [dirKnown ? "" : "性別", d.tm === "known" ? "" : "時刻"].filter(Boolean);
+    return { age, now, verdict, nowSpan, nextSpan, left };
   }
 
   function buildSynthesis(d) {
@@ -382,7 +386,8 @@
       '<div class="rs-time rs-' + vcls + '"><div class="rs-verdict">' + tm.verdict + "</div>" +
       '<ul class="rs-why">' + tm.now.map(x => "<li><b>" + SHORT[x.sys] + "</b> " + esc(x.why) + (x.say ? "（" + x.say + "）" : "") + "</li>").join("") + "</ul>" +
       '<p class="rs-turn">' + turn + "</p></div>" +
-      '<p class="rs-small">変わり目は、10年ごとの運を持つ3つの占術（四柱推命・紫微斗数・インド占星術）のうち2つ以上が同時に「変化」を示す年齢。</p>' +
+      '<p class="rs-small">変わり目は、10年ごとの運を持つ3つの占術（四柱推命・紫微斗数・インド占星術）のうち2つ以上が同時に「変化」を示す年齢。' +
+      (tm.left && tm.left.length ? "今回は" + tm.left.join("と") + "が入っていないので、" + (tm.left.indexOf("性別") >= 0 ? "四柱推命の大運と紫微斗数の大限" : "紫微斗数の大限") + "を外して数えています（向きや命宮が決まらないため）。" + tm.left.join("・") + "を入れると加わります。" : "") + "</p>" +
       "</div></details>";
 
     h += "</div>";
@@ -794,15 +799,28 @@
   ];
   const isCompat = () => typeof currentMode !== "undefined" && currentMode === "compat" && typeof dataB !== "undefined" && !!dataB;
   const themesNow = i => i === SUM_I ? (isCompat() ? THEMES_SUM_COMPAT : THEMES_SUM) : isCompat() ? THEMES_COMPAT : THEMES;
-  function answerKey(i) {
+  // AIの答えの保存キー。生年月日とタブに加えて、答えを左右する入力（時刻・時刻の有無・性別・出生地、相性なら相手の分と相性の種類）も入れる。
+  // 旧版のキーは生年月日とタブだけで、00:00で残した答えが23:30の命盤にも出ていた（2026-10-20 監査）。旧キー（old）は読むだけ
+  const profileOf = p => [p.tm === "known" ? String(p.h).padStart(2, "0") + String(p.mi).padStart(2, "0") : "nt", p.sex || "X", p.bp || "-"].join("_");
+  function answerKeys(i) {
     const d = typeof currentData !== "undefined" ? currentData : null;
     if (!d) return null;
-    // 総合は、前の「総合鑑定の答えを貼る欄」（tab9）と同じ置き場所＝前に貼った答えがそのまま出る
-    if (i === SUM_I) return "sanmeiban_reading_" + d.y + "_" + d.m + "_" + d.d + (isCompat() ? "_with_" + dataB.y + "_" + dataB.m + "_" + dataB.d : "");
-    let k = "sanmeiban_consult_" + d.y + "_" + d.m + "_" + d.d + "_" + i;
-    if (isCompat()) k += "_with_" + dataB.y + "_" + dataB.m + "_" + dataB.d;
-    return k;
+    const cp = isCompat(), date = p => p.y + "_" + p.m + "_" + p.d;
+    // 総合の旧キーは、前の「総合鑑定の答えを貼る欄」（tab9）と同じ置き場所
+    const old = (i === SUM_I ? "sanmeiban_reading_" + date(d) : "sanmeiban_consult_" + date(d) + "_" + i) + (cp ? "_with_" + date(dataB) : "");
+    return { key: old + "_p_" + profileOf(d) + (cp ? "_" + profileOf(dataB) + "_" + (dataB.relType || "love") : ""), old };
   }
+  function answerKey(i) { const k = answerKeys(i); return k ? k.key : null; }
+  // 新しいキーに無いときだけ、前の版で残した答え（入力の区別なし）を注意書き付きで出す
+  function savedAnswer(i) {
+    const k = answerKeys(i);
+    if (!k) return { text: "", legacy: false };
+    const t = localStorage.getItem(k.key);
+    if (t) return { text: t, legacy: false };
+    const o = localStorage.getItem(k.old) || "";
+    return { text: o, legacy: !!o };
+  }
+  const LEGACY_NOTE = '<p class="rs-small">※ この答えは、生まれた時刻・性別・出生地を分けずに保存していた前の版で残したものです。入力を変えていたら、今の入力で聞き直して保存し直してください。</p>';
   // AIの答えを読みやすくする（見出し・太字・箇条書き・段落）。先にエスケープするので、答えの中のタグは動かない
   function answerHtml(text) {
     const out = [];
@@ -823,7 +841,7 @@
     return out.join("");
   }
   function consultHtml(i, sys) {
-    const ths = themesNow(i), key = answerKey(i), saved = key ? localStorage.getItem(key) || "" : "";
+    const ths = themesNow(i), sv = savedAnswer(i), saved = sv.text;
     const who = isCompat() ? "2人の" + sys + "の結果" : sys + "の結果";
     const lead = i === SUM_I && isCompat()
       ? "2人の9つの占いの数値と相性の判定、この画面と各タブの相性の読み、2人それぞれの知りたいこと別のまとめを、AIへの相談文にします。ChatGPT・Claude・Gemini などに貼って送ると、9つを合わせて2人の相性を読んでくれます。続けて質問すれば、そのまま相談を続けられます。"
@@ -841,7 +859,7 @@
       '<button type="button" class="rs-share rs-consult-copy" onclick="RSynth.copyConsult(' + i + ')">AIへの相談文をコピー</button>' +
       '<div class="rs-consult-msg" id="rs-cmsg-' + i + '" aria-live="polite"></div>' +
       '<details class="rs-fold rs-answer"' + (saved ? " open" : "") + "><summary>AIの答えをこのタブに残す<span>貼り付けて保存すると、次に開いたときもここで読めます（この端末の中に保存します）</span></summary>" +
-      '<div class="rs-fold-body"><div class="rs-ans-view" id="rs-av-' + i + '">' + (saved ? answerHtml(saved) : "") + "</div>" +
+      '<div class="rs-fold-body"><div class="rs-ans-view" id="rs-av-' + i + '">' + (saved ? (sv.legacy ? LEGACY_NOTE : "") + answerHtml(saved) : "") + "</div>" +
       '<label class="rs-consult-l" for="rs-at-' + i + '">AIの答え</label>' +
       '<textarea id="rs-at-' + i + '" class="rs-q" rows="5" placeholder="AIの答えをここに貼り付けて「保存」">' + esc(saved) + "</textarea>" +
       '<div class="rs-ans-btns"><button type="button" class="rs-ans-save" onclick="RSynth.saveAnswer(' + i + ')">保存</button>' +
@@ -891,7 +909,8 @@
         : "- 9つの占いを合わせて答える。根拠にした占いと星・数・宿・干支などを、文の中で示す（例：「四柱推命の日主が庚で、九星も一白なので」）",
       compat ? "- 多くの占いがそろう点ははっきり、占いによって分かれる点は「場面によって違う顔が出る」として書く"
         : "- 【11】の「何個の占いがそろったか」を使い、多くの占いがそろう点ははっきり、そろった数が2つ以下の点は控えめに書く",
-      "- 星・干支・宿・数などの計算値は、計算し直さずそのまま使う（天体の位置は Swiss Ephemeris による計算）",
+      // 2026-10-20 監査: 「計算し直さない」だけだと旧暦・四化などの誤りをAIが止められない。食い違いに気づいたら言ってもらう
+      "- 星・干支・宿・数などの計算値は、基本はそのまま使う（天体の位置は Swiss Ephemeris による計算）。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する",
       "- " + (compat ? "【相性の画面の読み】" : "【12】") + "など羅占盤の解説文は、確かめてよい参考情報として扱う。計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して、採用する読みと根拠を示す",
       "- 上の内容に無い配置や条件を、確かめた事実のように付け足さない",
       "- 読み手は占いに詳しくない。専門用語は、使ったらその場で一言で説明する",
@@ -920,7 +939,7 @@
       "■ 答え方",
       // 例はこの人の実際の材料から作る。旧版はどの占術・どの人にも「日主が庚なので」で、日主が丙の人や紫微・九星の相談にも庚が出ていた（2026-10-20）
       "- " + sys + "の見方で答える。根拠にした星・数・宿・干支などを、文の中で示す" + (exWhat ? "（例：「" + exWhat + (/借りる$/.test(exWhat) ? "ので" : /宮に[^が]+$/.test(exWhat) ? "があるので" : "なので") + "」）" : ""),
-      "- 星・干支・宿・数などの計算値は、計算し直さずそのまま使う" + (/西洋|インド/.test(sys) ? "（天体の位置は Swiss Ephemeris による計算）" : ""),
+      "- 星・干支・宿・数などの計算値は、基本はそのまま使う" + (/西洋|インド/.test(sys) ? "（天体の位置は Swiss Ephemeris による計算）" : "") + "。ただし計算値どうしが食い違う、暦や" + sys + "の決まりと合わないと気づいたら、使う前にその点を指摘する",
       "- 画面の解説文は、確かめてよい参考情報として扱う。計算値と食い違う点や、" + sys + "の一般的な読み方と違う点があれば、指摘して、採用する読みと根拠を示す",
       "- 下の内容に無い配置や条件を、確かめた事実のように付け足さない",
       "- " + sys + "だけが示す特徴を2つ以上取り上げる。どの占いでも言えそうな一般論だけで終わらせない",
@@ -988,9 +1007,11 @@
     showMsg(i, "✓ 保存しました");
   }
   function clearAnswer(i) {
-    const k = answerKey(i);
-    if (!k || !window.confirm("このタブに残したAIの答えを消しますか？")) return;
-    localStorage.removeItem(k);
+    const ks = answerKeys(i);
+    if (!ks || !window.confirm("このタブに残したAIの答えを消しますか？")) return;
+    // 出ていたのが前の版の答え（新しいキーが空）なら、その旧キーも消す
+    if (!localStorage.getItem(ks.key)) localStorage.removeItem(ks.old);
+    localStorage.removeItem(ks.key);
     const ta = document.getElementById("rs-at-" + i), v = document.getElementById("rs-av-" + i);
     if (ta) ta.value = "";
     if (v) v.innerHTML = "";
@@ -1474,7 +1495,8 @@
     if (workRow) out.work = { text: "<b>" + esc(workRow.what) + "</b> → 「" + workRow.tags.map(t => WORK_TAGS[t].label).join("」「") + "」。" + WORK_TAGS[workRow.tags[0]].say + "で力が出ます。" + (workRow.note ? '<span class="rs-qa-note">' + esc(workRow.note) + "</span>" : ""),
       tags: workRow.tags, what: workRow.what, note: workRow.note };
     const tm = timing(d, nu), nowOf = s => tm.now.find(x => x.sys === s);
-    const year = new Date().getFullYear();
+    // 九星の「今年」は立春で切り替える（旧版は西暦の年で、1月〜立春前は次の年の盤だった。2026-10-20 監査）
+    const year = typeof kyuseiNowYear === "function" ? kyuseiNowYear() : new Date().getFullYear();
     if (sys === "西洋占星術") {
       out.self = { text: "<b>太陽が" + SIGN12[sunI] + "、月が" + SIGN12[moonI] + "</b> → " + esc(first(planetInSign("太陽", SIGN12[sunI]))) + "素の自分（月）は" + esc(first(moonCore(SIGN12[moonI]))) };
       if (venus) set("like", "金星が" + SIGN12[signOf(venus.lon)], VAL_TAGS, BY_SIGN.like[signOf(venus.lon)]);
@@ -1489,6 +1511,7 @@
       set("like", "日主が" + d.day.stem, VAL_TAGS, BY_STEM.like[d.day.stem]);
       const n0 = nowOf("四柱推命");
       if (n0) out.life = { text: "<b>今の大運</b> → " + esc(n0.why) + "。" + (tm.nextSpan && tm.nextSpan.sys.indexOf(sys) >= 0 ? "次の大きな変わり目は" + tm.nextSpan.start + "歳ごろ。" : "") };
+      else if (tm.left && tm.left.indexOf("性別") >= 0) out.life = { none: "性別を選んでいないので、大運の向き（順行・逆行）が決まらず、今の大運からは読みません。性別を選ぶと出ます。" };
       set("decide", "日主が" + d.day.stem, DEC_TAGS, BY_STEM.decide[d.day.stem]);
       const mt = [];
       if (tens.includes("正財")) mt.push("earn", "save");
@@ -1516,7 +1539,9 @@
         const fu = zwPalace(d, "福徳宮"); if (fu) set("like", fu.text, VAL_TAGS, tagsOf(ZW_BY.like, fu.st));
         try {
           const age = getCurrentAge(d.y, d.m, d.d), du = calcZiweiDayun(d, d.lifeIdx).find(x => age >= x.startAge && age < x.endAge);
-          if (du) out.life = { text: "<b>今の大限（" + du.startAge + "〜" + (du.endAge - 1) + "歳）</b> → " + du.palaceName + "の10年。" + esc(first(typeof palaceExpl === "function" ? palaceExpl(du.palaceName) : "")) };
+          // 大限の向きは性別で決まる。性別を選んでいないときは出さない（2026-10-20 監査）
+          if (tm.left && tm.left.indexOf("性別") >= 0) out.life = { none: "性別を選んでいないので、大限の向き（順行・逆行）が決まらず、今の大限からは読みません。性別を選ぶと出ます。" };
+          else if (du) out.life = { text: "<b>今の大限（" + du.startAge + "〜" + (du.endAge - 1) + "歳）</b> → " + du.palaceName + "の10年。" + esc(first(typeof palaceExpl === "function" ? palaceExpl(du.palaceName) : "")) };
         } catch (e) { }
         const ml = zwPalace(d, "命宮"); if (ml) set("decide", ml.text, DEC_TAGS, tagsOf(ZW_BY.decide, ml.st));
         const zc = zwPalace(d, "財帛宮"); if (zc) set("money", zc.text, MONEY_TAGS, tagsOf(ZW_BY.money, zc.st));
@@ -1651,6 +1676,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, copyConsult, saveAnswer, clearAnswer, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, copyConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);
