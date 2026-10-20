@@ -938,7 +938,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=2"></script>
 <script src="type-judge.js?v=14"></script>
-<script src="synthesis.js?v=24"></script>
+<script src="synthesis.js?v=25"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1257,6 +1257,39 @@ function setsuDayCard(d){
   const t = setsuDayNote(d);
   return t ? `<div class="card" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;"><p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">節入りの日です。</strong>${t}</p></div>` : "";
 }
+// 23時台に生まれた人（相性モードならどちらか）の四柱推命タブに出す、日の変わり目の流派の切り替え
+function lateZiCard(){
+  const compat = currentMode === "compat" && !!dataB;
+  const ps = [[currentData, compat ? "あなた" : ""]].concat(compat ? [[dataB, "お相手"]] : []).filter(([p]) => p && p.lateZi);
+  if (!ps.length) return "";
+  const cur = shichuDayBoundary(), gz = p => p.stem + p.branch, p2 = n => String(n).padStart(2, "0");
+  // 流派ごとに1行（スマホで「日主」の途中で折り返さないように）
+  const line = ([p, who]) => (who ? `<strong>${who}</strong>（${p2(p.h)}:${p2(p.mi)}生まれ）<br>` : "") +
+    `23時の流派　日柱 ${gz(p.lateZi.b23.day)}・時柱 ${gz(p.lateZi.b23.hour)}（日主 ${p.lateZi.b23.day.stem}）<br>` +
+    `0時の流派　日柱 ${gz(p.lateZi.b24.day)}・時柱 ${gz(p.lateZi.b24.hour)}（日主 ${p.lateZi.b24.day.stem}）`;
+  const btn = (v, label) => `<button type="button" onclick="setShichuDayBoundary('${v}')" aria-pressed="${cur === v}" style="flex:1; padding:10px 8px; border-radius:4px; font-family:inherit; font-size:15px; cursor:pointer; ${cur === v ? "background:var(--gold); color:#fff; border:1px solid var(--gold); font-weight:700;" : "background:var(--surface); color:var(--muted); border:1px solid var(--border);"}">${label}</button>`;
+  return `<div class="card" id="shichu-day-boundary" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;">
+    <p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">23時台の生まれです。</strong>四柱推命は、日の変わり目を23時（子の刻から翌日）とする流派と、0時（日付どおり）とする流派に分かれ、23時台に生まれた人は日柱と時柱が変わります。羅占盤は23時の流派で出し、0時の流派にも切り替えられます。</p>
+    <div role="group" aria-label="四柱推命の日の変わり目" style="display:flex; gap:8px; margin:12px 0;">${btn("23", "23時で切り替える（標準）")}${btn("24", "0時で切り替える")}</div>
+    ${ps.map(x => `<p style="font-size:15px; line-height:1.8; margin-top:6px;">${line(x)}</p>`).join("")}
+    <p style="font-size:14px; color:var(--muted); line-height:1.7; margin-top:8px;">今は${cur === "24" ? "0時" : "23時"}の流派で表示しています。切り替えると、四柱推命の読みと、日主を使う羅占盤タイプ・相性・総合鑑定も変わることがあります。算命学は生まれた時刻を使わないので、どちらでも生まれた日付どおりの日柱です。選んだ流派はこの端末に覚えておきます。</p>
+  </div>`;
+}
+// 相性のAI用の文：23時台の人だけ、日主が流派で変わることを1行に添える
+function compatLateZiNote(p){
+  if (!p || !p.lateZi) return "";
+  const o = p.dayBoundary === "24" ? p.lateZi.b23 : p.lateZi.b24;
+  return `（23時台の生まれ。日の変わり目を${p.dayBoundary === "24" ? "0時" : "23時"}とする流派で出した。${p.dayBoundary === "24" ? "23時" : "0時"}の流派では日柱${o.day.stem}${o.day.branch}・日主${o.day.stem}）`;
+}
+// AI用の文：四柱推命の日の変わり目（23時台の人には、もう一方の流派の日柱も書く）
+function shichuDayLine(d){
+  let s = "\n  日の変わり目: " + (d.dayBoundary === "24" ? "0時（日付どおり）" : "23時（子の刻から翌日の日柱）");
+  if (d.lateZi) {
+    const o = d.dayBoundary === "24" ? d.lateZi.b23 : d.lateZi.b24;
+    s += `\n  ※ 23時台の生まれ。もう一方の流派（${d.dayBoundary === "24" ? "23時" : "0時"}で切り替え）では 日柱${o.day.stem}${o.day.branch}・時柱${o.hour.stem}${o.hour.branch}・日主${o.day.stem}になる。流派で日柱が変わる人なので、日主・日柱を根拠にした断定は控えめにする`;
+  }
+  return s;
+}
 // 年柱・月柱: 生まれた瞬間の太陽黄経で節月を決める（0＝寅月＝立春315°〜 … 10＝子月・11＝丑月）
 function pillarsFromSun(y, m, sunLon){
   const mIdx = Math.floor((((sunLon - 315) % 360) + 360) % 360 / 30);
@@ -1493,6 +1526,24 @@ function fillBirthplaceOptions(){
 }
 document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
 
+// 四柱推命の日の変わり目。"23"＝23時（子の刻から翌日の日柱・既定）／"24"＝0時（日付どおり）。選んだ流派はこの端末に覚えておく
+const SHICHU_DAY_KEY = "sanmeiban_shichu_day";
+function shichuDayBoundary(){ try { return localStorage.getItem(SHICHU_DAY_KEY) === "24" ? "24" : "23"; } catch (e) { return "23"; } }
+// 流派を切り替えて、今の入力のまま計算し直す。四柱推命タブを開いたまま、切り替えのカードの位置に戻す
+function setShichuDayBoundary(v){
+  try { localStorage.setItem(SHICHU_DAY_KEY, v === "24" ? "24" : "23"); } catch (e) { }
+  if (!currentData) return;
+  const p2 = n => String(n).padStart(2, "0");
+  const again = p => calcPersonData(`${p.y}-${p2(p.m)}-${p2(p.d)}`, p.tm === "known" ? `${p2(p.h)}:${p2(p.mi)}` : "", p.tm, p.sex, p.bp);
+  currentData = again(currentData);
+  if (dataB) { const rt = dataB.relType; dataB = again(dataB); dataB.relType = rt; }
+  window._quietRender = true;
+  try { renderAll(); } finally { window._quietRender = false; }
+  setTab(1);
+  const el = document.getElementById("shichu-day-boundary");
+  if (el) el.scrollIntoView({ block: "center" });
+}
+
 // 生年月日の対応範囲。天体の表（ephemeris-data.js 1919-12〜2081-03）と旧暦の表（lunar-data.js 1918-12〜2081-11）の中で、
 // 前後に節入り・補間の余白を取った範囲。旧版は入力欄が1900〜2099年で、表の外は誤差が数十度ある簡略式に落ちていた（2026-10-20 監査）
 const BD_MIN = "1920-01-01", BD_MAX = "2080-12-31";
@@ -1553,7 +1604,17 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   }
   const year = ym.year;
   const month = ym.month;
-  const day = getDayPillar(y,m,d);
+  // 日柱：四柱推命は既定で23時に日を切り替える（子の刻から翌日の日柱・子初換日）。0時で切り替える流派も選べる（shichuDayBoundary）。
+  //   違いが出るのは23時台に生まれた人だけ。23時の流派は日柱が翌日、時柱も翌日の日干から出す子の刻。0時の流派は日付どおりの日柱と、その日干から出す子の刻（旧版と同じ）。
+  //   算命学は生まれた時刻を使わないので、いつも生まれた日付の日柱（dayCal）で出す（2026-10-21 井内さん「23時で日を切り替える流派をデフォルトに」）
+  const dayCal = getDayPillar(y,m,d);
+  const dayBoundary = shichuDayBoundary();
+  let lateZi = null;
+  if (hourKnown && h >= 23) {
+    const next = getDayPillar(y, m, d + 1);
+    lateZi = { b23: { day: next, hour: getHourPillar(next.stem, h) }, b24: { day: dayCal, hour: getHourPillar(dayCal.stem, h) } };
+  }
+  const day = lateZi && dayBoundary === "23" ? lateZi.b23.day : dayCal;
   const hour = getHourPillar(day.stem, h);
   // 時柱は時刻が分かるときだけ入れる（五行バランス・十神・16タイプの判定にも入らない）
   const pillars = [
@@ -1600,7 +1661,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
   const sihua = calcSihua(ziweiYear.stem, fuxingPos);
   return {
-    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay, setsuDay, geoTentative,
+    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay, setsuDay, geoTentative, dayCal, lateZi, dayBoundary,
     jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
     pillars, wx, lifeIdx, year, month, day, hour,
     ziweiDistrib: fullDistrib,
@@ -2156,7 +2217,7 @@ ${aspectLines}
 【3】四柱推命
 ━━━━━━━━━━━━━━━━━━━━
 ◆ 四柱八字
-${pillarLines}${d.hourKnown ? "" : "\n  時柱: 出生時刻不明のため算出なし（五行バランスにも入れていない）"}
+${pillarLines}${d.hourKnown ? "" : "\n  時柱: 出生時刻不明のため算出なし（五行バランスにも入れていない）"}${shichuDayLine(d)}
 
 ◆ 日主: ${d.day.stem}（${STEM_EL[STEMS.indexOf(d.day.stem)]}）
 
@@ -2213,7 +2274,9 @@ ${(() => {
   const sm = calcJintai(d);
   const allStars = [sm.stars.north, sm.stars.west, sm.stars.center, sm.stars.east, sm.stars.south];
   const totalE = sm.juuniYear.e + sm.juuniMonth.e + sm.juuniDay.e;
-  return `◆ 人体星図（十大主星）
+  const dayNote = sm.day.stem + sm.day.branch !== d.day.stem + d.day.branch
+    ? `◆ 日柱: ${sm.day.stem}${sm.day.branch}（算命学は生まれた時刻を使わないので、生まれた日付どおり。四柱推命の日柱 ${d.day.stem}${d.day.branch} とは違う）\n\n` : "";
+  return `${dayNote}◆ 人体星図（十大主星）
   北（頭）: ${sm.stars.north}
   西（右手）: ${sm.stars.west}
   中央: ${sm.stars.center}
@@ -2459,7 +2522,7 @@ ${typeInfoText}
 出生地: ${d.bp || "不明"}${d.geoTentative ? "（ASCは日本の中央で出した仮の値）" : ""}${dayunDirKnown(d) ? "" : "\n（性別が未選択なので、大運・大限の向きは決まらない）"}
 
 ◆ 西洋占星術: 太陽${sunA} / 月${moonA}${d.ascLon!==null ? " / ASC"+SIGNS[signOf(d.ascLon)].n : ""}
-◆ 四柱推命: 日主${dayStemA}（${dayElA}）
+◆ 四柱推命: 日主${dayStemA}（${dayElA}）${compatLateZiNote(d)}
 ◆ 紫微斗数: 命宮主星 ${lifeStarsA.join("・")||"無主星"}
 ◆ 算命学: 中心星${smA.stars.center} / ${smA.tenchuType.name}
 ◆ 数秘術: ライフパス${nA.lifePath} / バースデー${nA.birthday}
@@ -2477,7 +2540,7 @@ ${typeInfoText}
 出生地: ${db.bp || "不明"}${db.geoTentative ? "（ASCは日本の中央で出した仮の値）" : ""}${dayunDirKnown(db) ? "" : "\n（性別が未選択なので、大運・大限の向きは決まらない）"}
 
 ◆ 西洋占星術: 太陽${sunB} / 月${moonB}${db.ascLon!==null ? " / ASC"+SIGNS[signOf(db.ascLon)].n : ""}
-◆ 四柱推命: 日主${dayStemB}（${dayElB}）
+◆ 四柱推命: 日主${dayStemB}（${dayElB}）${compatLateZiNote(db)}
 ◆ 紫微斗数: 命宮主星 ${lifeStarsB.join("・")||"無主星"}
 ◆ 算命学: 中心星${smB.stars.center} / ${smB.tenchuType.name}
 ◆ 数秘術: ライフパス${nB.lifePath} / バースデー${nB.birthday}
@@ -3955,6 +4018,7 @@ function renderShichu(){
   document.getElementById("tab1").innerHTML = `
     ${introCard("shichu")}
     ${compatHeader("shichu")}
+    ${lateZiCard()}
     ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? shichuCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの四柱推命 — ひとことで言うと</h3>
@@ -4012,7 +4076,7 @@ function renderShichu(){
     ${dayunDirKnown(d) ? "" : `<p style="font-size:15px; color:#a07020; line-height:1.7; margin:0 0 10px;">※ ${dayunDirNote(d, "大運")}</p>`}
     ${dayunHtml}
 
-    <div class="note">※ 四柱推命の日柱は2000年1月1日＝戊午の系列、年柱・月柱は生まれた瞬間の太陽の位置（立春・節入り）で決めています。日の変わり目は0時です。</div>
+    <div class="note">※ 四柱推命の日柱は2000年1月1日＝戊午の系列、年柱・月柱は生まれた瞬間の太陽の位置（立春・節入り）で決めています。日の変わり目は流派で23時（子の刻から翌日）と0時に分かれ、羅占盤は23時で出しています。${d.lateZi ? `あなたは23時台の生まれなので、上のカードで0時の流派にも切り替えられます（今は${d.dayBoundary === "24" ? "0時" : "23時"}の流派）。` : d.hourKnown ? "違いが出るのは23時台に生まれた人だけで、あなたの日柱はどちらでも同じです。" : "生まれた時刻が分からないので、日付どおりの日柱で出しています（23時台の生まれだと、23時の流派では翌日の日柱になります）。"}</div>
     `}
   `;
 }
@@ -5047,8 +5111,10 @@ function getTenchuType(k1, k2){
 
 // 人体星図の算出（高尾式）
 function calcJintai(d){
-  const dayStemIdx = STEMS.indexOf(d.day.stem);
-  const dayBranchIdx = BRANCHES.indexOf(d.day.branch);
+  // 算命学は生まれた時刻を使わないので、日柱は生まれた日付どおり（dayCal）。四柱推命の23時の流派で日柱が翌日になる人も、ここは変えない
+  const D = d.dayCal || d.day;
+  const dayStemIdx = STEMS.indexOf(D.stem);
+  const dayBranchIdx = BRANCHES.indexOf(D.branch);
   const yearBranchIdx = BRANCHES.indexOf(d.year.branch);
   const monthBranchIdx = BRANCHES.indexOf(d.month.branch);
 
@@ -5057,8 +5123,8 @@ function calcJintai(d){
   // 蔵干は節入りからの日数で選ぶ（日数が無いときは本元）
   const days = typeof d.setsuDays === "number" ? d.setsuDays : 99;
   const zk = b => sanmeiZokan(b, days) || b;
-  const star = stem => JUSSHU_MAP[tenGod(d.day.stem, stem)] || "貫索星";
-  const zokan = { year: zk(d.year.branch), month: zk(d.month.branch), day: zk(d.day.branch) };
+  const star = stem => JUSSHU_MAP[tenGod(D.stem, stem)] || "貫索星";
+  const zokan = { year: zk(d.year.branch), month: zk(d.month.branch), day: zk(D.branch) };
   const stars = {
     north:  star(d.year.stem),
     south:  star(d.month.stem),
@@ -5073,15 +5139,15 @@ function calcJintai(d){
   const juuniDay = JUUNI_STARS[JUUNI_TABLE[dayStemIdx][dayBranchIdx]];
 
   // 天中殺
-  const [k1, k2] = getTenchu(d.day.stem, d.day.branch);
+  const [k1, k2] = getTenchu(D.stem, D.branch);
   const tenchuType = getTenchuType(k1, k2);
 
-  return { stars, zokan, days, juuniYear, juuniMonth, juuniDay, tenchuType, k1, k2 };
+  return { stars, zokan, days, juuniYear, juuniMonth, juuniDay, tenchuType, k1, k2, day: D };
 }
 
 // 算命学の柱ごとの意味を生成
 function pillarMeaning(type, d){
-  const dayStem = d.day.stem;
+  const dayStem = (d.dayCal || d.day).stem;   // 算命学は生まれた日付どおりの日柱
   if (type === "day") {
     return dayMasterTheme(dayStem);
   }
@@ -5193,7 +5259,7 @@ function renderSanmei(){
     ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? sanmeiCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの算命学 — ひとことで言うと</h3>
-      <p><strong style="color:var(--gold)">本質（日主${d.day.stem}＝${STEM_EL[STEMS.indexOf(d.day.stem)]}）</strong>: ${dayMasterTheme(d.day.stem).split("。")[0]}。
+      <p><strong style="color:var(--gold)">本質（日主${sm.day.stem}＝${STEM_EL[STEMS.indexOf(sm.day.stem)]}）</strong>: ${dayMasterTheme(sm.day.stem).split("。")[0]}。
       <br><strong style="color:var(--gold)">行動パターンの核（中心星＝${sm.stars.center}）</strong>: ${JUSSHU_EXPL[sm.stars.center].split("。")[0]}。
       <br><strong style="color:var(--gold)">エネルギー</strong>: ${totalEnergy >= 28 ? "非常に強い。大きなことを動かせるが、使いこなすのが課題" : totalEnergy >= 20 ? "強い。普通の人より多くのことを同時にこなせる" : totalEnergy >= 12 ? "バランスが取れている。無理なく自分のペースで進める" : "省エネ型。少ない燃料で効率的に動く"}（${totalEnergy}/36点）。
       <br><strong style="color:var(--gold)">人生の構造的テーマ（${sm.tenchuType.name}）</strong>: ${sm.tenchuType.desc.split("。")[0]}。</p>
@@ -5224,12 +5290,13 @@ function renderSanmei(){
       </div>
       <div class="pillar main">
         <div class="plabel">日柱 — 本当の自分</div>
-        <div class="stem" style="color:var(--gold)">${d.day.stem}${d.day.branch}</div>
-        <div class="sub">${STEM_EL[STEMS.indexOf(d.day.stem)]}の${d.day.stem}（日主）＋ ${BRANCH_EL[BRANCHES.indexOf(d.day.branch)]}の${d.day.branch}</div>
-        <div style="font-size:13px; color:var(--muted); margin-top:6px; padding-top:6px; border-top:1px solid var(--border);">蔵干 ${(ZOUKAN[d.day.branch]||[]).map((s,i) => '<span style="color:'+EL_COLOR[STEM_EL[STEMS.indexOf(s)]]+'; margin-right:4px;">'+s+'<span style="font-size:11px; color:var(--muted);">'+STEM_EL[STEMS.indexOf(s)]+'</span></span>').join("")}</div>
+        <div class="stem" style="color:var(--gold)">${sm.day.stem}${sm.day.branch}</div>
+        <div class="sub">${STEM_EL[STEMS.indexOf(sm.day.stem)]}の${sm.day.stem}（日主）＋ ${BRANCH_EL[BRANCHES.indexOf(sm.day.branch)]}の${sm.day.branch}</div>
+        <div style="font-size:13px; color:var(--muted); margin-top:6px; padding-top:6px; border-top:1px solid var(--border);">蔵干 ${(ZOUKAN[sm.day.branch]||[]).map((s,i) => '<span style="color:'+EL_COLOR[STEM_EL[STEMS.indexOf(s)]]+'; margin-right:4px;">'+s+'<span style="font-size:11px; color:var(--muted);">'+STEM_EL[STEMS.indexOf(s)]+'</span></span>').join("")}</div>
         <div class="ten" style="color:var(--gold); border:none; padding:0; margin-top:8px; font-size:15px; line-height:1.7">自分自身の星 — ${sm.stars.center}（中心星）。${pillarMeaning("day", d)}</div>
       </div>
     </div>
+    ${d.lateZi && d.day.stem + d.day.branch !== sm.day.stem + sm.day.branch ? `<div class="note" style="margin-top:10px;">※ 23時台の生まれです。算命学は生まれた時刻を使わないので、日柱は生まれた日付どおりの${sm.day.stem}${sm.day.branch}で出しています。四柱推命タブは23時で日を切り替える流派なので、日柱が${d.day.stem}${d.day.branch}になっています。</div>` : ""}
 
     <div class="section-title">人体星図 — 9つの星が示すあなたの全体像</div>
     <div class="note" style="margin-bottom:12px;">中央が自分の本質（十大主星）。上下左右は人生の場面ごとの顔。四隅は人生の時期ごとのエネルギー（十二大従星）。高尾式の出し方で、北＝年干・南＝月干・東＝年支・中央＝月支・西＝日支。支は節入りから${sm.days}日目の蔵干（年支${sm.zokan.year}・月支${sm.zokan.month}・日支${sm.zokan.day}）を使う。</div>
@@ -5355,8 +5422,8 @@ function renderSanmei(){
         <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:center;">
           <tr>
             ${(() => {
-              const sIdx = STEMS.indexOf(d.day.stem);
-              const bIdx = BRANCHES.indexOf(d.day.branch);
+              const sIdx = STEMS.indexOf(sm.day.stem);
+              const bIdx = BRANCHES.indexOf(sm.day.branch);
               const junStart = (bIdx - sIdx + 12) % 12;
               const baseYear = d.y;
               let html = '<td style="padding:6px 4px; color:var(--muted); font-size:13px;">十二支</td>';
@@ -5380,8 +5447,8 @@ function renderSanmei(){
           </tr>
           <tr>
             ${(() => {
-              const sIdx = STEMS.indexOf(d.day.stem);
-              const bIdx = BRANCHES.indexOf(d.day.branch);
+              const sIdx = STEMS.indexOf(sm.day.stem);
+              const bIdx = BRANCHES.indexOf(sm.day.branch);
               const junStart = (bIdx - sIdx + 12) % 12;
               const junStemStart = (sIdx - bIdx + 10) % 10;
               let html = '<td style="padding:6px 4px; color:var(--muted); font-size:13px;">十干</td>';
@@ -5402,7 +5469,7 @@ function renderSanmei(){
           </tr>
         </table>
       </div>
-      <p style="font-size:14px; color:var(--muted); margin-top:8px;">ゴールド背景＝あなたの日柱（${d.day.stem}${d.day.branch}）。右端の「空」＝干が届かない2支＝<strong style="color:var(--gold)">${BRANCHES[sm.k1]}・${BRANCHES[sm.k2]}</strong>（天中殺）。</p>
+      <p style="font-size:14px; color:var(--muted); margin-top:8px;">ゴールド背景＝あなたの日柱（${sm.day.stem}${sm.day.branch}）。右端の「空」＝干が届かない2支＝<strong style="color:var(--gold)">${BRANCHES[sm.k1]}・${BRANCHES[sm.k2]}</strong>（天中殺）。</p>
     </div>
 
     <div class="card" style="margin-top:12px;">

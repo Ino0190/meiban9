@@ -801,7 +801,8 @@
   const themesNow = i => i === SUM_I ? (isCompat() ? THEMES_SUM_COMPAT : THEMES_SUM) : isCompat() ? THEMES_COMPAT : THEMES;
   // AIの答えの保存キー。生年月日とタブに加えて、答えを左右する入力（時刻・時刻の有無・性別・出生地、相性なら相手の分と相性の種類）も入れる。
   // 旧版のキーは生年月日とタブだけで、00:00で残した答えが23:30の命盤にも出ていた（2026-10-20 監査）。旧キー（old）は読むだけ
-  const profileOf = p => [p.tm === "known" ? String(p.h).padStart(2, "0") + String(p.mi).padStart(2, "0") : "nt", p.sex || "X", p.bp || "-"].join("_");
+  // 23時台の人が0時の流派を選んでいるときだけ "_d24" を足す（既定の23時の流派と、23時台以外の人のキーは変えない。2026-10-21）
+  const profileOf = p => [p.tm === "known" ? String(p.h).padStart(2, "0") + String(p.mi).padStart(2, "0") : "nt", p.sex || "X", p.bp || "-"].join("_") + (p.lateZi && p.dayBoundary === "24" ? "_d24" : "");
   function answerKeys(i) {
     const d = typeof currentData !== "undefined" ? currentData : null;
     if (!d) return null;
