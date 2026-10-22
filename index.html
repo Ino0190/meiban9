@@ -1257,23 +1257,56 @@ function setsuDayCard(d){
   const t = setsuDayNote(d);
   return t ? `<div class="card" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;"><p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">節入りの日です。</strong>${t}</p></div>` : "";
 }
-// 23時台に生まれた人（相性モードならどちらか）の四柱推命タブに出す、日の変わり目の流派の切り替え
-function lateZiCard(){
+// 旧暦の日付の言い方。年は、くらべる相手（other）と年が違うときだけ付ける
+function lunarLabel(L, other){
+  if (!L) return "—";
+  return (other && L.year !== other.year ? L.year + "年" : "") + (L.leap ? "閏" : "") + L.month + "月" + L.day + "日";
+}
+// 紫微斗数の命盤（ziweiChart の結果）の命宮の主星（14主星だけ）
+function zwLifeMain(z){ return ((z.ziweiDistrib[z.lifeIdx] || []).filter(s => ZW_LIFE[s]).join("・")) || "無主星"; }
+// 23時台に生まれた人（相性モードならどちらか）に出す、日の変わり目の流派の切り替え。tab＝1（四柱推命タブ）／2（紫微斗数タブ）。
+// 1つの設定で四柱推命と紫微斗数の両方を切り替えるので、どちらのタブで押しても同じ（2026-10-21 紫微斗数のタブにも出した）
+function lateZiCard(tab){
   const compat = currentMode === "compat" && !!dataB;
   const ps = [[currentData, compat ? "あなた" : ""]].concat(compat ? [[dataB, "お相手"]] : []).filter(([p]) => p && p.lateZi);
   if (!ps.length) return "";
+  const t = tab === 2 ? 2 : 1, zwTab = t === 2;
   const cur = shichuDayBoundary(), gz = p => p.stem + p.branch, p2 = n => String(n).padStart(2, "0");
-  // 流派ごとに1行（スマホで「日主」の途中で折り返さないように）
+  const nb = s => `<span style="white-space:nowrap;">${s}</span>`;   // スマホで言葉の途中で折り返さない
+  const val = (p, k) => {
+    const s = p.lateZi[k], o = p.lateZi[k === "b23" ? "b24" : "b23"];
+    // 紫微は、命宮が同じで主星も同じ（無主星どうしなど）でも紫微星の宮が動くことが多いので、紫微星の宮も並べる
+    return zwTab ? nb("旧暦" + lunarLabel(s.zw.lunar, o.zw.lunar)) + "・" + nb(`命宮 ${BRANCHES[s.zw.lifeIdx]}（${zwLifeMain(s.zw)}）`) + "・" + nb(`紫微星 ${BRANCHES[s.zw.ziweiPos]}`)
+                 : nb("日柱 " + gz(s.day)) + "・" + nb("時柱 " + gz(s.hour)) + nb(`（日主 ${s.day.stem}）`);
+  };
+  // 流派ごとに1行
   const line = ([p, who]) => (who ? `<strong>${who}</strong>（${p2(p.h)}:${p2(p.mi)}生まれ）<br>` : "") +
-    `23時の流派　日柱 ${gz(p.lateZi.b23.day)}・時柱 ${gz(p.lateZi.b23.hour)}（日主 ${p.lateZi.b23.day.stem}）<br>` +
-    `0時の流派　日柱 ${gz(p.lateZi.b24.day)}・時柱 ${gz(p.lateZi.b24.hour)}（日主 ${p.lateZi.b24.day.stem}）`;
-  const btn = (v, label) => `<button type="button" onclick="setShichuDayBoundary('${v}')" aria-pressed="${cur === v}" style="flex:1; padding:10px 8px; border-radius:4px; font-family:inherit; font-size:15px; cursor:pointer; ${cur === v ? "background:var(--gold); color:#fff; border:1px solid var(--gold); font-weight:700;" : "background:var(--surface); color:var(--muted); border:1px solid var(--border);"}">${label}</button>`;
-  return `<div class="card" id="shichu-day-boundary" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;">
-    <p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">23時台の生まれです。</strong>四柱推命は、日の変わり目を23時（子の刻から翌日）とする流派と、0時（日付どおり）とする流派に分かれ、23時台に生まれた人は日柱と時柱が変わります。羅占盤は23時の流派で出し、0時の流派にも切り替えられます。</p>
-    <div role="group" aria-label="四柱推命の日の変わり目" style="display:flex; gap:8px; margin:12px 0;">${btn("23", "23時で切り替える（標準）")}${btn("24", "0時で切り替える")}</div>
+    `${nb("23時の流派")}　${val(p, "b23")}<br>${nb("0時の流派")}　${val(p, "b24")}`;
+  const btn = (v, label) => `<button type="button" onclick="setShichuDayBoundary('${v}', ${t})" aria-pressed="${cur === v}" style="flex:1; padding:10px 8px; border-radius:4px; font-family:inherit; font-size:15px; cursor:pointer; ${cur === v ? "background:var(--gold); color:#fff; border:1px solid var(--gold); font-weight:700;" : "background:var(--surface); color:var(--muted); border:1px solid var(--border);"}">${label}</button>`;
+  const lead = zwTab
+    ? "紫微斗数は、日の変わり目を23時（子の刻から翌日）として旧暦の日を数える流派と、0時（日付どおり）で数える流派があり、23時台に生まれた人は旧暦の日が1日ずれて、紫微星と14主星の並びが変わります（翌日が旧暦の1日や旧正月なら、月や年も変わります）。"
+    : "四柱推命は、日の変わり目を23時（子の刻から翌日）とする流派と、0時（日付どおり）とする流派に分かれ、23時台に生まれた人は日柱と時柱が変わります。";
+  return `<div class="card" id="day-boundary-${t}" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;">
+    <p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">23時台の生まれです。</strong>${lead}羅占盤は23時の流派で出し、0時の流派にも切り替えられます。</p>
+    <div role="group" aria-label="日の変わり目の流派" style="display:flex; gap:8px; margin:12px 0;">${btn("23", "23時で切り替える（標準）")}${btn("24", "0時で切り替える")}</div>
     ${ps.map(x => `<p style="font-size:15px; line-height:1.8; margin-top:6px;">${line(x)}</p>`).join("")}
-    <p style="font-size:14px; color:var(--muted); line-height:1.7; margin-top:8px;">今は${cur === "24" ? "0時" : "23時"}の流派で表示しています。切り替えると、四柱推命の読みと、日主を使う羅占盤タイプ・相性・総合鑑定も変わることがあります。算命学は生まれた時刻を使わないので、どちらでも生まれた日付どおりの日柱です。選んだ流派はこの端末に覚えておきます。</p>
+    <p style="font-size:14px; color:var(--muted); line-height:1.7; margin-top:8px;">今は${cur === "24" ? "0時" : "23時"}の流派で表示しています。この切り替えは${zwTab ? "四柱推命の日柱・時柱" : "紫微斗数の命盤（旧暦の日）"}も一緒に変えます。日主や命宮を使う羅占盤タイプ・相性・総合鑑定も変わることがあります。算命学と宿曜は生まれた時刻を使わないので、どちらでも生まれた日付どおりです。選んだ流派はこの端末に覚えておきます。</p>
   </div>`;
+}
+// AI用の文：紫微斗数の日の変わり目（23時台の人だけ。もう一方の流派の旧暦の日と命宮の主星も書く）
+function ziweiDayLine(d){
+  if (!d.lateZi) return "";
+  const s = d.dayBoundary === "24" ? d.lateZi.b24 : d.lateZi.b23, o = d.dayBoundary === "24" ? d.lateZi.b23 : d.lateZi.b24;
+  const mainOf = z => zwLifeMain(z) === "無主星" ? "無主星" : "主星 " + zwLifeMain(z);
+  return `\n  ※ 23時台の生まれ。日の変わり目を${d.dayBoundary === "24" ? "0時" : "23時"}とする流派で、旧暦${lunarLabel(s.zw.lunar, o.zw.lunar)}として出した。` +
+    `${d.dayBoundary === "24" ? "23時" : "0時"}の流派では旧暦${lunarLabel(o.zw.lunar, s.zw.lunar)}・命宮${BRANCHES[o.zw.lifeIdx]}（${mainOf(o.zw)}）・紫微星${BRANCHES[o.zw.ziweiPos]}になる。` +
+    `流派で命盤が変わる人なので、命宮・主星を根拠にした断定は控えめにする`;
+}
+// 相性のAI用の文：23時台の人だけ、命宮の主星が流派で変わることを添える（変わらないときは何も書かない）
+function compatLateZiZw(p){
+  if (!p || !p.lateZi) return "";
+  const s = p.dayBoundary === "24" ? p.lateZi.b24 : p.lateZi.b23, o = p.dayBoundary === "24" ? p.lateZi.b23 : p.lateZi.b24;
+  return zwLifeMain(s.zw) === zwLifeMain(o.zw) ? "" : `（23時台の生まれ。${p.dayBoundary === "24" ? "23時" : "0時"}の流派では命宮主星 ${zwLifeMain(o.zw)}）`;
 }
 // 相性のAI用の文：23時台の人だけ、日主が流派で変わることを1行に添える
 function compatLateZiNote(p){
@@ -1526,21 +1559,24 @@ function fillBirthplaceOptions(){
 }
 document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
 
-// 四柱推命の日の変わり目。"23"＝23時（子の刻から翌日の日柱・既定）／"24"＝0時（日付どおり）。選んだ流派はこの端末に覚えておく
+// 日の変わり目。"23"＝23時（子の刻から翌日・既定）／"24"＝0時（日付どおり）。1つの設定で、四柱推命の日柱・時柱と
+// 紫微斗数の旧暦の日（命盤）の両方を決める（2026-10-21 紫微も合わせた）。選んだ流派はこの端末に覚えておく。
+// 名前は四柱推命だけだったときのまま（保存済みの設定をそのまま読むため）
 const SHICHU_DAY_KEY = "sanmeiban_shichu_day";
 function shichuDayBoundary(){ try { return localStorage.getItem(SHICHU_DAY_KEY) === "24" ? "24" : "23"; } catch (e) { return "23"; } }
-// 流派を切り替えて、今の入力のまま計算し直す。四柱推命タブを開いたまま、切り替えのカードの位置に戻す
-function setShichuDayBoundary(v){
+// 流派を切り替えて、今の入力のまま計算し直す。押したタブ（1＝四柱推命・2＝紫微斗数）を開いたまま、切り替えのカードの位置に戻す
+function setShichuDayBoundary(v, tab){
   try { localStorage.setItem(SHICHU_DAY_KEY, v === "24" ? "24" : "23"); } catch (e) { }
   if (!currentData) return;
+  const t = tab === 2 ? 2 : 1;
   const p2 = n => String(n).padStart(2, "0");
   const again = p => calcPersonData(`${p.y}-${p2(p.m)}-${p2(p.d)}`, p.tm === "known" ? `${p2(p.h)}:${p2(p.mi)}` : "", p.tm, p.sex, p.bp);
   currentData = again(currentData);
   if (dataB) { const rt = dataB.relType; dataB = again(dataB); dataB.relType = rt; }
   window._quietRender = true;
   try { renderAll(); } finally { window._quietRender = false; }
-  setTab(1);
-  const el = document.getElementById("shichu-day-boundary");
+  setTab(t);
+  const el = document.getElementById("day-boundary-" + t);
   if (el) el.scrollIntoView({ block: "center" });
 }
 
@@ -1636,12 +1672,36 @@ function calcPersonData(bd, bt, tm, sex, bp) {
       wx[STEM_EL[STEMS.indexOf(stem)]] += weight;
     });
   });
-  // 紫微斗数: 旧暦の年・月・日と時支で安星（旧暦が引けない範囲は節月・新暦の日で代用）。閏月は同じ番号の月として扱う
+  // 紫微斗数: 旧暦の年・月・日と時支で安星（ziweiChart）。日の変わり目は四柱推命と同じ設定に合わせる：
+  //   23時の流派（既定）は、23時台の生まれを翌日の旧暦の日・子の刻で出す（紫微斗数は子の刻から翌日とする説明が多い）。0時の流派は日付どおりの旧暦の日・子の刻（旧版と同じ）。
+  //   命宮は旧暦の月と時支で決まるので、ふつうは変わらない。旧暦の日で決まる紫微星と14主星の並びが1日分ずれる。翌日が旧暦の1日・旧正月なら、月・年（年干・四化）も変わる（2026-10-21）
   const hourBranchIdx = h >= 23 || h < 1 ? 0 : Math.floor((h + 1) / 2);
-  const lunar = lunarDate(y, m, d);
-  const zMonth = lunar ? lunar.month : ym.mIdx + 1;
-  const zDay = lunar ? lunar.day : d;
-  const zYear = lunar ? lunar.year : ym.effY;
+  const fb = { month: ym.mIdx + 1, day: d, year: ym.effY };
+  const zwCal = ziweiChart(lunarDate(y, m, d), hourBranchIdx, fb);
+  let zw = zwCal;
+  if (lateZi) {
+    const zwNext = ziweiChart(lunarDate(y, m, d + 1), hourBranchIdx, { ...fb, day: d + 1 });
+    lateZi.b23.zw = zwNext; lateZi.b24.zw = zwCal;
+    if (dayBoundary === "23") zw = zwNext;
+  }
+  return {
+    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay, setsuDay, geoTentative, dayCal, lateZi, dayBoundary,
+    jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
+    pillars, wx, lifeIdx: zw.lifeIdx, year, month, day, hour,
+    ziweiDistrib: zw.ziweiDistrib,
+    ziweiJu: zw.ziweiJu,
+    ziweiPos: zw.ziweiPos,
+    ziweiYear: zw.ziweiYear, lunar: zw.lunar, setsuDays,
+    sihua: zw.sihua,
+  };
+}
+
+// 紫微斗数の命盤。旧暦の年・月・日と時支から命宮・五行局・14主星・副星10星・四化を出す。閏月は同じ番号の月として扱う。
+// lunar が無い（旧暦の表の外）ときは fb（節月・新暦の日・節月の年）で代用。calcPersonData から、23時台の人は2つの流派の分を呼ぶ
+function ziweiChart(lunar, hourBranchIdx, fb){
+  const zMonth = lunar ? lunar.month : fb.month;
+  const zDay = lunar ? lunar.day : fb.day;
+  const zYear = lunar ? lunar.year : fb.year;
   const zyS = ((zYear - 4) % 10 + 10) % 10, zyB = ((zYear - 4) % 12 + 12) % 12;
   const ziweiYear = { stem: STEMS[zyS], branch: BRANCHES[zyB] };
   const lifeIdx = ((2 + (zMonth - 1) - hourBranchIdx) % 12 + 12) % 12;
@@ -1660,16 +1720,7 @@ function calcPersonData(bd, bt, tm, sex, bp) {
   }
   // 四化：生年干から化禄・化権・化科・化忌を算出（副星配置済み情報を渡す）
   const sihua = calcSihua(ziweiYear.stem, fuxingPos);
-  return {
-    y,m,d,h,mi,sex,bp,tm, hourKnown, moonDay, setsuDay, geoTentative, dayCal, lateZi, dayBoundary,
-    jd, sunLon, moonLon, ascLon, mcLon, houses, rahuLon, ketuLon, planets,
-    pillars, wx, lifeIdx, year, month, day, hour,
-    ziweiDistrib: fullDistrib,
-    ziweiJu: ziweiResult.ju,
-    ziweiPos: ziweiResult.ziweiPos,
-    ziweiYear, lunar, setsuDays,
-    sihua,
-  };
+  return { lunar, ziweiYear, lifeIdx, ziweiDistrib: fullDistrib, ziweiJu: ziweiResult.ju, ziweiPos: ziweiResult.ziweiPos, sihua };
 }
 
 // 8桁入力（例：19990707）→ date inputに自動変換
@@ -2230,7 +2281,7 @@ ${shichuDayunLines}
 ━━━━━━━━━━━━━━━━━━━━
 【4】紫微斗数
 ━━━━━━━━━━━━━━━━━━━━
-◆ 命宮: ${BRANCHES[lifeIdx]}宮${d.hourKnown ? "" : "（出生時刻不明のため正午で出した仮の命宮。十二宮・大限も仮。命宮を根拠にした断定はしない）"}
+◆ 命宮: ${BRANCHES[lifeIdx]}宮${d.hourKnown ? "" : "（出生時刻不明のため正午で出した仮の命宮。十二宮・大限も仮。命宮を根拠にした断定はしない）"}${ziweiDayLine(d)}
 ◆ 十二宮の主星配置
 ${palaceLines.join("\n")}
 
@@ -2523,7 +2574,7 @@ ${typeInfoText}
 
 ◆ 西洋占星術: 太陽${sunA} / 月${moonA}${d.ascLon!==null ? " / ASC"+SIGNS[signOf(d.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemA}（${dayElA}）${compatLateZiNote(d)}
-◆ 紫微斗数: 命宮主星 ${lifeStarsA.join("・")||"無主星"}
+◆ 紫微斗数: 命宮主星 ${lifeStarsA.join("・")||"無主星"}${compatLateZiZw(d)}
 ◆ 算命学: 中心星${smA.stars.center} / ${smA.tenchuType.name}
 ◆ 数秘術: ライフパス${nA.lifePath} / バースデー${nA.birthday}
 ◆ 九星気学: ${KYUSEI_NAMES[kA.honmei].name}
@@ -2541,7 +2592,7 @@ ${typeInfoText}
 
 ◆ 西洋占星術: 太陽${sunB} / 月${moonB}${db.ascLon!==null ? " / ASC"+SIGNS[signOf(db.ascLon)].n : ""}
 ◆ 四柱推命: 日主${dayStemB}（${dayElB}）${compatLateZiNote(db)}
-◆ 紫微斗数: 命宮主星 ${lifeStarsB.join("・")||"無主星"}
+◆ 紫微斗数: 命宮主星 ${lifeStarsB.join("・")||"無主星"}${compatLateZiZw(db)}
 ◆ 算命学: 中心星${smB.stars.center} / ${smB.tenchuType.name}
 ◆ 数秘術: ライフパス${nB.lifePath} / バースデー${nB.birthday}
 ◆ 九星気学: ${KYUSEI_NAMES[kB.honmei].name}
@@ -4018,7 +4069,7 @@ function renderShichu(){
   document.getElementById("tab1").innerHTML = `
     ${introCard("shichu")}
     ${compatHeader("shichu")}
-    ${lateZiCard()}
+    ${lateZiCard(1)}
     ${currentMode === "compat" && dataB ? "" : setsuDayCard(d)}
     ${currentMode === "compat" && dataB ? shichuCompatContent : `<div class="card hi" style="margin-bottom:20px;">
       <h3>☯ あなたの四柱推命 — ひとことで言うと</h3>
@@ -4644,6 +4695,7 @@ function renderZiwei(){
   document.getElementById("tab2").innerHTML = `
     ${introCard("ziwei")}
     ${compatHeader("ziwei")}
+    ${lateZiCard(2)}
     ${d.hourKnown ? "" : `<div class="card" style="margin-bottom:20px; border-color:var(--gold); background:#fdf6e8;">
       <p style="font-size:16px; line-height:1.8;"><strong style="color:var(--gold);">この命盤は仮のものです。</strong>紫微斗数の命宮は、生まれた時刻（2時間ごと）で決まります。時刻が分からないので、正午（午の刻）に生まれたとして並べています。命宮・十二宮の星・大限（10年ごとの運）は、生まれた時刻を入れると正しい形になります。羅占盤タイプの判定には、命宮は使っていません。</p>
     </div>`}
@@ -4793,7 +4845,7 @@ function renderZiwei(){
     ${dayunDirKnown(d) ? "" : `<p style="font-size:15px; color:#a07020; line-height:1.7; margin:0 0 10px;">※ ${dayunDirNote(d, "大限")}</p>`}
     ${dayunHtml}
 
-    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。日の変わり目は流派で23時（子の刻から翌日の旧暦の日）と0時に分かれ、羅占盤は23時で出しています（四柱推命と同じ設定）。${d.lateZi ? `あなたは23時台の生まれなので、上のカードで0時の流派にも切り替えられます（今は${d.dayBoundary === "24" ? "0時" : "23時"}の流派・旧暦${lunarLabel(d.lunar)}）。` : ""}命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
