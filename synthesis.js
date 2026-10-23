@@ -799,6 +799,14 @@
   ];
   const isCompat = () => typeof currentMode !== "undefined" && currentMode === "compat" && typeof dataB !== "undefined" && !!dataB;
   const themesNow = i => i === SUM_I ? (isCompat() ? THEMES_SUM_COMPAT : THEMES_SUM) : isCompat() ? THEMES_COMPAT : THEMES;
+  // 総合鑑定の相談文で、AIに渡す量（2026-10-23 井内さん「全部の結果を1つにまとめてくれたら良くない？」）。
+  //   要点だけ＝各占術の読みを節を選んで300字ずつ（今までどおり）／全部＝9タブと総合鑑定の画面の文を丸ごと
+  //   相性モードは画面に出している文がもともと少なく、丸ごと渡しても約500字しか増えないので、量は選ばせない（要点だけ）
+  const man = n => n >= 10000 ? (n / 10000).toFixed(1) + "万" : String(n);
+  const amounts = () => [
+    { label: "要点だけ", note: "9つの占いの数値と、各占術の読みの要点（約1.9万字）。チャット欄にそのまま貼れます。" },
+    { label: "画面の文を全部", note: "上に加えて、9つのタブと総合鑑定の画面に出している文を丸ごと（約5.8万字）。羅占盤が画面に出している読みを、取りこぼしなく渡せます。長い文は貼ると添付ファイルに変わるAIもありますが、そのまま送れます。「テキストファイルで保存」で添付してもかまいません。" },
+  ];
   // AIの答えの保存キー。生年月日とタブに加えて、答えを左右する入力（時刻・時刻の有無・性別・出生地、相性なら相手の分と相性の種類）も入れる。
   // 旧版のキーは生年月日とタブだけで、00:00で残した答えが23:30の命盤にも出ていた（2026-10-20 監査）。旧キー（old）は読むだけ
   // 23時台の人が0時の流派を選んでいるときだけ "_d24" を足す（既定の23時の流派と、23時台以外の人のキーは変えない。2026-10-21）
@@ -857,7 +865,13 @@
         '<button type="button" class="rs-chip" aria-pressed="' + (k === 0) + '" onclick="RSynth.pickTheme(' + i + ",'" + t.id + "')\">" + t.label + "</button>").join("") + "</div>" +
       '<label class="rs-consult-l" for="rs-q-' + i + '">聞きたいこと（書かなくても送れます）</label>' +
       '<textarea id="rs-q-' + i + '" class="rs-q" rows="3" maxlength="1000" placeholder="' + (isCompat() ? "例：最近すれ違いが多い。どう接するといいか知りたい" : "例：転職を考えています。今動いていいか知りたい") + '"></textarea>' +
+      (i === SUM_I && !isCompat() ? (() => { const A = amounts(), k = digestFull ? 1 : 0;
+        return '<div class="rs-consult-l" id="rs-al-' + i + '">AIに渡す量</div>' +
+          '<div class="rs-amts" role="group" aria-labelledby="rs-al-' + i + '">' + A.map((a, n) =>
+            '<button type="button" class="rs-chip" aria-pressed="' + (n === k) + '" onclick="RSynth.setAmount(' + i + "," + n + ')">' + a.label + "</button>").join("") + "</div>" +
+          '<span class="rs-small rs-amt-note">' + A[k].note + "</span>"; })() : "") +
       '<button type="button" class="rs-share rs-consult-copy" onclick="RSynth.copyConsult(' + i + ')">AIへの相談文をコピー</button>' +
+      (i === SUM_I ? '<button type="button" class="rs-share rs-share-sub rs-consult-save" onclick="RSynth.saveConsult(' + i + ')">テキストファイルで保存</button>' : "") +
       '<div class="rs-consult-msg" id="rs-cmsg-' + i + '" aria-live="polite"></div>' +
       '<details class="rs-fold rs-answer"' + (saved ? " open" : "") + "><summary>AIの答えをこのタブに残す<span>貼り付けて保存すると、次に開いたときもここで読めます（この端末の中に保存します）</span></summary>" +
       '<div class="rs-fold-body"><div class="rs-ans-view" id="rs-av-' + i + '">' + (saved ? (sv.legacy ? LEGACY_NOTE : "") + answerHtml(saved) : "") + "</div>" +
@@ -871,8 +885,17 @@
     if (!box) return;
     box.dataset.theme = id;
     const ths = themesNow(i);
-    box.querySelectorAll(".rs-chip").forEach((b, k) => b.setAttribute("aria-pressed", String(ths[k] && ths[k].id === id)));
+    // 「AIに渡す量」のボタンも同じ .rs-chip なので、相談したいことの側（.rs-chips の中）だけを書き換える
+    box.querySelectorAll(".rs-chips .rs-chip").forEach((b, k) => b.setAttribute("aria-pressed", String(ths[k] && ths[k].id === id)));
     if (id === "free") { const q = document.getElementById("rs-q-" + i); if (q) q.focus(); }
+  }
+  function setAmount(i, k) {
+    setDigestFull(k === 1);
+    const box = document.getElementById("rs-consult-" + i);
+    if (!box) return;
+    box.querySelectorAll(".rs-amts .rs-chip").forEach((b, n) => b.setAttribute("aria-pressed", String(n === k)));
+    const p = box.querySelector(".rs-amt-note");
+    if (p) p.textContent = amounts()[k].note;
   }
   // タブに出ている文を、畳んだ節も開いて取り出す（タブは見えている前提＝ボタンを押したタブ）
   function tabText(i) {
@@ -883,7 +906,9 @@
     if (hidden) el.classList.remove("hide");
     const closed = Array.from(el.querySelectorAll("details:not([open])")).filter(x => !x.closest(".rs-consult"));
     closed.forEach(x => { x.open = true; });
-    const hide = Array.from(el.querySelectorAll(".rs-consult, .rs-back, .rs-to-consult"));
+    // 操作のための部品は読まない（相談箱・戻る・シェア・画像保存・分類のボタン列・問いの一覧）。
+    // 2026-10-23 総合鑑定を丸ごと渡すようにしたとき、「結果をシェア」「16タイプを全部見る」などが相談文に混ざった
+    const hide = Array.from(el.querySelectorAll(".rs-consult, .rs-back, .rs-to-consult, .rs-actions, .rs-story-link, .rs-cats, .qe"));
     const prev = hide.map(x => x.style.display);
     hide.forEach(x => { x.style.display = "none"; });
     let t = el.innerText;
@@ -912,7 +937,9 @@
         : "- 【11】の「何個の占いがそろったか」を使い、多くの占いがそろう点ははっきり、そろった数が2つ以下の点は控えめに書く",
       // 2026-10-20 監査: 「計算し直さない」だけだと旧暦・四化などの誤りをAIが止められない。食い違いに気づいたら言ってもらう
       "- 星・干支・宿・数などの計算値は、基本はそのまま使う（天体の位置は Swiss Ephemeris による計算）。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する",
-      "- " + (compat ? "【相性の画面の読み】" : "【12】") + "など羅占盤の解説文は、確かめてよい参考情報として扱う。計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して、採用する読みと根拠を示す",
+      "- " + (compat ? "【相性の画面の読み】" : digestFull ? "【12】【13】" : "【12】") + "など羅占盤の解説文は、確かめてよい参考情報として扱う。計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して、採用する読みと根拠を示す",
+      // 全部モードは5万字を超える。前の方だけで書かれないよう、9つ全部を見てから答えるよう頼む
+      ...(digestFull ? ["- 渡した内容は長いですが、9つの占いすべてに目を通してから答える。前半に出てくる占いだけで書かない。どの占いを根拠にしたか分かるように書く"] : []),
       "- 上の内容に無い配置や条件を、確かめた事実のように付け足さない",
       "- 読み手は占いに詳しくない。専門用語は、使ったらその場で一言で説明する",
       "- 決めつけず、毎日の行動・仕事・人づきあいの具体的な形にする。健康・お金・法律のことは一般的な目安にとどめる",
@@ -965,7 +992,7 @@
     m._t = setTimeout(() => { m.textContent = ""; }, 6000);
   }
   function copyText(i, text) {
-    const done = () => showMsg(i, "✓ コピーしました。AIの入力欄に貼り付けて送ってください。");
+    const done = () => showMsg(i, "✓ コピーしました（約" + man(text.length) + "字）。AIの入力欄に貼り付けて送ってください。");
     const fallback = () => {
       // コピーできない環境では、選んだ状態の文を出す（手でコピーしてもらう）
       const ta = document.getElementById("rs-q-" + i);
@@ -997,6 +1024,27 @@
       localStorage.setItem(KEY, "1");
     }
     copyText(i, p.text);
+  }
+  // 「画面の文を全部」は5万字を超えるので、チャット欄に貼る代わりにファイルで添付できるようにする（2026-10-23）
+  function saveConsult(i) {
+    if (typeof currentData === "undefined" || !currentData) return;
+    const r = consultPrompt(i);
+    if (r.err) { showMsg(i, r.err); return; }
+    const KEY = "ra_ai_privacy_acknowledged";
+    if (!localStorage.getItem(KEY)) {
+      if (!window.confirm("相談文には、生年月日・出生時刻・出生地が入ります。\nこの端末にテキストファイルとして保存します。\nAIに渡した後の扱いは、お使いのAIサービスの決まりによります。\n（羅占盤は、生年月日を外部に送っていません）\n\n保存しますか？")) return;
+      localStorage.setItem(KEY, "1");
+    }
+    const d = currentData, z = n => String(n).padStart(2, "0");
+    const nm = "羅占盤_相談文_" + d.y + z(d.m) + z(d.d) + (isCompat() && dataB ? "_x" + dataB.y + z(dataB.m) + z(dataB.d) : "") + ".txt";
+    try {
+      const url = URL.createObjectURL(new Blob([r.text], { type: "text/plain;charset=utf-8" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = nm; a.style.display = "none";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showMsg(i, "✓ " + nm + "（約" + man(r.text.length) + "字）を保存しました。AIの入力欄にこのファイルを添付して送れます。");
+    } catch (e) { showMsg(i, "ファイルに保存できませんでした。「AIへの相談文をコピー」をお使いください。"); }
   }
   function saveAnswer(i) {
     const k = answerKey(i), ta = document.getElementById("rs-at-" + i), v = document.getElementById("rs-av-" + i);
@@ -1289,14 +1337,23 @@
     }
     return out;
   }
+  // 各占術の読みをどこまで渡すか。false＝節を選んで抜粋（総合で約1.9万字）／true＝9タブの画面の文を丸ごと（約5.5万字）
+  // 2026-10-23 井内さん「AI鑑定用に、総合だけじゃなく、全部の結果を１つにまとめてくれたら良くない？」
+  let digestFull = false;
+  const setDigestFull = v => { digestFull = !!v; };
+  const isDigestFull = () => digestFull;
+  const CAP_FULL = 100000; // 全部モードでは切らない
   function compatDigest(d, db) {
     if (typeof document === "undefined") return "";
     const bar = "━━━━━━━━━━━━━━━━━━━━";
-    const L = [bar, "【相性の画面の読み】（羅占盤の画面の文から抜粋）", bar, "", "■ 相性総合（総合鑑定タブ）"];
-    try { L.push(...panelRead(10, "AIで深く読む", 600)); } catch (e) { }
+    // 相性モードでは量を選ばせていない（画面の文が少なく、丸ごとでも約500字しか増えない）。
+    // ただし自分モードで「全部」を選んだまま相性に切り替えた場合に備えて、切らない側でも通るようにしておく
+    const full = digestFull;
+    const L = [bar, "【相性の画面の読み】（羅占盤の画面" + (full ? "に出している文を丸ごと" : "の文から抜粋") + "）", bar, "", "■ 相性総合（総合鑑定タブ）"];
+    try { L.push(...panelRead(10, "AIで深く読む", full ? CAP_FULL : 600)); } catch (e) { }
     SYS.forEach((sys, i) => {
       L.push("", "■ " + sys + "で見た2人");
-      try { L.push(...panelRead(i, "", 300)); } catch (e) { }
+      try { L.push(...panelRead(i, "", full ? CAP_FULL : 300)); } catch (e) { }
     });
     L.push("", bar, "【2人それぞれの知りたいこと別のまとめ】", bar,
       "各占術の材料を傾向の札に振り分け、同じ札を出した占術の数で数えたもの。数えるのは、そのテーマを得意（◎）か見られる（○）占術だけ。");
@@ -1317,15 +1374,24 @@
     const L = [bar, "【11】知りたいこと別のまとめ（羅占盤の総合鑑定より）", bar,
       "各占術の材料を傾向の札に振り分け、同じ札を出した占術の数で数えたもの。数えるのは、そのテーマを得意（◎）か見られる（○）占術だけ。", ""];
     try { L.push(...topicPlain(d)); } catch (e) { L.push("（まとめを出せませんでした）"); }
-    L.push("", bar, "【12】各占術の読み（羅占盤の画面の文から抜粋）", bar,
-      "上の数値をもとに、羅占盤が各タブに出している読み。「知りたいことへの答え」の印は ◎得意 ○見られる △参考 ×見ない。",
+    const full = digestFull;
+    L.push("", bar, "【12】各占術の読み（羅占盤の画面" + (full ? "に出している文を丸ごと" : "の文から抜粋") + "）", bar,
+      full ? "羅占盤が9つのタブに出している読みの全文です。各占術の先頭には「総合鑑定の中でのこの占術」（9つをまとめた結果とこの占術の判定の違い）と「知りたいことに、この占術で答えると」（8つの知りたいことへの答え・印は ◎得意 ○見られる △参考 ×見ない）が入っています。"
+        : "上の数値をもとに、羅占盤が各タブに出している読み。「知りたいことへの答え」の印は ◎得意 ○見られる △参考 ×見ない。",
       "各占術の「読む順」は、その占術で根拠を拾う本来の順番。占術ごとに、この順で数値を見て読む。");
     SYS.forEach((sys, i) => {
       L.push("", "■ " + sys);
       if (READ_ORDER[sys]) L.push("◇ 読む順：" + READ_ORDER[sys]);
+      if (full) { try { L.push(tabText(i)); } catch (e) { } return; }
       try { L.push(...tabDigest(i, sys)); } catch (e) { }
       try { L.push("◇ 知りたいことへの答え", ...qaPlain(d, sys)); } catch (e) { }
     });
+    // 全部モードでは、総合鑑定の画面に出している文も丸ごと渡す（4軸の一致の内訳・強み・今日・今の時期・知りたいこと別のまとめの本文）
+    if (full) {
+      L.push("", bar, "【13】総合鑑定の画面に出している文（羅占盤が9つを合わせて書いた読み）", bar,
+        "羅占盤自身の総合鑑定です。【11】を文にしたものと、16タイプ判定の内訳が入っています。この読みに引きずられず、計算値から読み直してください。食い違う点は指摘してください。");
+      try { L.push(tabText(10)); } catch (e) { }
+    }
     return L.join("\n");
   }
 
@@ -1690,6 +1756,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, topicConclusion, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, copyConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, topicConclusion, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, setAmount, setDigestFull, isDigestFull, copyConsult, saveConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);

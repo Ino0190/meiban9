@@ -678,11 +678,12 @@ a.rs-go:hover{color:#6a4e10}
 .rs-consult-h{font-size:20px;font-weight:700;color:var(--gold);font-family:'Noto Serif JP',serif;letter-spacing:1px;margin-bottom:8px}
 .rs-consult-lead{font-size:16px;line-height:1.8;color:var(--text);margin:0 0 14px}
 .rs-consult-l{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
-.rs-chips{display:flex;flex-wrap:wrap;gap:8px}
+.rs-chips,.rs-amts{display:flex;flex-wrap:wrap;gap:8px}
 .rs-chip{font-family:inherit;font-size:15px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);cursor:pointer}
 .rs-chip[aria-pressed="true"]{border-color:var(--gold);background:#fdf6e8;color:#6a4e10;font-weight:700}
 .rs-q{display:block;width:100%;box-sizing:border-box;font-family:inherit;font-size:16px;line-height:1.7;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);resize:vertical}
 .rs-consult-copy{margin:16px auto 0}
+.rs-consult-save{margin:10px auto 0;padding:10px 24px;font-size:15px;font-weight:400}
 .rs-consult-msg{min-height:22px;font-size:15px;color:var(--gold);margin:8px 0 4px;text-align:center}
 .rs-consult .rs-answer{margin:12px 0 0}
 .rs-ans-view p{font-size:16px;line-height:1.9;margin:0 0 10px}
@@ -962,7 +963,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=2"></script>
 <script src="type-judge.js?v=14"></script>
-<script src="synthesis.js?v=26"></script>
+<script src="synthesis.js?v=27"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -2488,7 +2489,7 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 - 各セクションは「読み物」として成立する文章で書く（箇条書きの羅列にしない）。
 - 占術間で矛盾する結果は隠さず、「Aの占術ではこう出ているが、Bではこう出ている。これは〜を意味する」と議論して統合する。
 - 【11】の「何個の占術がそろったか」を使い、多くの占術がそろう点ははっきり、そろった数が2つ以下の点は控えめに書く。
-- 星・干支・宿・数などの計算値は基本はそのまま使う。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する。【12】など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。
+- 星・干支・宿・数などの計算値は基本はそのまま使う。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する。${(() => { try { return window.RSynth && RSynth.isDigestFull && RSynth.isDigestFull() ? "【12】【13】" : "【12】"; } catch (e) { return "【12】"; } })()}など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。${(() => { try { return window.RSynth && RSynth.isDigestFull && RSynth.isDigestFull() ? "\n- 渡したデータは長いですが、9つの占いすべてに目を通してから書く。前半に出てくる占術だけで書かない。どの占術を根拠にしたかが分かるように書く。" : ""; } catch (e) { return ""; } })()}
 - 上のデータに無い配置や条件を、確かめた事実のように付け足さない。実際に起きた出来事は入力されていないので、過去や未来の出来事を起きたこととして書かない（「〜が出やすい時期」と書く）。
 - 健康・お金・仕事の結果（病気、収入、昇進、結婚など）を予言しない。占術が示すのは傾向と時期の読みで、出来事の発生までは計算していない。
 - 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
@@ -8520,7 +8521,7 @@ function renderConsult(){
 
   let html = `
     <div class="section-title">${currentMode === "compat" && dataB ? "相性総合" : "総合鑑定"}</div>
-    ${currentMode === "compat" && dataB ? "" : `<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:24px; max-width:480px; margin-left:auto; margin-right:auto;">
+    ${currentMode === "compat" && dataB ? "" : `<div class="rs-cats" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:24px; max-width:480px; margin-left:auto; margin-right:auto;">
       ${cats.map(c => `<button onclick="setConsultCategory('${c.id}')" style="
         padding:10px 4px; border-radius:4px; font-family:inherit; font-size:14px; cursor:pointer; transition:all 0.2s; white-space:nowrap;
         ${consultCategory === c.id
