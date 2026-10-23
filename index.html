@@ -633,6 +633,22 @@ a.rs-go:hover{color:#6a4e10}
 .rs-topic-rows .rs-bt{margin:4px 6px 0 0}
 .rs-topic-note{display:block;font-size:14px;color:var(--muted)}
 /* 総合鑑定：知りたいことから見る */
+/* 聞きたいことから探す（問いの入口） */
+.qe{max-width:1040px;margin:0 auto 28px;text-align:left}
+.qe-h{font-size:24px;color:var(--gold);margin:0 0 8px}
+.qe-lead{font-size:15px;color:var(--muted);line-height:1.8;margin:0 0 16px}
+.qe-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qe-gt{font-size:16px;color:var(--gold);font-weight:700;margin-bottom:8px}
+.qe-q{display:block;width:100%;text-align:left;font-family:inherit;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;color:var(--text)}
+.qe-q:hover{border-color:var(--gold)}
+.qe-qt{display:block;font-size:17px;font-weight:700;line-height:1.5}
+.qe-by{display:inline-block;font-size:13px;margin:4px 0;padding:1px 8px;border-radius:3px}
+.qe-by-m{background:var(--hi);color:var(--gold)}
+.qe-by-t{background:#efe9f4;color:#6a4a80}
+.qe-note{display:block;font-size:14px;color:var(--muted);line-height:1.7}
+.qe-foot{font-size:14px;color:var(--muted);line-height:1.7;margin:14px 0 0}
+#qe-msg{display:none;font-size:15px;color:var(--gold);line-height:1.7;margin:12px 0 0;padding:10px 14px;background:var(--hi);border-radius:8px}
+@media (max-width:768px){.qe-grid{grid-template-columns:1fr;gap:12px}.qe-h{font-size:20px}}
 .rs-ti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rs-ti{display:block;text-align:left;font-family:inherit;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;color:var(--text)}
 .rs-ti:hover{border-color:var(--gold)}
@@ -812,6 +828,8 @@ a.rs-go:hover{color:#6a4e10}
 
       <label class="label" for="birthplace-b">出生地</label>
       <select id="birthplace-b" class="bp-select"><option value="">選ばない</option></select>
+      <!-- 相手の生年月日を知らない人に何も返せないのが一番大きな穴だった（2026-10-22）。カードの相談へ回す -->
+      <div class="more-input-note" style="margin-top:10px;">お相手の生年月日が分からないときは、9占術の相性は出せません。<a href="#" onclick="goToTarot('好きな人との今の関係と、これからどうなるか', 'cross'); return false;" style="color:var(--gold);">カードで今の関係を読む</a>ことはできます。</div>
     </div>
 
     <button class="cast" onclick="cast()">占 う</button>
@@ -834,6 +852,9 @@ a.rs-go:hover{color:#6a4e10}
       <div style="font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.8;">9つの占術が交差する点に、あなたがいる。<br>性格診断では見えない「なぜそう動くのか」「なぜそこで迷うのか」を、星の配置から読み解きます。</div>
       <button type="button" onclick="RSynth.openType('革新_広い_リーダー_楽天')" style="margin-bottom:28px; padding:12px 28px; background:var(--surface); border:1px solid var(--gold); color:var(--gold); border-radius:6px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">16タイプ図鑑を見る</button>
 
+      <!-- 聞きたいことから探す（問いの入口。DOMContentLoaded で中身を入れる） -->
+      <div id="question-entry-slot" style="width:100%; margin-bottom:28px;"></div>
+      <div id="qe-msg"></div>
       <!-- 2分岐の入口（7:3） -->
       <div style="display:grid; grid-template-columns:7fr 3fr; gap:20px; width:100%; align-items:stretch;">
 
@@ -1558,6 +1579,11 @@ function fillBirthplaceOptions(){
   });
 }
 document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
+// 生年月日を入れる前の画面に「聞きたいことから探す」を出す
+document.addEventListener("DOMContentLoaded", () => {
+  const slot = document.getElementById("question-entry-slot");
+  if (slot) try { slot.innerHTML = questionEntryHtml("empty"); } catch (e) { console.warn("問いの一覧の描画エラー:", e); }
+});
 
 // 日の変わり目。"23"＝23時（子の刻から翌日・既定）／"24"＝0時（日付どおり）。1つの設定で、四柱推命の日柱・時柱と
 // 紫微斗数の旧暦の日（命盤）の両方を決める（2026-10-21 紫微も合わせた）。選んだ流派はこの端末に覚えておく。
@@ -9600,6 +9626,8 @@ function renderConsult(){
     try { html += buildSynthesisHtml(d); } catch (e) { console.warn("まとめの描画エラー:", e); }
     // 知りたいことから見る（仕事・お金・人間関係・健康・好き嫌い・迷ったときの結論を1行ずつ）
     try { if (currentMode !== "compat") html += RSynth.topicIndexHtml(d); } catch (e) { console.warn("知りたいことの一覧の描画エラー:", e); }
+    // 聞きたいことから探す（問いの言葉で入って、答えのある場所へ飛ぶ。カードで占う問いはタロットへ）
+    try { if (currentMode !== "compat") html += questionEntryHtml("result"); } catch (e) { console.warn("問いの一覧の描画エラー:", e); }
     html += `
     <div class="rs-more-title">もっと詳しく</div>
     ${(() => {
@@ -10997,7 +11025,8 @@ function renderConsult(){
     <div class="card" style="margin-bottom:16px;">
       <h3 style="font-size:18px; margin-bottom:8px;">タロットで占う</h3>
       <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">10枚のカードで状況の全体像を物語的に読み解きます。</p>
-      <a href="tarot/index.html" style="display:inline-block; padding:12px 28px; background:none; border:1px solid var(--gold); color:var(--gold); border-radius:4px; text-decoration:none; font-size:16px; font-weight:700; letter-spacing:2px;">タロットを開く</a>
+      <a href="tarot/index.html" onclick="goToTarot(); return false;" style="display:inline-block; padding:12px 28px; background:none; border:1px solid var(--gold); color:var(--gold); border-radius:4px; text-decoration:none; font-size:16px; font-weight:700; letter-spacing:2px;">タロットを開く</a>
+      <p style="font-size:14px; color:var(--muted); line-height:1.7; margin-top:10px;">この命盤（9占術のまとめ）も一緒に渡すので、あなたの持ち物をふまえてカードを読めます。</p>
     </div>
 
     <!-- さらに詳しくAIに聞く（読み物を全部読んだ後の最後尾CTA。流れを一方向にするため末尾に配置） -->
@@ -11333,8 +11362,94 @@ function setTab(i){
   };
 })();
 /* ── AI用エクスポート ── */
-function goToTarot(){
-  if (!currentData) { alert("先に命盤を立ててください"); return; }
+/* ============ 問いから入る（2026-10-22 井内さん「占いたい人のニーズに応えられているか」） ============
+   羅占盤の本体は命術（生年月日から、その人の持ち物と時期を読む）。
+   「相手が今どう思っているか」「これを買っていいか」「他に好きな人がいるか」は生年月日からは出ないので、
+   卜術（タロット＝その場でカードを引いて、今の問いに答える）に回す。どちらで答えるかを問いごとに決めておく。
+   by: meiban＝命盤のタブへ／type＝16タイプの詳しい説明へ／compat＝相性モードへ／tarot＝タロットへ（sp＝スプレッド） */
+const QUESTIONS = [
+  { g:"恋愛", q:"好きな人が私をどう思っているか", by:"tarot", sp:"three",
+    note:"相手の今の気持ちは、生年月日からは出ません。カードで、今の関係の流れとして読みます。" },
+  { g:"恋愛", q:"どうしたら振り向いてもらえるか", by:"compat",
+    note:"お相手の生年月日が分かれば、2人の間に出やすいことと接し方を9占術で読みます。" },
+  { g:"恋愛", q:"あの人に他に好きな人がいるか", by:"tarot", sp:"three",
+    note:"人の事情を当てる占いではありません。今の自分がどう向き合うかを読みます。" },
+  { g:"お金", q:"お金を稼げるようになるか", by:"meiban", cat:"money",
+    note:"稼ぎ方の型と、お金が動きやすい時期を読みます。金額や時期は約束できません。" },
+  { g:"お金", q:"これを買ってもいいか", by:"tarot", sp:"one",
+    note:"個別の買い物の可否は命盤では出ません。カードで、背中を押すか止めるかを見ます。" },
+  { g:"仕事", q:"向いてる仕事は？", by:"meiban", cat:"work",
+    note:"9占術それぞれの「力が出る場」を集めて読みます。羅占盤がいちばん得意な問いです。" },
+  { g:"仕事", q:"今の仕事を続けていいか", by:"tarot", sp:"yesno",
+    note:"続ける・変えるをカードで比べます。決める時期は命盤の「迷ったとき」でも見られます。" },
+  { g:"仕事", q:"職場でどう思われているか", by:"tarot", sp:"three",
+    note:"人が今どう見ているかは、生年月日からは出ません。カードで読みます。" },
+  { g:"仕事", q:"どうしたらもっとちゃんと働けるか", by:"meiban", cat:"work",
+    note:"力が出る場面と、無理が出やすい場面を分けて読みます。" },
+  { g:"性格", q:"自分がどんな性格か", by:"meiban", cat:"summary", sel:"#type-result-section",
+    note:"16タイプと9占術の性格を合わせて読みます。羅占盤の中心です。" },
+  { g:"性格", q:"どうやって人生を乗り越えていくか", by:"type",
+    note:"タイプの苦しみと処方箋、これからの変わり目を読みます。" },
+  { g:"性格", q:"何を励みにするか", by:"meiban", cat:"values",
+    note:"あなたがいちばん大事にしていることを、8つの型から読みます。" },
+  { g:"性格", q:"今日はどんな日か", by:"meiban", cat:"summary", sel:".rs-today",
+    note:"日ごとの運を持つ5つの占術で、今日と明日を読みます。" },
+];
+// 問いの一覧。place: "empty"＝生年月日を入れる前の画面／"result"＝総合鑑定タブ
+function questionEntryHtml(place){
+  const groups = [...new Set(QUESTIONS.map(x => x.g))];
+  const body = groups.map(g => `<div class="qe-g"><div class="qe-gt">${g}</div>` +
+    QUESTIONS.map((x, i) => [x, i]).filter(([x]) => x.g === g).map(([x, i]) =>
+      `<button type="button" class="qe-q" onclick="askQuestion(${i})">
+        <span class="qe-qt">${x.q}</span>
+        <span class="qe-by qe-by-${x.by === "tarot" ? "t" : "m"}">${x.by === "tarot" ? "カードで占う" : "生年月日で占う"}</span>
+        <span class="qe-note">${x.note}</span>
+      </button>`).join("") + "</div>").join("");
+  return `<section class="qe" id="question-entry-${place}">
+    <h3 class="qe-h">聞きたいことから探す</h3>
+    <p class="qe-lead">羅占盤は生年月日から、その人の持ち物と時期を読む占い（命術）です。相手の今の気持ちや、個別のことの可否は生年月日からは出ないので、その問いはカードに回します。押すと答えのある場所へ移ります。</p>
+    <div class="qe-grid">${body}</div>
+    <p class="qe-foot">どの問いも、当たる・当たらないを決めるものではありません。考えるための材料として読んでください。</p>
+  </section>`;
+}
+// 問いを押したときの行き先
+function askQuestion(i){
+  const Q = QUESTIONS[i];
+  if (Q.by === "tarot") { goToTarot(Q.q, Q.sp); return; }
+  if (!currentData) {   // 生年月日がまだ：入力欄へ案内する（カードの問いは生年月日なしで占える）
+    const el = document.getElementById("birthdate");
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 400); }
+    const msg = document.getElementById("qe-msg");
+    if (msg) { msg.textContent = `「${Q.q}」は生年月日から読みます。生年月日を入れて「占う」を押してください。`; msg.style.display = "block"; }
+    return;
+  }
+  if (Q.by === "compat") { if (window.RSynth && RSynth.startCompat) RSynth.startCompat(); return; }
+  if (Q.by === "type") {
+    try { RSynth.openType(RSynth.buildSynthesis(currentData).tj.key); return; } catch (e) { /* 開けないときは総合鑑定へ */ }
+  }
+  setTab(10);
+  if (Q.cat) setConsultCategory(Q.cat);
+  if (Q.sel) {
+    const el = document.querySelector("#tab10 " + Q.sel) || document.querySelector(Q.sel);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+// タロットへ。question・spread を渡すと、タロット側で問いとスプレッドが入った状態で始まる。
+// 命盤を立てていれば、9占術のまとめも一緒に渡す（立てていなくてもカードは引ける）
+function goToTarot(question, spread){
+  let url = "tarot/index.html";
+  const qs = [];
+  if (currentData) {
+    try { qs.push("meiban=" + encodeURIComponent(JSON.stringify(buildMeibanSummary()))); } catch (e) { }
+  }
+  if (question) qs.push("q=" + encodeURIComponent(question));
+  if (spread) qs.push("spread=" + encodeURIComponent(spread));
+  window.location.href = url + (qs.length ? "?" + qs.join("&") : "");
+}
+// タロットへ渡す9占術のまとめ
+function buildMeibanSummary(){
+  if (!currentData) return null;
   // 羅占盤サマリーをlocalStorageに保存（タロット側で読み込む）
   const d = currentData;
   const sunSign = SIGNS[signOf(d.sunLon)];
@@ -11407,10 +11522,9 @@ function goToTarot(){
     sex: d.sex,
     text: textLines.join("\n")
   };
-  localStorage.setItem("meiban_summary", JSON.stringify(summary));
-  // file:///ではlocalStorageがオリジン別になるため、URLパラメータでも渡す
-  const encoded = encodeURIComponent(JSON.stringify(summary));
-  window.location.href = "tarot/index.html?meiban=" + encoded;
+  // file:///ではlocalStorageがオリジン別になるため、goToTarot はURLパラメータでも渡す
+  try { localStorage.setItem("meiban_summary", JSON.stringify(summary)); } catch (e) { }
+  return summary;
 }
 
 function exportForAI(){
