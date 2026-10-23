@@ -104,7 +104,10 @@ window.EPH_READY = new Promise(function (resolve, reject) {
   .tabs button:hover{ color:var(--text); background:rgba(201,147,58,0.06); }
   .tabs button.active{ color:var(--gold); border-bottom-color:var(--gold); background:rgba(201,147,58,0.10); font-weight:700; }
 
-  .panel{ padding:28px 36px; max-width:none; margin:0; }
+  /* 読み物の列は960px（＝総合鑑定の .rs-* と同じ幅）に揃える。2026-10-24 井内さん「こういうレイアウトカッコ悪いね」
+     それまではカードと見出しだけがパネル幅いっぱいに広がり、.rs-* の960pxの列と段差ができていた
+     （1920pxで本文1488px＝91文字/行、2560pxで2128px＝131文字/行。井内さんの基準は65〜90文字） */
+  .panel{ padding:28px 36px; max-width:1032px; margin:0 auto; }
   .panel.hide{ display:none; }
 
   .section-title{
@@ -634,7 +637,7 @@ a.rs-go:hover{color:#6a4e10}
 .rs-topic-note{display:block;font-size:14px;color:var(--muted)}
 /* 総合鑑定：知りたいことから見る */
 /* 聞きたいことから探す（問いの入口） */
-.qe{max-width:1040px;margin:0 auto 28px;text-align:left}
+.qe{max-width:960px;margin:0 auto 28px;text-align:left}
 .qe-h{font-size:24px;color:var(--gold);margin:0 0 8px}
 .qe-lead{font-size:15px;color:var(--muted);line-height:1.8;margin:0 0 16px}
 .qe-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -847,7 +850,7 @@ a.rs-go:hover{color:#6a4e10}
       <div style="text-align:center; margin-bottom:8px; position:relative; z-index:2;">
         <img src="icons/TopImage.webp" alt="羅占盤" fetchpriority="high" style="width:640px; max-width:90%; height:auto; object-fit:contain;">
       </div>
-      <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%;">
+      <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; max-width:1032px; margin:0 auto;">
       <div style="font-size:17px; color:var(--text); margin-bottom:8px; line-height:1.9; font-weight:700;">リーダーなのに孤独。楽観的なのに慎重。社交的なのに一人が好き。<br>ひとつの占術では説明できない「矛盾」こそが、あなたの本質です。</div>
       <div style="font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.8;">9つの占術が交差する点に、あなたがいる。<br>性格診断では見えない「なぜそう動くのか」「なぜそこで迷うのか」を、星の配置から読み解きます。</div>
       <button type="button" onclick="RSynth.openType('革新_広い_リーダー_楽天')" style="margin-bottom:28px; padding:12px 28px; background:var(--surface); border:1px solid var(--gold); color:var(--gold); border-radius:6px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;">16タイプ図鑑を見る</button>
