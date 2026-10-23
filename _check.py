@@ -762,6 +762,123 @@ def check_iching(fails):
     r69 = (sums.get("6", 0) + sums.get("9", 0)) / n
     chk(f"コイン3枚の出方（老陰・老陽が約1/4 → {r69 * 100:.1f}%）", 0.2 < r69 < 0.3, f"{r69 * 100:.1f}%")
 
+# ─────────── 表の独立照合（2026-10-23）。アプリの式・既存の参照の写しを使わず、外部に公開されている規則と表から組み立てる ───────────
+# 十二大従星：十二運の規則（長生の支＋陽干順行・陰干逆行）と、十二運→星名・点数の1対1対応から120通りを導く。
+#   出典＝sanmeiscope.com「十二大従星とは？12星の意味一覧とエネルギー点数を図解で解説」（長生の支の表・十二運との対応・点数・公開例）
+JU_START = {"甲": "亥", "乙": "午", "丙": "寅", "丁": "酉", "戊": "寅", "己": "酉", "庚": "巳", "辛": "子", "壬": "申", "癸": "卯"}
+JU_ORDER = ["長生", "沐浴", "冠帯", "建禄", "帝旺", "衰", "病", "死", "墓", "絶", "胎", "養"]
+JU_STAR = {"胎": ("天報星", 3), "養": ("天印星", 6), "長生": ("天貴星", 9), "沐浴": ("天恍星", 7),
+           "冠帯": ("天南星", 10), "建禄": ("天禄星", 11), "帝旺": ("天将星", 12), "衰": ("天堂星", 8),
+           "病": ("天胡星", 4), "死": ("天極星", 2), "墓": ("天庫星", 5), "絶": ("天馳星", 1)}
+
+def juusei_rule(day_stem, branch):
+    """日干と支から、十二運の規則で十二大従星と点数を出す（表を写さない）"""
+    si = STEMS.index(day_stem)
+    step = 1 if si % 2 == 0 else -1                      # 陽干は順行・陰干は逆行
+    k = ((BRANCHES.index(branch) - BRANCHES.index(JU_START[day_stem])) * step) % 12
+    return JU_STAR[JU_ORDER[k]]
+
+# 紫微斗数の副星：古典の規則と、外部に公開されている年支系の表から導く。
+#   天魁天鉞＝貴人歌「甲戊庚牛羊、乙己鼠猴郷、丙丁猪鶏位、壬癸蛇兎藏、六辛逢馬虎」（最も古い口訣。庚を寅午とする流派もある）
+#   禄存＝十干の建禄（臨官）の支／天馬＝三合の駅馬／紅鸞・天喜＝紫微改運研究室「命盤作成＜副星２＞」の年支系諸星の表
+#   左輔＝辰から旧暦月で順行・右弼＝戌から逆行／文曲＝辰から生時で順行・文昌＝戌から逆行
+KUI_SONG = {"甲": "丑未", "戊": "丑未", "庚": "丑未", "乙": "子申", "己": "子申",
+            "丙": "亥酉", "丁": "亥酉", "壬": "卯巳", "癸": "卯巳", "辛": "午寅"}
+LU_JIANLU = {"甲": "寅", "乙": "卯", "丙": "巳", "丁": "午", "戊": "巳", "己": "午",
+             "庚": "申", "辛": "酉", "壬": "亥", "癸": "子"}
+MA_SANHE = {"申": "寅", "子": "寅", "辰": "寅", "巳": "亥", "酉": "亥", "丑": "亥",
+            "寅": "申", "午": "申", "戌": "申", "亥": "巳", "卯": "巳", "未": "巳"}
+HONGLUAN_TBL = "卯寅丑子亥戌酉申未午巳辰"      # 年支 子丑寅卯辰巳午未申酉戌亥 の順
+TIANXI_TBL = "酉申未午巳辰卯寅丑子亥戌"
+# 四化：生年干ごとに化禄・化権・化科・化忌が付く星。出典＝note「紫微斗数の四化①：四化表」（一般的に使われる表。流派で一部違う）
+SIHUA_TBL = {"甲": "廉貞 破軍 武曲 太陽", "乙": "天機 天梁 紫微 太陰", "丙": "天同 天機 文昌 廉貞",
+             "丁": "太陰 天同 天機 巨門", "戊": "貪狼 太陰 右弼 天機", "己": "武曲 貪狼 天梁 文曲",
+             "庚": "太陽 武曲 太陰 天同", "辛": "巨門 太陽 文曲 文昌", "壬": "天梁 紫微 左輔 武曲",
+             "癸": "破軍 巨門 太陰 貪狼"}
+
+def fuxing_rule(year_stem, year_branch, lunar_month, hour_branch_idx):
+    """副星10星の宮（地支の名前）を、規則と外部の表から出す"""
+    b = lambda i: BRANCHES[i % 12]
+    kui = KUI_SONG[year_stem]
+    yb = BRANCHES.index(year_branch)
+    return {"左輔": b(4 + lunar_month - 1), "右弼": b(10 - (lunar_month - 1)),
+            "文曲": b(4 + hour_branch_idx), "文昌": b(10 - hour_branch_idx),
+            "天魁": kui[0], "天鉞": kui[1],
+            "禄存": LU_JIANLU[year_stem], "天馬": MA_SANHE[year_branch],
+            "紅鸞": HONGLUAN_TBL[yb], "天喜": TIANXI_TBL[yb]}
+
+TABLE_JS = r"""() => {
+  const out = { ju: {}, e: {}, fx: {}, sel: {} };
+  // 十二大従星：日干×支の120通りと点数
+  STEMS.forEach((s, si) => BRANCHES.forEach((b, bi) => {
+    const x = JUUNI_STARS[JUUNI_TABLE[si][bi]];
+    out.ju[s + b] = x.n; out.e[s + b] = x.e;
+  }));
+  // 副星6星：年干10 × 旧暦月1〜12 × 時支0〜11（左輔右弼は月、文昌文曲は時、天魁天鉞は年干で決まる）
+  STEMS.forEach(s => { for (let m = 1; m <= 12; m++) for (let h = 0; h < 12; h++) {
+    const f = calcFuxing(s, m, h);
+    out.fx[s + "_" + m + "_" + h] = ["左輔", "右弼", "文曲", "文昌", "天魁", "天鉞"].map(k => BRANCHES[f[k]]).join("");
+  } });
+  // 厳選副星4星：年干10 × 年支12
+  STEMS.forEach(s => BRANCHES.forEach(b => {
+    const f = calcSelectFuxing(s, b);
+    out.sel[s + b] = ["禄存", "天馬", "紅鸞", "天喜"].map(k => BRANCHES[f[k]]).join("");
+  }));
+  // 四化：生年干10
+  out.sihua = {};
+  STEMS.forEach(s => { out.sihua[s] = SIHUA_TABLE[s].join(" "); });
+  return out;
+}"""
+
+def check_tables(fails):
+    """外部に公開されている規則・表と、アプリの出す値を突き合わせる（アプリの式も、これまでの参照の写しも使わない）"""
+    def chk(k, ok, msg=""):
+        print(f"  {'✓' if ok else '✗'} {k} {msg if not ok else ''}")
+        if not ok:
+            fails.setdefault(k, []).append(msg)
+    print("\n■ 表の独立照合（外部に公開されている規則・表 vs アプリ）")
+    app = run_js([TABLE_JS], [None])[0]
+    # ① 十二大従星120通り：十二運の規則から導いたもの vs これまで写していた表 vs アプリ
+    bad = [(s, b) for s in STEMS for b in BRANCHES if juusei_rule(s, b)[0] != juusei(s, b)]
+    chk("十二大従星120通り（十二運の規則 vs これまで写していた表）", not bad, f"違い {bad[:6]}")
+    bad = [(s, b, app["ju"][s + b], juusei_rule(s, b)[0]) for s in STEMS for b in BRANCHES if app["ju"][s + b] != juusei_rule(s, b)[0]]
+    chk("十二大従星120通り（十二運の規則 vs アプリ）", not bad, f"違い {bad[:6]}")
+    bad = [(s, b, app["e"][s + b], juusei_rule(s, b)[1]) for s in STEMS for b in BRANCHES if app["e"][s + b] != juusei_rule(s, b)[1]]
+    chk("十二大従星の点数120通り（天報3・天印6・天貴9・天恍7・天南10・天禄11・天将12・天堂8・天胡4・天極2・天庫5・天馳1）", not bad, f"違い {bad[:6]}")
+    ex = [juusei_rule("庚", x) for x in ("寅", "酉", "午")]
+    chk("公開例 1986-09-23（丙寅・丁酉・庚午）＝天馳1・天将12・天恍7", ex == [("天馳星", 1), ("天将星", 12), ("天恍星", 7)], f"{ex}")
+    # ② 紫微の副星：規則と外部の表から導いたもの vs アプリ（1440通り＋120通り）
+    bad = []
+    for s in STEMS:
+        for m in range(1, 13):
+            for h in range(12):
+                r = fuxing_rule(s, "子", m, h)
+                want = "".join(r[k] for k in ("左輔", "右弼", "文曲", "文昌", "天魁", "天鉞"))
+                if app["fx"][f"{s}_{m}_{h}"] != want:
+                    bad.append((s, m, h, app["fx"][f"{s}_{m}_{h}"], want))
+    chk("副星6星 1440通り（左輔＝辰から旧暦月で順行・右弼＝戌から逆行・文曲＝辰から生時で順行・文昌＝戌から逆行・天魁天鉞＝貴人歌）",
+        not bad, f"違い {len(bad)}件 {bad[:4]}")
+    bad = []
+    for s in STEMS:
+        for b in BRANCHES:
+            r = fuxing_rule(s, b, 1, 0)
+            want = "".join(r[k] for k in ("禄存", "天馬", "紅鸞", "天喜"))
+            if app["sel"][s + b] != want:
+                bad.append((s, b, app["sel"][s + b], want))
+    chk("厳選副星4星 120通り（禄存＝建禄の支・天馬＝三合の駅馬・紅鸞と天喜＝年支系諸星の表）", not bad, f"違い {len(bad)}件 {bad[:4]}")
+    # ③ 外部に書かれている性質で裏を取る
+    same = [m for m in range(1, 13) if app["fx"][f"甲_{m}_0"][0] == app["fx"][f"甲_{m}_0"][1]]
+    chk("左輔と右弼が同じ宮になるのは旧暦4月と10月だけ（外部の記述と合うか）", same == [4, 10], f"{same}")
+    same = [h for h in range(12) if app["fx"][f"甲_1_{h}"][2] == app["fx"][f"甲_1_{h}"][3]]
+    chk("文曲と文昌が同じ宮になるのは卯の刻と酉の刻だけ（辰と戌から逆向きに同じ歩数）", same == [3, 9], f"{[BRANCHES[h] for h in same]}")
+    opp = all((BRANCHES.index(app["sel"][s + b][2]) + 6) % 12 == BRANCHES.index(app["sel"][s + b][3]) for s in STEMS for b in BRANCHES)
+    chk("紅鸞と天喜は必ず向かい合う宮にある（外部の記述「必ず対拱する」）", opp)
+    chk("天魁と天鉞は同じ宮にならない（外部の記述「同宮することがない」）",
+        all(app["fx"][f"{s}_1_0"][4] != app["fx"][f"{s}_1_0"][5] for s in STEMS))
+    # ④ 四化の表（生年干→化禄・化権・化科・化忌）
+    bad = [(s, app["sihua"][s], SIHUA_TBL[s]) for s in STEMS if app["sihua"][s] != SIHUA_TBL[s]]
+    chk("四化の表10干（外部に公開されている四化表 vs アプリ）", not bad, f"違い {bad}")
+
 def check_ui(fails):
     """画面の操作で確かめる（入力欄・相手の時刻欄・出生地未選択・性別「言わない」・範囲外の日付・端末の日付を固定した「今年」）"""
     def chk(k, ok, msg=""):
@@ -827,6 +944,106 @@ def check_ui(fails):
         chk("出生地未選択の表示（上昇点は仮）", "上昇点は仮" in r["meta"] and "日本の中央" in r["west"], f"{r['meta']}")
         chk("性別「言わない」の表示（大運・大限の向きは仮）", "向き（順行・逆行）が決まりません" in r["shichu"] and "向き（順行・逆行）が決まりません" in r["ziwei"])
         chk("端末の日付が2027-01-20のとき九星の今年は2026年（一白水星は中宮）", r["ky"] == "中宮", f"{r['ky']}")
+        # AIへの相談文の量（2026-10-23）。既定＝要点だけ／「画面の文を全部」で9タブと総合鑑定の画面の文を丸ごと渡す
+        r = pg.evaluate("""() => {
+          setTab(10);
+          const box = () => document.getElementById('rs-consult-10');
+          const amt = () => Array.from(box().querySelectorAll('.rs-amts .rs-chip')).map(b => b.textContent + ':' + b.getAttribute('aria-pressed'));
+          const o = { amt0: amt(), full0: RSynth.isDigestFull() };
+          const t0 = RSynth.consultPrompt(10).text;
+          RSynth.setAmount(10, 1);
+          const t1 = RSynth.consultPrompt(10).text;
+          o.amt1 = amt(); o.full1 = RSynth.isDigestFull();
+          const SYSN = ['西洋占星術','四柱推命','紫微斗数','算命学','数秘術','九星気学','マヤ暦','宿曜','インド占星術'];
+          o.len = [t0.length, t1.length];
+          o.cut = t0.indexOf('【12】各占術の読み（羅占盤の画面の文から抜粋') >= 0 && t0.indexOf('【13】') < 0;
+          o.all = t1.indexOf('【13】総合鑑定の画面') >= 0 && t1.indexOf('【12】【13】') >= 0 && SYSN.every(s => t1.indexOf('■ ' + s) >= 0);
+          o.ui = ['結果をシェア','16タイプを全部見る','ストーリー用の縦長画像','AIへの相談文をコピー','テキストファイルで保存','でAIに相談'].filter(w => t1.indexOf(w) >= 0);
+          o.bad = (t1.match(/undefined|NaN|\\[object/g) || []).length;
+          // 図・表そのもの（座標や記号の羅列）が混ざらないか。2026-10-23 ツォルキン表の260マス・タイムラインの格子・SVGの文字が入っていた
+          o.fig = [['ツォルキン表の数字', '222\\t183\\t144'], ['タイムラインの格子', '始\\n待\\n表\\n基'],
+                   ['ホロスコープのSVG', '牡羊牡牛双子蟹獅子乙女天秤蠍射手山羊水瓶魚'], ['レーダーのSVG', '行動力4票'],
+                   ['ラーシチャートの格子', '南インド式']].filter(([, w]) => t1.indexOf(w) >= 0).map(([k]) => k);
+          // 目印は、誰の命盤でも必ず出る見出しやラベルにする（配置によって出ない文を使うと、人によって ✗ になる）
+          o.keep = [['惑星の配置', '📖 魂の目的'], ['レーダーの内訳', '複数占術が一致する強み'], ['三九の秘法', '栄親'],
+                    ['方位の吉凶', '最大吉方'], ['十二宮', '僕役宮'], ['蔵干と通根', '通根']].filter(([, w]) => t1.indexOf(w) < 0).map(([k]) => k);
+          // 月のナクシャトラの説明が1系統か（インドタブの表＝NAKSHATRAS と、「9占術が語る」の表で同じものを使う）
+          o.nak = (() => {
+            const i = Math.floor(norm360(currentData.moonLon - ayanamsha(currentData.jd)) / (360 / 27)), n = NAKSHATRAS[i];
+            const row = Array.from(document.querySelectorAll('#tab10 tr')).find(tr => /^\\s*インド占星術/.test(tr.textContent));
+            if (!row) return ['行が無い'];
+            return [n.n, row.textContent.indexOf(n.n) >= 0, row.textContent.indexOf(n.desc.split('。')[0]) >= 0];
+          })();
+          RSynth.setAmount(10, 0);
+          o.back = [RSynth.consultPrompt(10).text.length, RSynth.isDigestFull()];
+          return o; }""")
+        chk("総合鑑定の相談箱に「AIに渡す量」が出る（既定＝要点だけ）",
+            r["amt0"] == ["要点だけ:true", "画面の文を全部:false"] and r["full0"] is False, f"{r['amt0']}")
+        chk(f"「画面の文を全部」で9タブと総合鑑定の文が丸ごと入る（{r['len'][0]:,}字 → {r['len'][1]:,}字）",
+            r["cut"] and r["all"] and r["full1"] and r["amt1"] == ["要点だけ:false", "画面の文を全部:true"] and r["len"][1] > r["len"][0] * 2.5, f"{r}")
+        chk("相談文に操作のための文字が入らない（シェア・16タイプ・画像保存・ボタン名）", r["ui"] == [] and r["bad"] == 0, f"{r['ui']}/{r['bad']}")
+        chk("相談文に図・表そのものが入らない（ツォルキン表の数字・タイムラインの格子・SVGの文字・ラーシチャート）", r["fig"] == [], f"{r['fig']}")
+        chk("図を外しても文の中身は残る（惑星の配置・レーダーの内訳・三九の秘法・方位・十二宮・蔵干）", r["keep"] == [], f"入らなかった: {r['keep']}")
+        chk(f"月のナクシャトラの説明が1系統（{r['nak'][0]}・インドタブと「9占術が語る」の表で同じ）", r["nak"][1:] == [True, True], f"{r['nak']}")
+        chk("「要点だけ」に戻すと元の長さに戻る", r["back"] == [r["len"][0], False], f"{r['back']}")
+        with pg.expect_download() as dl:
+            pg.evaluate("() => RSynth.saveConsult(10)")
+        chk("テキストファイルで保存できる", dl.value.suggested_filename == "羅占盤_相談文_19900515.txt", dl.value.suggested_filename)
+        # 票の数え方と材料の重なり（2026-10-23 外部レビュー）。ルールの票（タイプ名を決める）と占術の種類（総合の一致）を両方出す
+        r = pg.evaluate("""() => {
+          const t = buildExportText();
+          const notes = Array.from(document.querySelectorAll('#tab10 .rs-count-note')).map(x => x.textContent);
+          return {
+            票: (t.match(/判定ルールの票 \\d+ 対 \\d+＝\\d+%/g) || []).length,
+            占術数: (t.match(/→ 占術の種類で数えると \\d+ 対 \\d+/g) || []).length,
+            食い違い: /ルールの票では.+側だが、占術の数では割れている/.test(t),
+            固定文: t.indexOf('このタイプに共通の固定文です') >= 0 && t.indexOf('この3つはタイプ共通の固定文') >= 0,
+            材料: t.indexOf('独立した9つの証拠ではありません') >= 0 && t.indexOf('独立した証拠の数として扱わない') >= 0,
+            能力でない: t.indexOf('判定ルールが何個当てはまったか') >= 0,
+            注記: notes.filter(x => x.indexOf('判定ルールの数では') >= 0).length,
+            重なり: notes.filter(x => /材料が\\d通り/.test(x)).length,
+          }; }""")
+        chk("16タイプの軸に、ルールの票と占術の種類の両方を出す（4軸とも）", r["票"] == 4 and r["占術数"] == 4, f"{r}")
+        chk("2つの数え方で結論が違う軸は、食い違いを説明する", r["食い違い"], f"{r}")
+        chk("総合鑑定の4軸にも数え方の注記が出て、材料の重なりを書く", r["注記"] == 4 and r["重なり"] >= 3, f"注記{r['注記']}/重なり{r['重なり']}")
+        chk("9占術が材料を共有していることを、相談文とAIへの指示に書く", r["材料"], f"{r}")
+        chk("タイプの物語・苦悩・処方箋がタイプ共通の固定文だと書く", r["固定文"], f"{r}")
+        chk("票は「ルールが何個当てはまったか」で、能力の量ではないと書く", r["能力でない"], f"{r}")
+        # 人格の4段（動機→思考→行動→葛藤）。4つの軸を動き方の順に言い直したもの（2026-10-23）
+        r = pg.evaluate("""() => {
+          const s = RSynth.buildSynthesis(currentData), A = RSynth.archLines(s), k = s.tj.key.split('_');
+          const dl = document.querySelector('#tab10 .rs-arch dl'), t = buildExportText();
+          return { 軸: k, 文: A.lines,
+            空: A.lines.filter(x => !x || /undefined/.test(x)).length,
+            画面: dl ? dl.children.length : 0,
+            見出し: dl ? Array.from(dl.querySelectorAll('dt')).map(x => x.textContent.replace(/（.*/, '').trim().slice(0, 2)) : [],
+            AI: /◆ 人格の4段/.test(t) && A.lines.every(x => t.indexOf(x) >= 0),
+            対応: (k[0] === '革新' ? /違和感/ : /受け継いだ/).test(A.lines[0])
+               && (k[2] === 'リーダー' ? /自分で新しい方法|人の前に立ち/ : /表に立たず|支える側から/).test(A.lines[2])
+               && (k[3] === '慎重' ? /長く考える|止まりやすい/ : /手が離れる|勢いで崩して/).test(A.lines[3]),
+            割れた注記: s.axes.some(a => a.level === 'split') === /意見が割れている/.test(A.note) }; }""")
+        chk(f"人格の4段が画面とAI用の文に出る（{'・'.join(r['見出し'])}）",
+            r["空"] == 0 and r["画面"] == 8 and r["AI"] and r["見出し"] == ["動機", "思考", "行動", "葛藤"], f"{r}")
+        chk(f"4段の文が4つの軸と対応している（{'_'.join(r['軸'])}）", r["対応"] and r["割れた注記"], f"{r['文']}")
+        # 前にこの端末で出たタイプと違うとき、変わった軸と理由を出す
+        r = pg.evaluate("""() => {
+          localStorage.setItem('sanmeiban_last_type', JSON.stringify(
+            { k: '継承_狭い_参謀_楽天', n: 'アルチザン', v: '2026-09-28', p: '1230_F_東京都', d: '1990-5-15' }));
+          renderAll();
+          const e = document.querySelector('#tab10 .rs-changed');
+          const once = (renderAll(), document.querySelector('#tab10 .rs-changed'));
+          return { 文: e ? e.textContent : '', 二度目: !!once }; }""")
+        # 仕込んだ前回＝アルチザン（継承_狭い_参謀_楽天）→ 今回はガーディアン（継承_狭い_リーダー_慎重）なので、役割と気質が動く
+        chk("前にこの端末で出たタイプと違うとき、変わった軸と理由を出す（2度目は出さない）",
+            "アルチザン" in r["文"] and "判定ルールを見直したためです" in r["文"]
+            and "役割（参謀 → リーダー）" in r["文"] and "気質（楽天 → 慎重）" in r["文"] and not r["二度目"], f"{r}")
+        r = pg.evaluate("""() => { currentMode = 'compat';
+          dataB = calcPersonData('1995-08-07', '23:30', 'known', 'F', '東京都'); dataB.relType = 'love';
+          renderAll(); setTab(10);
+          const box = document.getElementById('rs-consult-10');
+          return { amt: box.querySelectorAll('.rs-amts .rs-chip').length, len: RSynth.consultPrompt(10).text.length }; }""")
+        chk(f"相性モードでは量を選ばせない（画面の文が少なく、丸ごとでも差がほとんど無い・{r['len']:,}字）",
+            r["amt"] == 0 and r["len"] > 5000, f"{r}")
         b.close()
 
 def check_ephem(fails):
@@ -912,6 +1129,7 @@ def main():
     check_audit(fails)
     check_day_boundary(fails)
     check_iching(fails)
+    check_tables(fails)
     check_ui(fails)
     rules_and_types(fails)
     print("\n━━ まとめ ━━")
@@ -963,6 +1181,7 @@ if __name__ == "__main__":
         check_audit(f)
         check_day_boundary(f)
         check_iching(f)
+        check_tables(f)
         check_ui(f)
         print("\n━━ まとめ ━━\n" + ("全項目一致" if not f else "\n".join(f"✗ {k}" for k in f)))
         sys.exit(1 if f else 0)

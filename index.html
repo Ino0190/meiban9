@@ -577,6 +577,15 @@ body.tv-open{overflow:hidden}
 .rs-why{margin:0 0 8px;padding-left:20px;font-size:15px;line-height:1.8;color:var(--text)}
 .rs-turn{font-size:16px;margin:8px 0 0;padding-top:10px;border-top:1px solid var(--border);color:var(--text)}
 .rs-small{display:block;font-size:14px;color:var(--muted);line-height:1.6;margin-top:6px}
+.rs-changed{padding:10px 14px;background:#fdf6e8;border-left:3px solid var(--gold);color:var(--text)}
+.rs-arch{margin:16px 0 0;padding:16px 18px;border:1px solid var(--border);background:var(--surface)}
+.rs-arch-h{font-size:14px;color:var(--muted);margin-bottom:12px}
+.rs-arch dl{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;margin:0}
+.rs-arch dt{font-size:17px;font-weight:700;color:var(--gold);white-space:nowrap}
+.rs-arch dt span{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:2px}
+.rs-arch dd{margin:0;font-size:16px;line-height:1.8;color:var(--text)}
+@media (max-width:768px){.rs-arch{text-align:left}.rs-arch dl{grid-template-columns:1fr;gap:2px}.rs-arch dt{margin-top:10px}.rs-arch dt span{display:inline;margin-left:8px}}
+.rs-count-note{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .rs-foot{text-align:center;padding:8px 0}
 .rs-conf{font-size:15px;color:var(--muted)}
 .rs-share{display:block;margin:14px auto 0;padding:13px 36px;background:var(--gold);color:#fff;border:none;border-radius:6px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px}
@@ -2246,14 +2255,34 @@ ${(() => {
   };
   // 勝った側は判定本体（TypeJudge）と同じものを使う。旧版はここで「票が同じなら前の側」と決め直していて、
   // 同点・0票対0票のとき画面のタイプと食い違っていた（2026-10-20 監査）
+  // 2026-10-23 外部レビュー「16タイプでは役割が7対4なのに、総合鑑定では3占術対3占術。利用者には矛盾に見える」。
+  //   タイプ名は判定ルールの票（重み付き）で決め、総合鑑定の一致は占術の種類で数えている。2つの数え方を並べて書く
+  const synth = (() => { try { return RSynth.buildSynthesis(d); } catch (e) { return null; } })();
+  const axSys = synth ? synth.axes : null;
+  // 人格の4段（動機→思考→行動→葛藤）。4つの軸を動き方の順に言い直したもの（2026-10-23 外部レビュー）
+  const archText = (() => {
+    if (!synth) return "";
+    try {
+      const A = RSynth.archLines(synth);
+      return "\n◆ 人格の4段（動機→思考→行動→葛藤。4つの軸を、動き方の順に言い直したもの）:\n" +
+        RSynth.ARCH_Q.map(([q, sub], i) => `  ${q}（${sub}）: ${A.lines[i]}`).join("\n") + `\n  ※ ${A.note}\n`;
+    } catch (e) { return ""; }
+  })();
+  const sysCount = (i, winner, loser) => {
+    const x = axSys && axSys[i];
+    if (!x) return "";
+    const nW = x.winSys.length, nL = x.loseSys.length;
+    return `\n    → 占術の種類で数えると ${nW} 対 ${nL}（${AXIS_DISPLAY[winner]||winner}：${x.winSys.join("・")||"なし"}／${AXIS_DISPLAY[loser]||loser}：${x.loseSys.join("・")||"なし"}）。` +
+      (nW <= nL ? `ルールの票では${AXIS_DISPLAY[winner]||winner}側だが、占術の数では割れている。タイプ名はルールの票で決めているので、総合鑑定ではこの軸を「意見が割れた」と出している。この軸を性格の決め手にしない。` : "");
+  };
   const axisResults = [tj.a1, tj.a2, tj.a3, tj.a4].map((a, i) => {
     const winner = a.winner, loser = winner === a.pn ? a.mn : a.pn;
     const wv = winner === a.pn ? a.plus : a.minus, lv = winner === a.pn ? a.minus : a.plus;
     const total = a.plus + a.minus;
     if (total === 0) return `  ${AXIS_NAMES[i]}: 判定材料なし（0票 対 0票）\n    → どちらの側のルールにも当てはまらなかった。タイプ名を出すために、年柱などの陰陽で仮に${AXIS_DISPLAY[winner]||winner}側としている。この軸は性格の根拠にしない。`;
-    if (wv === lv) return `  ${AXIS_NAMES[i]}: 同点（${a.plus}票 対 ${a.minus}票）\n    → 同点なので、年柱などの陰陽で${AXIS_DISPLAY[winner]||winner}側としている。両方の面を持つと読む。`;
+    if (wv === lv) return `  ${AXIS_NAMES[i]}: 同点（${a.plus}票 対 ${a.minus}票）\n    → 同点なので、年柱などの陰陽で${AXIS_DISPLAY[winner]||winner}側としている。両方の面を持つと読む。${sysCount(i, winner, loser)}`;
     const pct = Math.round(wv / total * 100);
-    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（支持割合${pct}%：${wv}票 対 ${lv}票。判定ルールの票の割合で、当たる確率ではない）\n    → ${AXIS_DISPLAY[winner]||winner}側に判定。${AXIS_DISPLAY[loser]||loser}側の要素も${lv}票あり、完全な一方向ではない。`;
+    return `  ${AXIS_NAMES[i]}: ${AXIS_DISPLAY[winner]||winner}（判定ルールの票 ${wv} 対 ${lv}＝${pct}%。ルールが何個当てはまったかで、当たる確率ではない）\n    → ${AXIS_DISPLAY[winner]||winner}側に判定。${AXIS_DISPLAY[loser]||loser}側のルールも${lv}個当てはまっており、完全な一方向ではない。${sysCount(i, winner, loser)}`;
   }).join("\n");
 
   const myParts = tj.key.split("_");
@@ -2279,7 +2308,10 @@ ${tj.warnings.length > 0 ? "◆ 警告: " + tj.warnings.join(" / ") : ""}
 ◆ 4軸の判定理由:
 ${axisResults}
 
+${archText}
 ◆ 生き方の傾向: ${tj.m1.label} / ${tj.m2.label}
+
+◆ タイプの物語・苦悩・処方箋（※ 下の3つは、このタイプに共通の固定文です。この人の9占術のデータから出したものではありません）
 
 ◆ タイプの物語:
   ${typeInfo.story || ""}
@@ -2295,7 +2327,11 @@ ${neighborText}
 
 ◆ 16タイプの意味:
   このタイプ判定は9占術のデータから4軸（価値観/視野/役割/気質）×2極に投票し、
-  各軸の多数決で決定しています。「能力の量」ではなく「指向の方向」を示します。`;
+  各軸の多数決で決定しています。「能力の量」ではなく「指向の方向」を示します。
+  票は「判定ルールが何個当てはまったか」です。
+  9つの占術は材料を共有しているので、独立した9つの証拠ではありません。
+  四柱推命・算命学・九星気学は干支、西洋占星術とインド占星術は同じ天体の位置、紫微斗数と宿曜は旧暦の日を使います。
+  同じ材料を別の方式で読んだ一致は、別の材料どうしの一致より弱い根拠として扱ってください。`;
 })()}
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -2492,7 +2528,8 @@ ${(() => { try { return window.RSynth && RSynth.exportDigest ? "\n" + RSynth.exp
 - 星・干支・宿・数などの計算値は基本はそのまま使う。ただし計算値どうしが食い違う、暦や占術の決まりと合わないと気づいたら、使う前にその点を指摘する。${(() => { try { return window.RSynth && RSynth.isDigestFull && RSynth.isDigestFull() ? "【12】【13】" : "【12】"; } catch (e) { return "【12】"; } })()}など羅占盤の解説文は確かめてよい参考情報として扱い、計算値と食い違う点や、その占術の一般的な読み方と違う点があれば、指摘して根拠を示す。${(() => { try { return window.RSynth && RSynth.isDigestFull && RSynth.isDigestFull() ? "\n- 渡したデータは長いですが、9つの占いすべてに目を通してから書く。前半に出てくる占術だけで書かない。どの占術を根拠にしたかが分かるように書く。" : ""; } catch (e) { return ""; } })()}
 - 上のデータに無い配置や条件を、確かめた事実のように付け足さない。実際に起きた出来事は入力されていないので、過去や未来の出来事を起きたこととして書かない（「〜が出やすい時期」と書く）。
 - 健康・お金・仕事の結果（病気、収入、昇進、結婚など）を予言しない。占術が示すのは傾向と時期の読みで、出来事の発生までは計算していない。
-- 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。
+- 16タイプ判定の結果（タイプの物語・苦悩・処方箋）を土台に、9占術の個人データで個人化する。ただしこの3つはタイプ共通の固定文で、この人のデータから出したものではない。「敵味方を分ける」「孤立する」のような強い描写を、この人に当てはまることとして書かない。9占術のデータで裏づけが取れる範囲に収め、取れないものは書かない。
+- 9つの占術は材料を共有している（四柱推命・算命学・九星気学は干支、西洋占星術とインド占星術は同じ天体の位置、紫微斗数と宿曜は旧暦の日）。「何個の占術がそろった」を、独立した証拠の数として扱わない。同じ材料を別の方式で読んだ一致は、別の材料どうしの一致より弱い根拠として書く。
 - 抽象的・神秘的な表現で終わらせず、必ず「現実の行動」「仕事」「人間関係」「人生選択」に落とし込む。読み手が「結局、自分はどう生きればいいのか」がわかること。
 - 健康に関する記述は生活習慣の目安であり、医学的助言ではないことを前提とした書き方にする。
 - 分量: 各セクション400〜700字、セクション8のみ300〜500字。全体で4000〜5500字に収める。
@@ -4896,7 +4933,7 @@ function renderZiwei(){
     ${dayunDirKnown(d) ? "" : `<p style="font-size:15px; color:#a07020; line-height:1.7; margin:0 0 10px;">※ ${dayunDirNote(d, "大限")}</p>`}
     ${dayunHtml}
 
-    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。日の変わり目は流派で23時（子の刻から翌日の旧暦の日）と0時に分かれ、羅占盤は23時で出しています（四柱推命と同じ設定）。${d.lateZi ? `あなたは23時台の生まれなので、上のカードで0時の流派にも切り替えられます（今は${d.dayBoundary === "24" ? "0時" : "23時"}の流派・旧暦${lunarLabel(d.lunar)}）。` : ""}命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 紫微斗数は旧暦（月の満ち欠けの暦）の年・月・日と生まれた時刻で安星しています。日の変わり目は流派で23時（子の刻から翌日の旧暦の日）と0時に分かれ、羅占盤は23時で出しています（四柱推命と同じ設定）。${d.lateZi ? `あなたは23時台の生まれなので、上のカードで0時の流派にも切り替えられます（今は${d.dayBoundary === "24" ? "0時" : "23時"}の流派・旧暦${lunarLabel(d.lunar)}）。` : ""}命宮は旧暦の月と時支、五行局は命宮の干支の納音、14主星は五行局と旧暦の日から、副星6星（左輔・右弼・文昌・文曲・天魁・天鉞）は旧暦の月・時支・生年干から、厳選副星4星（禄存・天馬・紅鸞・天喜）は生年の干支から出しています。天魁・天鉞は最も古い貴人歌（甲戊庚は丑未、乙己は子申、丙丁は亥酉、壬癸は卯巳、辛は午寅）で出しています。庚年を寅午とする流派（中州派など）もあり、庚年生まれの方はこの2星の宮が変わります。閏月は同じ番号の月として扱っています（流派で扱いが分かれます）。その他の副星は未実装です。流年四化は旧正月で年を切り替えています。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
@@ -5601,7 +5638,7 @@ function renderSanmei(){
       return ``;
     })() : ""}
 
-    <div class="note">※ 蔵干は実装済みです（各柱の地支に含まれる隠れた干を表示＋四柱推命の五行バランスに反映）。十二支同士の関係（位相法）と日主の強弱・守護神（守護神法）は、四柱推命タブで出しています。厳密な占断は専門家にご依頼ください。</div>
+    <div class="note">※ 蔵干は実装済みです（各柱の地支に含まれる隠れた干を表示＋四柱推命の五行バランスに反映）。十二支同士の関係（位相法）と日主の強弱・守護神（守護神法）は、四柱推命タブで出しています。十二大従星は、日干と支の十二運（長生・沐浴・冠帯・建禄・帝旺・衰・病・死・墓・絶・胎・養）から出しています。長生の支は甲亥・乙午・丙寅・丁酉・戊寅・己酉・庚巳・辛子・壬申・癸卯で、陽干は順行・陰干は逆行します。十二運と星は1対1で対応し（長生＝天貴星、帝旺＝天将星など）、点数は天将12点からあの世の天馳1点までです。厳密な占断は専門家にご依頼ください。</div>
     `}
   `;
 }
@@ -10068,7 +10105,7 @@ function renderConsult(){
     <div class="section-title">9占術が一致するテーマ — 統合傾向レーダー</div>
     <div class="card" style="margin-bottom:20px;">
       <p style="font-size:14px; color:#6a6050; margin-bottom:8px; line-height:1.7;">8つの人生テーマに対して、各占術が「この人はこの傾向が強い」と投票。複数の占術が一致するほど、その傾向がはっきり出ています。</p>
-      <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">このレーダーは「どれだけ持っているか（能力の量）」を示します。上の16タイプ診断は「それをどう使うか（指向の方向）」を示します。たとえば統率力が高くても、マーベリックのように群れを率いず一人で発揮するタイプもいます。</p>
+      <p style="font-size:13px; color:#8a7050; margin-bottom:16px; line-height:1.7; padding:8px 12px; background:rgba(201,147,58,0.06); border-left:3px solid var(--gold); border-radius:4px;">この票数は、9つの占術の解釈ルールのうち「この傾向を示す」とされるものが何個当てはまったかです。能力の高さや量を測ったものではありません（2026-10-23 修正。前は「どれだけ持っているか（能力の量）」と書いていました）。上の16タイプ診断は「その傾向をどう使うか（指向の方向）」を示します。たとえば統率力の票が多くても、マーベリックのように群れを率いず一人で発揮するタイプもいます。</p>
       ${(() => {
         // 8つの傾向軸を定義
         const axes = [
@@ -10836,8 +10873,9 @@ function renderConsult(){
               const ayaS = ayanamsha(d.jd);
               const sidMoonS = norm360(d.moonLon - ayaS);
               const nakIdx = Math.floor(sidMoonS / (360/27));
-              const NAKS = ["アシュヴィニー","バラニー","クリッティカー","ローヒニー","ムリガシラー","アールドラー","プナルヴァス","プシュヤ","アーシュレーシャー","マガー","プールヴァ・パールグニー","ウッタラ・パールグニー","ハスタ","チトラー","スワーティー","ヴィシャーカー","アヌラーダー","ジェーシュター","ムーラ","プールヴァ・アーシャーダー","ウッタラ・アーシャーダー","シュラヴァナ","ダニシュター","シャタビシャー","プールヴァ・バードラパダー","ウッタラ・バードラパダー","レーヴァティー"];
-              const NAK_DESC = ["先駆者の宿。新しいことを始める力がある。","変革の宿。強烈な変化をもたらす。","浄化の宿。鋭い知性と批判力がある。","豊穣の宿。魅力的で人を惹きつける。","探求の宿。知的好奇心が旺盛。","嵐の宿。激しいエネルギーを持つ。","再生の宿。困難から立ち直る力がある。","養育の宿。人を育て守る力がある。","直感の宿。鋭い洞察力を持つ。","王者の宿。リーダーシップと権威がある。","享楽の宿。人生を楽しむ才能がある。","奉仕の宿。人のために働く誠実さがある。","器用の宿。多才で手先が器用。","創造の宿。芸術的センスと独創性がある。","自由の宿。独立心が強く自由を愛する。","変容の宿。変化を通じて成長する。","献身の宿。深い愛情と忠誠心がある。","力の宿。強い意志と競争心がある。","解放の宿。束縛を嫌い自由を求める。","勝利の宿。目標に向かって突き進む。","誠実の宿。正直で信頼される。","学習の宿。知識を吸収し伝える力がある。","富の宿。物質的な豊かさを引き寄せる。","癒しの宿。人を癒す力がある。","苦行の宿。試練を通じて深く成長する。","深化の宿。精神的な深みがある。","完成の宿。物事を完成させる力がある。"];
+              // 27宿は NAKSHATRAS（インド占星術タブと同じ表）から引く。2026-10-23 修正：ここに名前と説明の別の写しを持っていて、
+              // 同じ宿に2つの説明が出ていた（ウッタラ・パールグニーが、インドタブでは「友情と契約の宿」、この表では「奉仕の宿」）
+              const nak = NAKSHATRAS[nakIdx] || null;
               const rows = [
                 { name:"西洋占星術", key:`太陽${sunSign.n}・月${moonSign.n}`, desc: (() => {
                   const sunDesc = ({"射手座":"遠くを見る理想主義者。自由と探求を愛し、大きなビジョンで動く。細部より全体を見る。","牡羊座":"即断即決の先駆者。エネルギーが溢れ、最初に動く勇気がある。飽きやすい面も。","獅子座":"舞台の中心に立つ表現者。誇り高く、人を惹きつける存在感がある。","乙女座":"細部に気づく分析家。完璧を求め、実用性を重んじる。批判的になりやすい。","山羊座":"目標に向かって着実に登る実践家。忍耐強く、長期的な視点で動く。","牡牛座":"安定と美を愛する現実主義者。変化を嫌い、一度決めたら動かない。","双子座":"好奇心旺盛な情報収集家。多才で話し上手。一つに絞るのが苦手。","天秤座":"バランスを重んじる調和の人。美意識が高く、対立を避ける。","水瓶座":"独自の視点を持つ革新者。人と違うことを好み、未来を見る。","蟹座":"感受性豊かな保護者。家族や仲間を大切にし、感情で動く。","蠍座":"深く探求する変容の人。執着が強く、秘密を好む。","魚座":"境界を超える夢想家。共感力が高く、現実と夢の間を生きる。"})[sunSign.n] || sunSign.n;
@@ -10851,7 +10889,7 @@ function renderConsult(){
                 { name:"九星気学", key:honmei2.name, desc: honmei2.desc || "" },
                 { name:"マヤ暦", key:seal?.n||"—", desc: seal?.desc || "" },
                 { name:"宿曜", key:shuku?.n||"—", desc: shuku?.desc || "" },
-                { name:"インド占星術", key:NAKS[nakIdx]||"—", desc: NAK_DESC[nakIdx]||"" },
+                { name:"インド占星術", key:nak?.n||"—", desc: nak ? nak.desc.split("。")[0] + "。" : "" },
               ];
               return rows.map((r,i) => `
                 <tr style="border-bottom:1px solid var(--border); ${i%2===0?'background:#faf8f4':''}">

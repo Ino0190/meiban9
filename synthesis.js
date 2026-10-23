@@ -43,6 +43,84 @@
   }
   const uniq = arr => SYS.filter(s => arr.indexOf(s) >= 0);   // 9占術の並び順にそろえる
 
+  // 人格の4段（動機→思考→行動→葛藤）。2026-10-23 外部レビュー「16タイプの名前よりも、動機・思考・行動・葛藤の
+  //   構造のほうが、9占術を並べるより人格アーキテクチャとして説得力がある」。4つの軸を「どう動く人か」の順に言い直す
+  const ARCH_MOT = {
+    "革新": "いまのやり方に違和感を持つと、黙っていられない。批判で終わらせず、自分で代わりを作りたくなる。",
+    "継承": "受け継いだものを守り、磨き上げたい。質を落とさないことが動機になる。急に変えることには慎重になる。",
+  };
+  const ARCH_THINK = {   // [反対が1つ以下, 反対が2つ以上]
+    "広い": ["まず広く見渡し、違う分野のものをつなげて考える。", "広く探索し、気になったものは深く掘って確かめる。"],
+    "狭い": ["一つのことを深く掘り下げ、確かめてから次に進む。", "深く掘るのが基本だが、周りを見渡して位置を確かめる目も持っている。"],
+  };
+  const ARCH_ACT = {   // 役割 × 価値観
+    "リーダー_革新": "自分で新しい方法を試作し、形にしてから人を巻き込む。説明より、動くものを見せて進める。",
+    "リーダー_継承": "人の前に立ち、確かな形を積み上げる。決めたことを続ける力が信用になる。",
+    "参謀_革新": "表に立たずに、仕組みのほうを作り替えて動かす。目立つ場所より、効く場所を選ぶ。",
+    "参謀_継承": "支える側から、続く形を整える。人が動きやすいように段取りを作る。",
+  };
+  const ARCH_CONF = {   // 価値観 × 気質
+    "革新_慎重": "自由に変えたいのに、いまある安定も失いたくない。だから動く前に長く考える。考えている時間は、迷いではなく準備と見てよい。",
+    "革新_楽天": "次々に新しくしたくなり、ひとつを仕上げる前に手が離れる。始める力は強いので、終わらせる仕組みを外側に作ると噛み合う。",
+    "継承_慎重": "守りたいのに、変えなければ続かないとも分かっている。そのあいだで止まりやすい。守る部分と変える部分を先に分けると進む。",
+    "継承_楽天": "型を大事にしたいのに、その場の勢いで崩してしまうことがある。崩してよい線を自分で決めておくと楽になる。",
+  };
+  const ARCH_Q = [["動機", "なぜ動くか"], ["思考", "どう考えるか"], ["行動", "どう形にするか"], ["葛藤", "何に引き裂かれるか"]];
+  function archLines(r) {
+    const [v, t, a, k] = r.axes;
+    const split = r.axes.filter(x => x.level === "split").map(x => x.q);
+    return {
+      lines: [ARCH_MOT[v.winner], ARCH_THINK[t.winner][t.loseSys.length >= 2 ? 1 : 0],
+              ARCH_ACT[a.winner + "_" + v.winner], ARCH_CONF[v.winner + "_" + k.winner]].map(s => s || ""),
+      note: "4つの軸（価値観・興味の向き・役割・気質）を、動き方の順に言い直したものです。" +
+        (split.length ? split.join("と") + "の軸は占術の間で意見が割れているので、上の文はルールの票が多い側で書いています。場面によって反対の顔も出ます。" : ""),
+    };
+  }
+
+  // 判定ルールの版。ルールを変えたらここを上げる（前に出したタイプと違う理由を説明するため）。
+  //   2026-10-20 「視野」の軸の数え方を見直した（ほぼ全員に当たるルールと、対の無いルールを外した）
+  const TYPE_RULE_VER = "2026-10-20";
+  const LAST_TYPE_KEY = "sanmeiban_last_type";
+  // 前にこの端末で出したタイプと違っていたら、どの軸がどう動いたか・なぜ変わったかを書く（2026-10-23 外部レビュー
+  //   「同じ人がマーベリックからレボリューショナリーになった。なぜ前回と判定が変わったかまで説明する機能があると信頼性が上がる」）
+  function typeChangeNote(tj, d) {
+    if (typeof localStorage === "undefined") return "";
+    const now = { k: tj.key, n: tj.type.name, v: TYPE_RULE_VER, p: profileOf(d), d: [d.y, d.m, d.d].join("-") };
+    let prev = null;
+    try { prev = JSON.parse(localStorage.getItem(LAST_TYPE_KEY) || "null"); } catch (e) { }
+    try { localStorage.setItem(LAST_TYPE_KEY, JSON.stringify(now)); } catch (e) { }
+    if (!prev || !prev.k || prev.d !== now.d || prev.k === now.k) return "";   // 同じ生年月日で、前と違うタイプのときだけ
+    const AX = ["価値観", "興味の向き", "役割", "気質"];
+    const a = String(prev.k).split("_"), b = now.k.split("_");
+    const moved = AX.map((q, i) => a[i] !== b[i] ? q + "（" + a[i] + " → " + b[i] + "）" : null).filter(Boolean);
+    const why = prev.v !== now.v
+      ? "判定ルールを見直したためです（" + prev.v + " → " + now.v + "）。前の判定が間違いだったのではなく、票の数え方を変えました。"
+      : prev.p !== now.p
+      ? "生まれた時刻・性別・出生地の入力が変わったためです。これらは材料そのものを変えるので、タイプも変わります。"
+      : "日の変わり目の流派の設定を変えたか、計算を直したためです。";
+    return '<p class="rs-small rs-changed">前にこの端末で出たタイプは<b>' + esc(prev.n) + "</b>でした（今回は<b>" + esc(now.n) +
+      "</b>）。変わった軸は" + moved.join("・") + "。" + why +
+      "材料は同じで、僅差の軸が反転しています。前のタイプの特徴も残っていると読んでください。</p>";
+  }
+
+  // 占術が何を材料にしているか。9つは独立した9つの証拠ではない（2026-10-23 外部レビュー「四柱推命と算命学は干支体系を
+  //   共有し、西洋占星術とインド占星術も同じ天体位置を異なる方式で読んでいる。9占術の一致を、そのまま9つの独立した
+  //   証拠とは扱えない」）。一致の数と一緒に「材料が何通りか」も出す
+  const MATERIAL = {
+    "西洋占星術": "天体の位置", "インド占星術": "天体の位置",
+    "四柱推命": "干支", "算命学": "干支", "九星気学": "干支",
+    "紫微斗数": "旧暦の日", "宿曜": "旧暦の日",
+    "数秘術": "生年月日の数字", "マヤ暦": "260日の周期",
+  };
+  const matsOf = sys => { const o = []; (sys || []).forEach(s => { const m = MATERIAL[s]; if (m && o.indexOf(m) < 0) o.push(m); }); return o; };
+  // 「n個そろった」の後ろに付ける、材料の重なりの但し書き（材料の数が占術の数より少ないときだけ）
+  function matNote(sys, label) {
+    const m = matsOf(sys);
+    if (!sys || sys.length < 2 || m.length >= sys.length) return "";
+    return (label ? label + "側の" : "") + "この" + sys.length + "つは材料が" + m.length + "通り（" + m.join("・") + "）。" +
+      "同じ材料を別の方式で読んでいる組があるので、独立した" + sys.length + "つの根拠ではない。";
+  }
+
   // 4つの軸（16タイプの元）。左右のどちらに寄ったかを、ふつうの言葉で言う
   const AXES = [
     { k: "a1", q: "価値観", pole: { "革新": "新しいやり方を自分で作る", "継承": "受け継いだものを磨き上げる" }, short: { "革新": "自分で作る", "継承": "受け継ぐ" } },
@@ -100,6 +178,8 @@
         text: ax.pole[a.winner], otherText: ax.pole[winIsPlus ? a.mn : a.pn],
         short: ax.short[a.winner], otherShort: ax.short[winIsPlus ? a.mn : a.pn],
         winSys, loseSys, share, level,
+        // 判定ルールの票（タイプ名を決めるのはこちら）。占術の種類の数と結論が違うことがあるので、両方を画面に出す（2026-10-23）
+        votes: winIsPlus ? [a.plus, a.minus] : [a.minus, a.plus],
       };
     });
   }
@@ -323,10 +403,16 @@
       (nb ? '<div class="rs-near" title="' + esc(nb.axis) + 'の軸が僅差">' + esc(nb.name) + "寄り</div>" : "") +
       '<div class="rs-desc">' + esc(t.desc) + "</div>" +
       (r.paradox.length && !/undefined/.test(r.paradox[0]) ? '<p class="rs-para1">' + esc(r.paradox[0]) + "</p>" : "") +
+      (() => { try { const A = archLines(r);
+        return '<div class="rs-arch"><div class="rs-arch-h">どう動く人か</div><dl>' +
+          ARCH_Q.map(([q, sub], i) => "<dt>" + q + "<span>" + sub + "</span></dt><dd>" + esc(A.lines[i]) + "</dd>").join("") +
+          '</dl><p class="rs-small">' + esc(A.note) + "</p></div>";
+      } catch (e) { console.warn("人格の4段の描画エラー:", e); return ""; } })() +
       '<div class="rs-self"><div class="rs-self-h">あなたらしさ 3つ</div><ol>' +
       r.top.map(x => "<li><b>" + x.label + "</b>　" + x.desc + "<small>" + x.n + "つの占術がそろって示す</small></li>").join("") +
       "</ol></div>" +
       (nb ? '<p class="rs-small">' + esc(nb.axis) + "の軸が僅差なので、" + esc(nb.name) + "（" + esc(nb.desc) + "）の顔も持っている。</p>" : "") +
+      (selfMode ? (() => { try { return typeChangeNote(r.tj, d); } catch (e) { console.warn("前のタイプとの比較でエラー:", e); return ""; } })() : "") +
       '<div class="rs-actions">' +
       '<button type="button" class="rs-share" onclick="shareTypeResult()">結果をシェア</button>' +
       (selfMode ? '<button type="button" class="rs-share rs-share-sub" onclick="RSynth.startCompat()">相性を見る</button>' : "") +
@@ -359,18 +445,24 @@
           : esc(a.text);
         const side = (label, sys, cls) => '<div class="rs-side rs-side-' + cls + '"><span class="rs-side-l">' + label + "</span>" + dots(sys, cls) +
           '<span class="rs-n"><b>' + sys.length + "</b></span>" + '<span class="rs-names">' + (sys.length ? names(sys) : "なし") + "</span></div>";
+        // 数え方を両方書く。タイプ名は判定ルールの票で決まるので、占術の数と結論が違って見えることがある（2026-10-23）
+        const note = "数え方：上の数は<b>占術の種類</b>。判定ルールの数では <b>" + a.votes[0] + " 対 " + a.votes[1] +
+          "</b>（タイプ名はこちらで決めている" + (a.level === "split" ? "ので、タイプ名とこの「意見が割れた」は食い違って見える" : "") + "）。" +
+          matNote(a.winSys, esc(a.short));
         return '<div class="rs-axis rs-' + a.level + '">' +
           '<div class="rs-axis-head"><span class="rs-q">' + a.q + '</span><span class="rs-badge">' + LEVEL[a.level] + "</span></div>" +
           '<div class="rs-axis-main">' + main + "</div>" +
           side(a.short, a.winSys, "on") +
           side(a.otherShort, a.loseSys, "off") +
+          '<p class="rs-small rs-count-note">' + note + "</p>" +
           "</div>";
       }).join("") +
       "</div></section>";
     h += '<section class="rs-sec"><h3>あなたらしさ3つの内訳</h3><ol class="rs-traits">' +
       r.top.map(x => '<li><div class="rs-trait-head"><b>' + x.label + '</b><span class="rs-n"><b>' + x.n + "</b>/9の占術</span></div>" +
         '<div class="rs-trait-desc">' + x.desc + "</div>" +
-        '<div class="rs-axis-sys">' + dots(x.sys, "on") + '<span class="rs-names">' + names(x.sys) + "</span></div></li>").join("") +
+        '<div class="rs-axis-sys">' + dots(x.sys, "on") + '<span class="rs-names">' + names(x.sys) + "</span></div>" +
+        (matNote(x.sys) ? '<p class="rs-small rs-count-note">' + matNote(x.sys) + "</p>" : "") + "</li>").join("") +
       "</ol></section>";
     h += '<p class="rs-small">判定の確かさ: <b>' + conf + "</b>。" + confNote + "</p>";
     h += "</div></details>";
@@ -897,6 +989,8 @@
     const p = box.querySelector(".rs-amt-note");
     if (p) p.textContent = amounts()[k].note;
   }
+  // AIに渡さない節の見出し（図・表そのもの。惑星の配置・大運・KINは数値の段と文で別に渡している）
+  const SKIP_SEC = ["ツォルキン表", "ラーシチャート", "人生タイムライン", "AIで深く読む"];
   // タブに出ている文を、畳んだ節も開いて取り出す（タブは見えている前提＝ボタンを押したタブ）
   function tabText(i) {
     const el = document.getElementById("tab" + i);
@@ -908,7 +1002,19 @@
     closed.forEach(x => { x.open = true; });
     // 操作のための部品は読まない（相談箱・戻る・シェア・画像保存・分類のボタン列・問いの一覧）。
     // 2026-10-23 総合鑑定を丸ごと渡すようにしたとき、「結果をシェア」「16タイプを全部見る」などが相談文に混ざった
-    const hide = Array.from(el.querySelectorAll(".rs-consult, .rs-back, .rs-to-consult, .rs-actions, .rs-story-link, .rs-cats, .qe"));
+    const hide = Array.from(el.querySelectorAll(".rs-consult, .rs-back, .rs-to-consult, .rs-actions, .rs-story-link, .rs-cats, .qe, svg"));
+    // 図そのものの節も読まない（中身が座標や記号の羅列で、同じ内容が数値や文で別に入っている）。
+    // 2026-10-23 ツォルキン表の260マスの数字、タイムラインの「始待表基変責省穫了」×9、ラーシチャートの格子が相談文に入っていた
+    Array.from(el.querySelectorAll(".section-title")).forEach(t => {
+      if (!SKIP_SEC.some(w => t.textContent.indexOf(w) >= 0)) return;
+      hide.push(t);
+      for (let n = t.nextElementSibling; n && !n.classList.contains("section-title"); n = n.nextElementSibling) hide.push(n);
+    });
+    // 畳んだ節（foldTab が移したもの）は見出しが summary になっているので、その details ごと読まない
+    Array.from(el.querySelectorAll("details")).forEach(dt => {
+      const s = dt.querySelector(":scope > summary");
+      if (s && SKIP_SEC.some(w => s.textContent.indexOf(w) >= 0)) hide.push(dt);
+    });
     const prev = hide.map(x => x.style.display);
     hide.forEach(x => { x.style.display = "none"; });
     let t = el.innerText;
@@ -1756,6 +1862,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, topicConclusion, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, setAmount, setDigestFull, isDigestFull, copyConsult, saveConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, topicConclusion, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, archLines, ARCH_Q, pickTheme, setAmount, setDigestFull, isDigestFull, copyConsult, saveConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);
