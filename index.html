@@ -912,7 +912,7 @@ a.rs-go:hover{color:#6a4e10}
           <div style="font-size:18px; color:var(--gold); font-weight:700; margin-bottom:8px;">今すぐ占う</div>
           <div style="font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:20px;">生年月日は不要。<br>心の中で問いを<br>思い浮かべて<br>ボタンを押すだけ。</div>
           <button onclick="showQuickOracle()" style="padding:12px 28px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:2px; width:100%;">易経で占う</button>
-          <div style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;">64の卦が、問いに端的に答えます</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;">64卦と変爻・之卦まで出します</div>
           <a href="tarot/index.html" style="display:block; margin-top:16px; padding:12px 28px; background:none; border:1px solid var(--gold); color:var(--gold); border-radius:4px; text-decoration:none; font-size:15px; font-weight:700; letter-spacing:2px; text-align:center;">タロットで占う</a>
           <div style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;">78枚のカードで物語的に読み解きます</div>
         </div>
@@ -11037,7 +11037,7 @@ function renderConsult(){
     <!-- 易経 -->
     <div class="card" style="margin-bottom:20px;">
       <h3 style="font-size:18px; margin-bottom:8px;">易経で占う</h3>
-      <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">心の中で問いを思い浮かべて、ボタンを押してください。3000年の知恵が端的に答えます。</p>
+      <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">心の中で問いを思い浮かべて、ボタンを押してください。コイン3枚を6回投げる作り方で、64卦と変爻・之卦（変わった先の形）まで出します。</p>
       <button onclick="castIChing()" style="padding:12px 28px; background:var(--gold); color:#fff; border:none; border-radius:4px; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:2px;">卦を立てる</button>
       <div id="iching-result" style="margin-top:16px;"></div>
     </div>
@@ -11221,109 +11221,73 @@ const ICHING_64 = [
   {n:"火水未済",k:"未完成",d:"まだ完成していません。でも、それは「まだ可能性がある」ということです。易経の最後の卦がこの「未完成」であることには深い意味があります——人生に完成はなく、常に次のステージがある。→ 完璧を求めないでください。未完成のまま前に進むことが、実は最も正しい姿です。"},
 ];
 
-function showQuickOracle(){
-  const resultDiv = document.getElementById("quick-oracle");
-  if (!resultDiv) return;
-  resultDiv.style.display = "block";
-
-  // コイン3枚×6回で卦を立てる（castIChingと同じロジック）
-  const lines = [];
-  for (let i = 0; i < 6; i++) {
-    const coins = [Math.random() < 0.5 ? 2 : 3, Math.random() < 0.5 ? 2 : 3, Math.random() < 0.5 ? 2 : 3];
-    const sum = coins.reduce((a,b) => a+b, 0);
-    lines.push(sum % 2 === 0 ? 0 : 1);
-  }
-  const trigramMap = {"111":0,"110":1,"101":2,"100":3,"011":4,"010":5,"001":6,"000":7};
-  const lower = lines.slice(0,3).join("");
-  const upper = lines.slice(3,6).join("");
-  const lowerIdx = trigramMap[lower] || 0;
-  const upperIdx = trigramMap[upper] || 0;
-  const KING_WEN = [
-    [0,42,12,24,5,8,14,1],[42,57,48,31,27,46,44,18],[12,48,29,55,62,35,13,21],[24,31,55,50,39,59,52,15],
-    [5,27,62,39,56,3,52,19],[8,46,35,59,3,28,38,6],[14,44,13,52,52,38,51,25],[1,18,21,15,19,6,25,63],
-  ];
-  const hexIdx = KING_WEN[upperIdx][lowerIdx];
-  const hex = ICHING_64[hexIdx] || ICHING_64[0];
-  const lineHtml = lines.slice().reverse().map(l => {
-    if (l === 1) return `<div style="width:120px; height:6px; background:var(--gold); margin:6px auto; border-radius:2px;"></div>`;
-    return `<div style="display:flex; justify-content:center; gap:16px; margin:6px auto; width:120px;"><div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div><div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div></div>`;
-  }).join("");
-
-  resultDiv.innerHTML = `
-    <div style="padding:24px; background:var(--hi); border:1px solid var(--gold); border-radius:8px;">
-      <div style="margin-bottom:16px;">${lineHtml}</div>
-      <h3 style="font-size:20px; color:var(--gold); text-align:center; margin-bottom:8px;">${hex.n}</h3>
-      <p style="font-size:14px; color:var(--muted); text-align:center; margin-bottom:16px;">「${hex.k}」</p>
-      <p style="font-size:18px; line-height:1.8; text-align:center;">${hex.d}</p>
-      <p style="font-size:14px; color:var(--muted); margin-top:16px; text-align:center;">
-        <button onclick="showQuickOracle()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:8px 20px; border-radius:4px; font-family:inherit; font-size:14px; cursor:pointer;">もう一度占う</button>
-      </p>
-    </div>
-  `;
-  resultDiv.scrollIntoView({behavior:"smooth", block:"center"});
+/* ============ 易経（コイン3枚×6回で卦を立てる） ============
+   上下の卦から64卦を引く表は、手で書いたものが左右対称になっていて、上下を入れ替えても同じ卦を指していた。
+   64通りのうち出せるのは35種類だけ、45組は別の卦（例：上が乾・下が兌は「天沢履」なのに「沢天夬」）。
+   2026-10-24 の指摘で、表を持たず、卦の名前から引く形に直した。
+   名前は「上卦＋下卦＋卦名」（天沢履＝上が天＝乾・下が沢＝兌）、上下が同じ卦は「乾為天」の形なので、
+   ICHING_64 の64個の名前から64通りの対応がそのまま作れる（表を手で持たないので、ずれようがない）。
+   コインの合計は 6＝老陰・7＝少陽・8＝少陰・9＝老陽。老（6と9）が変爻で、そこを反転させたものが之卦（これからの形）。 */
+const ICHING_TRI = ["乾","兌","離","震","巽","坎","艮","坤"];   // 3本の並び 111,110,101,100,011,010,001,000 の順
+const ICHING_NATURE = { 天:"乾", 沢:"兌", 澤:"兌", 火:"離", 雷:"震", 風:"巽", 水:"坎", 山:"艮", 地:"坤" };
+const ICHING_BY_TRIGRAM = (() => {
+  const t = {};
+  ICHING_64.forEach((h, i) => {
+    const d = h.n.match(/^(.)為(.)$/);                            // 乾為天・坤為地など（上下が同じ卦）
+    const up = d ? d[1] : ICHING_NATURE[h.n[0]], lo = d ? d[1] : ICHING_NATURE[h.n[1]];
+    if (up && lo) t[up + lo] = i;
+  });
+  return t;
+})();
+function ichingCast(){
+  const coin = () => (Math.random() < 0.5 ? 2 : 3);
+  const sums = Array.from({ length: 6 }, () => coin() + coin() + coin());   // 下から上へ6本
+  const lines = sums.map(s => (s % 2 === 0 ? 0 : 1));                        // 偶数＝陰・奇数＝陽
+  const moving = sums.map(s => s === 6 || s === 9);                          // 老陰・老陽＝変爻
+  const tri = ls => ICHING_TRI[{ "111":0, "110":1, "101":2, "100":3, "011":4, "010":5, "001":6, "000":7 }[ls.join("")]];
+  const idx = ls => ICHING_BY_TRIGRAM[tri(ls.slice(3, 6)) + tri(ls.slice(0, 3))];   // 上卦＋下卦で引く
+  const main = idx(lines);
+  const zhi = moving.some(Boolean) ? idx(lines.map((l, i) => (moving[i] ? 1 - l : l))) : null;
+  return { sums, lines, moving, main, zhi, upper: tri(lines.slice(3, 6)), lower: tri(lines.slice(0, 3)) };
 }
-
-function castIChing(){
-  const resultDiv = document.getElementById("iching-result");
-  if (!resultDiv) return;
-
-  // コイン3枚×6回で卦を立てる
-  const lines = [];
-  for (let i = 0; i < 6; i++) {
-    const coins = [Math.random() < 0.5 ? 2 : 3, Math.random() < 0.5 ? 2 : 3, Math.random() < 0.5 ? 2 : 3];
-    const sum = coins.reduce((a,b) => a+b, 0); // 6,7,8,9
-    lines.push(sum % 2 === 0 ? 0 : 1); // 偶数=陰(0), 奇数=陽(1)
-  }
-
-  // 下卦(lines[0-2])と上卦(lines[3-5])から64卦のインデックスを算出
-  const trigramMap = {"111":0,"110":1,"101":2,"100":3,"011":4,"010":5,"001":6,"000":7};
-  const trigramNames = ["乾","兌","離","震","巽","坎","艮","坤"];
-  const lower = lines.slice(0,3).join("");
-  const upper = lines.slice(3,6).join("");
-  const lowerIdx = trigramMap[lower] || 0;
-  const upperIdx = trigramMap[upper] || 0;
-
-  // 64卦の配列インデックス（上卦×8＋下卦の伝統的順序ではなく、序卦伝の順序で格納しているため、
-  // 上下卦から直接引く方式に変換）
-  const KING_WEN = [
-    [0,42,12,24,5,8,14,1],
-    [42,57,48,31,27,46,44,18],
-    [12,48,29,55,62,35,13,21],
-    [24,31,55,50,39,59,52,15],
-    [5,27,62,39,56,3,52,19],
-    [8,46,35,59,3,28,38,6],
-    [14,44,13,52,52,38,51,25],
-    [1,18,21,15,19,6,25,63],
-  ];
-  // 修正: 正しい文王64卦序を使用
-  const hexIdx = KING_WEN[upperIdx][lowerIdx];
-  const hex = ICHING_64[hexIdx] || ICHING_64[0];
-
-  // 卦の図を生成（下から上に描画、HTMLのdivで線を描く）
-  const lineHtml = lines.slice().reverse().map(l => {
-    if (l === 1) {
-      // 陽爻: 1本の太い線
-      return `<div style="width:120px; height:6px; background:var(--gold); margin:6px auto; border-radius:2px;"></div>`;
-    } else {
-      // 陰爻: 真ん中に隙間のある2本の線
-      return `<div style="display:flex; justify-content:center; gap:16px; margin:6px auto; width:120px;">
-        <div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div>
-        <div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div>
-      </div>`;
-    }
-  }).join("");
-
-  resultDiv.innerHTML = `
-    <div style="padding:20px; background:var(--hi); border:1px solid var(--gold); border-radius:6px; margin-top:12px;">
-      <div style="margin-bottom:16px;">
-        ${lineHtml}
+// 卦の図と読み。againFn にボタンの関数名を渡すと「もう一度占う」を出す
+function ichingHtml(r, againFn){
+  const hex = ICHING_64[r.main] || ICHING_64[0];
+  const zhi = (r.zhi === null || r.zhi === undefined) ? null : ICHING_64[r.zhi];
+  const bar = l => l === 1
+    ? '<div style="width:120px; height:6px; background:var(--gold); border-radius:2px;"></div>'
+    : '<div style="display:flex; gap:16px; width:120px;"><div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div><div style="flex:1; height:6px; background:var(--gold); border-radius:2px;"></div></div>';
+  // 下から立てた6本を、上から下へ並べて描く
+  const lineHtml = r.lines.map((l, i) => ({ l, mv: r.moving[i], no: i + 1 })).reverse().map(x =>
+    '<div style="display:flex; align-items:center; justify-content:center; gap:10px; margin:6px auto;">' + bar(x.l) +
+    '<span style="font-size:13px; width:64px; text-align:left; white-space:nowrap; color:' + (x.mv ? "var(--gold)" : "transparent") + ';">' +
+    (x.mv ? x.no + "爻が変" : "") + "</span></div>").join("");
+  const mv = r.moving.map((m, i) => (m ? i + 1 : 0)).filter(Boolean);
+  return `<div style="padding:24px; background:var(--hi); border:1px solid var(--gold); border-radius:8px;">
+      <div style="margin-bottom:16px;">${lineHtml}</div>
+      <h3 style="font-size:20px; color:var(--gold); text-align:center; margin-bottom:4px;">${hex.n}</h3>
+      <p style="font-size:14px; color:var(--muted); text-align:center; margin-bottom:16px;">「${hex.k}」　上が${r.upper}・下が${r.lower}</p>
+      <p style="font-size:18px; line-height:1.8;">${hex.d}</p>
+      <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+        ${zhi ? `<p style="font-size:15px; color:var(--muted); line-height:1.8;">${mv.join("・")}爻が変わります。変わった先の形（之卦）は <strong style="color:var(--gold);">${zhi.n}</strong>「${zhi.k}」です。今の形が ${hex.n} で、動くとこちらへ向かう、と読みます。</p>
+             <p style="font-size:16px; line-height:1.8; margin-top:8px;">${zhi.d}</p>`
+           : '<p style="font-size:15px; color:var(--muted); line-height:1.8;">変わる爻（変爻）はありません。今の形がそのまま続く、と読みます。</p>'}
       </div>
-      <h3 style="font-size:20px; color:var(--gold); text-align:center; margin-bottom:8px;">${hex.n}</h3>
-      <p style="font-size:14px; color:var(--muted); text-align:center; margin-bottom:16px;">「${hex.k}」</p>
-      <p style="font-size:18px; line-height:1.8; text-align:center;">${hex.d}</p>
-      <p style="font-size:14px; color:var(--muted); margin-top:12px; text-align:center;">もう一度占いたい場合は、新しい問いを心に浮かべてからボタンを押してください。</p>
-    </div>
-  `;
+      ${againFn ? `<p style="text-align:center; margin-top:16px;"><button onclick="${againFn}()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:8px 20px; border-radius:4px; font-family:inherit; font-size:14px; cursor:pointer;">もう一度占う</button></p>
+        <p style="font-size:14px; color:var(--muted); margin-top:8px; text-align:center;">もう一度占うときは、新しい問いを心に浮かべてからボタンを押してください。</p>` : ""}
+    </div>`;
+}
+function showQuickOracle(){
+  const el = document.getElementById("quick-oracle");
+  if (!el) return;
+  el.style.display = "block";
+  el.innerHTML = ichingHtml(ichingCast(), "showQuickOracle");
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function castIChing(){
+  const el = document.getElementById("iching-result");
+  if (!el) return;
+  el.innerHTML = ichingHtml(ichingCast(), "castIChing");
 }
 
 /* ── タブ切替 ── */
