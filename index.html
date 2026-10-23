@@ -959,7 +959,7 @@ a.rs-go:hover{color:#6a4e10}
 
 <script src="lunar-data.js?v=2"></script>
 <script src="type-judge.js?v=14"></script>
-<script src="synthesis.js?v=25"></script>
+<script src="synthesis.js?v=26"></script>
 <script>
 /* ============ 共通定数 ============ */
 // GAS WebApp URL（デプロイ後にここを書き換え）
@@ -1583,6 +1583,12 @@ document.addEventListener("DOMContentLoaded", fillBirthplaceOptions);
 document.addEventListener("DOMContentLoaded", () => {
   const slot = document.getElementById("question-entry-slot");
   if (slot) try { slot.innerHTML = questionEntryHtml("empty"); } catch (e) { console.warn("問いの一覧の描画エラー:", e); }
+  // タロットから戻ったのに命盤が無い（生年月日を入れたことがない）とき
+  const msg = document.getElementById("qe-msg");
+  if (returnCat() && msg && !localStorage.getItem("sanmeiban_form")) {
+    msg.textContent = "この続きは生年月日から読みます。生年月日を入れて「占う」を押してください。";
+    msg.style.display = "block";
+  }
 });
 
 // 日の変わり目。"23"＝23時（子の刻から翌日・既定）／"24"＝0時（日付どおり）。1つの設定で、四柱推命の日柱・時柱と
@@ -1986,6 +1992,20 @@ function restoreForm() {
 // DOM読み込み完了後に復元
 document.addEventListener("DOMContentLoaded", restoreForm);
 
+/* タロットから戻って来たとき（?cat=work など）、総合鑑定のその分類を開く（2026-10-23）。
+   命盤→カードは材料を渡し、カード→命盤はこの導線で戻る。どちらから入っても両方読めるようにする */
+function returnCat(){
+  try { return new URLSearchParams(location.search).get("cat") || ""; } catch (e) { return ""; }
+}
+function applyReturnCat(){
+  const cat = returnCat();
+  if (!cat || !currentData) return false;
+  setTab(10);
+  setConsultCategory(cat);
+  const el = document.getElementById("tab10");
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
+}
 // 再訪時に保存済みの生年月日で結果を開く（入力データの送信はしない。種類だけの再訪ログを送る）
 function autoOpen(f){
   try {
@@ -1995,7 +2015,8 @@ function autoOpen(f){
     window._quietRender = true;
     renderAll();
     window._quietRender = false;
-    if (window.innerWidth <= 768) {
+    // タロットから「羅占盤で見る」で戻って来たときは、その分類を開く。ふつうの再訪はこれまでと同じ
+    if (!applyReturnCat() && window.innerWidth <= 768) {
       const sec = document.getElementById('type-result-section');
       if (sec) sec.scrollIntoView({ block: 'start' });
     }
@@ -11368,21 +11389,21 @@ function setTab(i){
    卜術（タロット＝その場でカードを引いて、今の問いに答える）に回す。どちらで答えるかを問いごとに決めておく。
    by: meiban＝命盤のタブへ／type＝16タイプの詳しい説明へ／compat＝相性モードへ／tarot＝タロットへ（sp＝スプレッド） */
 const QUESTIONS = [
-  { g:"恋愛", q:"好きな人が私をどう思っているか", by:"tarot", sp:"three",
+  { g:"恋愛", q:"好きな人が私をどう思っているか", by:"tarot", sp:"three", side:"love-feel",
     note:"相手の今の気持ちは、生年月日からは出ません。カードで、今の関係の流れとして読みます。" },
   { g:"恋愛", q:"どうしたら振り向いてもらえるか", by:"compat",
     note:"お相手の生年月日が分かれば、2人の間に出やすいことと接し方を9占術で読みます。" },
-  { g:"恋愛", q:"あの人に他に好きな人がいるか", by:"tarot", sp:"three",
+  { g:"恋愛", q:"あの人に他に好きな人がいるか", by:"tarot", sp:"three", side:"love-rival",
     note:"人の事情を当てる占いではありません。今の自分がどう向き合うかを読みます。" },
   { g:"お金", q:"お金を稼げるようになるか", by:"meiban", cat:"money",
     note:"稼ぎ方の型と、お金が動きやすい時期を読みます。金額や時期は約束できません。" },
-  { g:"お金", q:"これを買ってもいいか", by:"tarot", sp:"one",
+  { g:"お金", q:"これを買ってもいいか", by:"tarot", sp:"one", side:"money-buy",
     note:"個別の買い物の可否は命盤では出ません。カードで、背中を押すか止めるかを見ます。" },
   { g:"仕事", q:"向いてる仕事は？", by:"meiban", cat:"work",
     note:"9占術それぞれの「力が出る場」を集めて読みます。羅占盤がいちばん得意な問いです。" },
-  { g:"仕事", q:"今の仕事を続けていいか", by:"tarot", sp:"yesno",
+  { g:"仕事", q:"今の仕事を続けていいか", by:"tarot", sp:"yesno", side:"work-continue",
     note:"続ける・変えるをカードで比べます。決める時期は命盤の「迷ったとき」でも見られます。" },
-  { g:"仕事", q:"職場でどう思われているか", by:"tarot", sp:"three",
+  { g:"仕事", q:"職場でどう思われているか", by:"tarot", sp:"three", side:"work-image",
     note:"人が今どう見ているかは、生年月日からは出ません。カードで読みます。" },
   { g:"仕事", q:"どうしたらもっとちゃんと働けるか", by:"meiban", cat:"work",
     note:"力が出る場面と、無理が出やすい場面を分けて読みます。" },
@@ -11412,10 +11433,50 @@ function questionEntryHtml(place){
     <p class="qe-foot">どの問いも、当たる・当たらないを決めるものではありません。考えるための材料として読んでください。</p>
   </section>`;
 }
+/* カードで占う問いに、命盤から出せるぶんを「材料」として添える（2026-10-23 井内さん「カードを引いた後に命盤の時期も並べて見せる」）。
+   カードはその場の問いに答え、命盤はその人の持ち物と時期を出す。片方だけだと、
+   「続けていいか」に時期の裏づけが無く、「向いてる仕事」に今の状況が無い。両方を並べて、読む人が突き合わせられるようにする。
+   keys＝知りたいこと（TOPIC_CFG）のどれを添えるか。時期はどの問いにも添える */
+const QUESTION_SIDE = {
+  "work-continue": { keys: ["work", "decide"], lead: "続けるか変えるかは、カードで今の流れを見てください。命盤から出せるのは、あなたが力を出せる働き方と、決め方と、今が動く時期かどうかです。" },
+  "money-buy":     { keys: ["money", "decide"], lead: "買うかどうかはカードで見てください。命盤から出せるのは、あなたのお金の流れの型と、決め方と、今が動く時期かどうかです。" },
+  "love-feel":     { keys: ["love"], lead: "相手の気持ちはカードで見てください。命盤から出せるのは、あなたの人との関わり方です。すれ違いの型が分かります。" },
+  "love-rival":    { keys: ["love", "decide"], lead: "相手の事情はカードでも当てられません。命盤から出せるのは、あなたの関わり方と決め方です。どう向き合うかの材料にしてください。" },
+  "work-image":    { keys: ["love", "work"], lead: "人が今どう見ているかはカードで見てください。命盤から出せるのは、あなたの人との関わり方と働き方です。見られ方の癖が分かります。" },
+};
+// 命盤から「この問いの材料」を作る。命盤を立てていなければ null
+function meibanSideFor(key){
+  const cfg = QUESTION_SIDE[key], d = currentData;
+  if (!cfg || !d || !window.RSynth) return null;
+  const lines = [], back = [];
+  (cfg.keys || []).forEach(k => {
+    try {
+      const c = RSynth.topicConclusion(d, k);
+      if (c) {
+        lines.push(`${c.title}：「${c.label}」（${c.n}/${c.total}の占術がそろって示す）\n　${c.text}`);
+        if (c.cat) back.push({ title: c.title, cat: c.cat });   // タロットから羅占盤へ戻る導線に使う
+      }
+    } catch (e) { }
+  });
+  try {
+    const tm = RSynth.buildSynthesis(d).timing;
+    if (tm) {
+      const turn = tm.nowSpan ? `今はちょうど人生の変わり目（${tm.nowSpan.start}〜${tm.nowSpan.end - 1}歳）です。`
+        : tm.nextSpan ? `次の大きな変わり目は${tm.nextSpan.start}歳ごろです。` : "";
+      // 性別・時刻が無いと大運・大限を数えられない（2026-10-20 監査）。何を入れれば根拠が増えるかを書く
+      // 性別が無いと大運も大限も数えられない。時刻だけ無いときは大限だけ（総合鑑定の注記と同じ数え方）
+      const lack = tm.left || [];
+      const more = lack.length ? `（${lack.join("と")}を入れると、${lack.indexOf("性別") >= 0 ? "四柱推命の大運と紫微斗数の大限" : "紫微斗数の大限"}も加わります）` : "";
+      lines.push(`今の時期：「${tm.verdict}」\n　${tm.now.map(x => x.why).filter(Boolean).join("／")}。${turn}${more}`);
+    }
+  } catch (e) { }
+  return lines.length ? { lead: cfg.lead, text: lines.join("\n\n"), back } : null;
+}
+
 // 問いを押したときの行き先
 function askQuestion(i){
   const Q = QUESTIONS[i];
-  if (Q.by === "tarot") { goToTarot(Q.q, Q.sp); return; }
+  if (Q.by === "tarot") { goToTarot(Q.q, Q.sp, Q.side); return; }
   if (!currentData) {   // 生年月日がまだ：入力欄へ案内する（カードの問いは生年月日なしで占える）
     const el = document.getElementById("birthdate");
     if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 400); }
@@ -11437,18 +11498,18 @@ function askQuestion(i){
 
 // タロットへ。question・spread を渡すと、タロット側で問いとスプレッドが入った状態で始まる。
 // 命盤を立てていれば、9占術のまとめも一緒に渡す（立てていなくてもカードは引ける）
-function goToTarot(question, spread){
+function goToTarot(question, spread, sideKey){
   let url = "tarot/index.html";
   const qs = [];
   if (currentData) {
-    try { qs.push("meiban=" + encodeURIComponent(JSON.stringify(buildMeibanSummary()))); } catch (e) { }
+    try { qs.push("meiban=" + encodeURIComponent(JSON.stringify(buildMeibanSummary(sideKey)))); } catch (e) { }
   }
   if (question) qs.push("q=" + encodeURIComponent(question));
   if (spread) qs.push("spread=" + encodeURIComponent(spread));
   window.location.href = url + (qs.length ? "?" + qs.join("&") : "");
 }
 // タロットへ渡す9占術のまとめ
-function buildMeibanSummary(){
+function buildMeibanSummary(sideKey){
   if (!currentData) return null;
   // 羅占盤サマリーをlocalStorageに保存（タロット側で読み込む）
   const d = currentData;
@@ -11522,6 +11583,8 @@ function buildMeibanSummary(){
     sex: d.sex,
     text: textLines.join("\n")
   };
+  // 問いごとの「命盤から見た材料」（カードを引いた後に、タロットの画面で並べて見せる）
+  try { const side = meibanSideFor(sideKey); if (side) summary.side = side; } catch (e) { }
   // file:///ではlocalStorageがオリジン別になるため、goToTarot はURLパラメータでも渡す
   try { localStorage.setItem("meiban_summary", JSON.stringify(summary)); } catch (e) { }
   return summary;

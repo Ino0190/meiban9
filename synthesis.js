@@ -1170,6 +1170,19 @@
   function topicHtml(d, topic) {
     try { return TOPIC_CFG[topic] ? renderTopic(d, topic) : ""; } catch (e) { console.warn("知りたいこと別のまとめでエラー:", e); return ""; }
   }
+  // 知りたいこと別の結論を、文字で外へ渡す（タロットへ「命盤から見た材料」として持って行くのに使う。2026-10-23）
+  function topicConclusion(d, key) {
+    const cfg = TOPIC_CFG[key];
+    if (!cfg) return null;
+    const T = cfg.tags, qi = QA.findIndex(q => q[0] === key), all = qaAll(d), rows = [];
+    SYS.forEach(sys => { const x = all[sys][key]; if (x && x.tags && x.tags.length && "◎○".indexOf(QA_RATE[sys][qi]) >= 0) rows.push({ sys, tags: x.tags.filter(t => T[t]) }); });
+    const s = topicSummary(rows, T, cfg.opp || {});
+    if (!s.top) return null;
+    const t = T[s.top];
+    // 文の作り方は知りたいこと別の画面と同じ（fmt がある分類は、それで文を閉じる）
+    return { key, title: cfg.title, cat: cfg.cat, label: t.label, text: cfg.fmt ? cfg.fmt(t) : (t.say || "") + (t.adv || ""),
+      n: s.cnt[s.top].length, total: s.total, sys: s.cnt[s.top].map(x => SHORT[x] || x) };
+  }
   // 総合鑑定の最初の画面に置く「知りたいことから見る」。各テーマの結論を1行ずつ、押すとその分類へ
   function topicIndexHtml(d) {
     const all = qaAll(d), lines = [];
@@ -1677,6 +1690,6 @@
     }
   }
 
-  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, copyConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
+  global.RSynth = { buildSynthesis, buildSynthesisHtml, systemOfRule, systemOfVoter, SYS, bridgeFor, decorateTabs, goTab, goSummary, topicHtml, topicIndexHtml, topicConclusion, qaListHtml, workReads, exportDigest, compatDigest, tabDigest, summaryConsultHtml, qaFor, pickTheme, copyConsult, saveAnswer, clearAnswer, answerKey, goConsult, consultPrompt, buildToday, showDay, startCompat, neighborType, typeCloseness, openType, closeType, slugOf };
   global.buildSynthesisHtml = buildSynthesisHtml;
 })(typeof window !== "undefined" ? window : globalThis);
