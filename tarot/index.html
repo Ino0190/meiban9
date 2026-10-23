@@ -169,7 +169,7 @@
   }
   .shuffle-card::after{
     content:""; position:absolute; inset:4px;
-    background:url('../icons/MeibanIcon01.png') center/contain no-repeat;
+    background:url('../icons/MeibanIcon01.webp') center/contain no-repeat;
     opacity:.6;
   }
   .shuffle-hint{
@@ -365,6 +365,7 @@
 先に偶然でカードを並べて、<em>それから</em>あなたの悩みを書いていただきます。
     </div>
 
+    <div id="fromRasen" style="display:none; font-size:16px; line-height:1.8; color:#6a4a80; background:#efe9f4; border-radius:8px; padding:12px 16px; margin-bottom:16px;"></div>
     <div class="spread-choice-grid" id="spreadChoices">
       <div class="spread-choice" data-spread="one">
         <div class="choice-count">1枚</div>
@@ -427,6 +428,17 @@
   <!-- Step 5: 読み解き -->
   <div class="section" id="resultStage">
     <div class="section-title">⑤ 読み解き</div>
+    <!-- 羅占盤から問いを持って来たときだけ出す「命盤から見た材料」。カードの読みと並べて突き合わせられるように（2026-10-23） -->
+    <div id="meibanSide" style="display:none; border:1px solid var(--gold); border-radius:8px; padding:16px 18px; margin-bottom:18px; background:#fdf6e8;">
+      <div style="font-size:17px; color:var(--gold); font-weight:700; margin-bottom:6px;">命盤から見た材料（カードとは別の見方）</div>
+      <div id="meibanSideLead" style="font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:10px;"></div>
+      <div id="meibanSideText" style="font-size:16px; line-height:1.9; white-space:pre-wrap;"></div>
+      <div id="meibanSideBack" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+        <div style="font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:8px;">命盤側の詳しい読み（9つの占術それぞれの根拠）は、羅占盤で見られます。</div>
+        <div id="meibanSideBackLinks" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+      </div>
+      <div style="font-size:14px; color:var(--muted); line-height:1.7; margin-top:10px;">カードはこの問いの今の流れ、命盤はあなたの持ち物と時期を出します。二つが違うことを言っていたら、どちらが正しいかではなく、両方が見ている別の面として読んでください。</div>
+    </div>
     <div class="tab-bar">
       <button class="active" id="tabLocal" onclick="setReadingTab('local')">辞書ベース解釈</button>
       <button id="tabAI" onclick="setReadingTab('ai')">AI用プロンプト</button>
@@ -479,6 +491,26 @@ document.querySelectorAll('.spread-choice').forEach(el => {
     currentSpread = el.getAttribute('data-spread');
   });
 });
+// 羅占盤から問いを持って来たとき（?q=問い&spread=スプレッド）。問いを先に入れ、合うスプレッドを選んでおく。
+// 問いはカードを引いた後の欄に入れる（カードを切る前に問いを見せない作りは変えない）
+(function () {
+  const p = new URLSearchParams(window.location.search);
+  // 命盤はURLで届く（file:// ではlocalStorageがオリジン別になるため）。先にlocalStorageへ移して、画面とAI用の文の両方から読めるようにする
+  const mb = p.get("meiban");
+  if (mb) { try { localStorage.setItem("meiban_summary", decodeURIComponent(mb)); } catch (e) { } }
+  const q = p.get("q"), sp = p.get("spread");
+  if (sp && document.querySelector('.spread-choice[data-spread="' + sp + '"]')) {
+    document.querySelectorAll('.spread-choice').forEach(x => x.classList.remove('active'));
+    document.querySelector('.spread-choice[data-spread="' + sp + '"]').classList.add('active');
+    currentSpread = sp;
+  }
+  if (q) {
+    const ta = document.getElementById("question");
+    if (ta) ta.value = q;
+    const box = document.getElementById("fromRasen");
+    if (box) { box.textContent = "羅占盤から持って来た問い：「" + q + "」　この問いは生年月日からは出ないので、カードで読みます。" + (sp ? "合うスプレッドを選んでおきました。" : ""); box.style.display = "block"; }
+  }
+})();
 
 // シャッフル開始
 function startShuffle() {
@@ -597,6 +629,23 @@ function doReading() {
 }
 
 function renderReadings(question) {
+  // 羅占盤から持って来た「命盤から見た材料」があれば、カードの読みの上に並べる
+  try {
+    const mb = JSON.parse(localStorage.getItem("meiban_summary") || "null");
+    if (mb && mb.side && mb.side.text) {
+      document.getElementById("meibanSideLead").textContent = mb.side.lead || "";
+      document.getElementById("meibanSideText").textContent = mb.side.text;
+      document.getElementById("meibanSide").style.display = "block";
+      // 羅占盤へ戻る導線（押すと総合鑑定のその分類が開く）
+      const back = (mb.side.back || []).filter(x => x && x.cat);
+      if (back.length) {
+        document.getElementById("meibanSideBackLinks").innerHTML = back.map(x =>
+          '<a href="../index.html?cat=' + encodeURIComponent(x.cat) + '" style="display:inline-block; padding:8px 16px; border:1px solid var(--gold); border-radius:4px; color:var(--gold); text-decoration:none; font-size:15px;">羅占盤で「' +
+          x.title + '」を見る</a>').join("");
+        document.getElementById("meibanSideBack").style.display = "block";
+      }
+    }
+  } catch (e) { }
   document.getElementById("readingLocal").textContent = interpretLocal(currentReading, question);
   document.getElementById("promptBox").textContent = buildAIPrompt(currentReading, question);
   document.getElementById("logBox").textContent = exportAuditLog(currentReading, question);

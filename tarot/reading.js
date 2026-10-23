@@ -62,6 +62,13 @@ function buildAIPrompt(reading, question) {
       lines.push(mb.text);
       lines.push("※ この命盤情報を踏まえてカードを読んでください。同じカードでも、この人の性格・現在の時期によって意味が変わります。");
       lines.push("");
+      // 羅占盤の「聞きたいことから探す」から来たとき、その問いについて命盤から出せる材料（2026-10-23）
+      if (mb.side && mb.side.text) {
+        lines.push("【この問いについて、命盤から出せること】");
+        lines.push(mb.side.text);
+        lines.push("※ カードの読みと命盤が違うことを示している場合は、どちらかを捨てずに「別の面を見ている」として両方を示してください。");
+        lines.push("");
+      }
     }
   } catch(e) {}
 
